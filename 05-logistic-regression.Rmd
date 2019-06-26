@@ -97,8 +97,10 @@ Applying a logit transformation to $p\left(X\right)$ results in a linear equatio
 We will fit two logistic regression models in order to predict the probability of an employee attriting. The first predicts the probability of attrition based on their monthly income (`MonthlyIncome`) and the second is based on whether or not the employee works overtime (`OverTime`). The `glm()` function fits generalized linear models, a class of models that includes both logistic regression and simple linear regression as special cases. The syntax of the `glm()` function is similar to that of `lm()`, except that we must pass the argument `family = "binomial"` in order to tell R to run a logistic regression rather than some other type of generalized linear model (the default is `family = "gaussian"`, which is equivalent to ordinary linear regression assuming normally distributed errors).
 
 ```{r glm-model1}
-model1 <- glm(Attrition ~ MonthlyIncome, family = "binomial", data = churn_train)
-model2 <- glm(Attrition ~ OverTime, family = "binomial", data = churn_train)
+model1 <- glm(Attrition ~ MonthlyIncome, family = "binomial", 
+              data = churn_train)
+model2 <- glm(Attrition ~ OverTime, family = "binomial", 
+              data = churn_train)
 ```
 
 In the background `glm()`, uses ML estimation to estimate the unknown model parameters. The basic intuition behind using ML estimation to fit a logistic regression model is as follows: we seek estimates for $\beta_0$ and $\beta_1$ such that the predicted probability $\widehat p\left(X_i\right)$ of attrition for each employee corresponds as closely as possible to the employee's observed attrition status. In other words, we try to find $\widehat \beta_0$ and $\widehat \beta_1$ such that plugging these estimates into the model for $p\left(X\right)$ (Equation \@ref(eq:logistic)) yields a number close to one for all employees who attrited, and a number close to zero for all employees who did not. This intuition can be formalized using a mathematical equation called a _likelihood function_\index{likelihood function}:
@@ -170,7 +172,12 @@ Let's go ahead and fit a model that predicts the probability of `Attrition` base
 
 
 ```{r glm-model3}
-model3 <- glm(Attrition ~ MonthlyIncome + OverTime, family = "binomial", data = churn_train)
+model3 <- glm(
+  Attrition ~ MonthlyIncome + OverTime,
+  family = "binomial", 
+  data = churn_train
+  )
+
 tidy(model3)
 ```
 
@@ -190,7 +197,7 @@ ggplot(churn_train3, aes(MonthlyIncome, prob, color = OverTime)) +
 
 ## Assessing model accuracy
 
-With a basic understanding of logistic regression under our belt, similar to linear regression our concern now shifts to how well do our models predict.  As in the last chapter, we'll use `caret::train()` and fit three 10-fold cross validated logistic regression models.  Extracting the accuracy measures (in this case, classification accuracy), we see that both `cv_model1` and `cv_model2` had an average accuracy of 83.89\%.  However, `cv_model3` which used all predictor variables in our data achieved an average accuracy rate of 86.3\%.
+With a basic understanding of logistic regression under our belt, similar to linear regression our concern now shifts to how well do our models predict.  As in the last chapter, we'll use `caret::train()` and fit three 10-fold cross validated logistic regression models.  Extracting the accuracy measures (in this case, classification accuracy), we see that both `cv_model1` and `cv_model2` had an average accuracy of 83.88\%.  However, `cv_model3` which used all predictor variables in our data achieved an average accuracy rate of 87.58\%.
 
 ```{r mult-models-logistic}
 set.seed(123)
@@ -249,9 +256,9 @@ confusionMatrix(
 )
 ```
 
-One thing to point out, in the confusion matrix above you will note the metric `No Information Rate: 0.8388`.  This represents the ratio of non-attrition vs. attrition in our training data (`table(churn_train$Attrition) %>% prop.table()`). Consequently, if we simply predicted `"No"` for every employee we would still get an accuracy rate of 83.88\%.  Therefore, our goal is to maximize our accuracy rate over and above this no information baseline while also trying to balance sensitivity and specificity. To that end, we plot the ROC curve (section \@ref(model-eval)) which is displayed in Figure \@ref(fig:roc).  If we compare our simple model (`cv_model1`) to our full model (`cv_model3`), we see the lift achieved with the more accurate model.  
+One thing to point out, in the confusion matrix above you will note the metric `No Information Rate: 0.839`.  This represents the ratio of non-attrition vs. attrition in our training data (`table(churn_train$Attrition) %>% prop.table()`). Consequently, if we simply predicted `"No"` for every employee we would still get an accuracy rate of 83.9\%.  Therefore, our goal is to maximize our accuracy rate over and above this no information baseline while also trying to balance sensitivity and specificity. To that end, we plot the ROC curve (section \@ref(model-eval)) which is displayed in Figure \@ref(fig:roc).  If we compare our simple model (`cv_model1`) to our full model (`cv_model3`), we see the lift achieved with the more accurate model.  
 
-```{r roc, fig.width=6, fig.height=4.5, fig.cap="ROC curve for `cv_model1` and `cv_model3`. The increase in the AUC represents the 'lift' that we achieve with `cv_model3`."}
+```{r logistic-regression-roc, fig.width=6, fig.height=4.5, fig.cap="ROC curve for cross-validated models 1 and 3. The increase in the AUC represents the 'lift' that we achieve with model 3."}
 library(ROCR)
 
 # Compute predicted probabilities
@@ -272,10 +279,11 @@ legend(0.8, 0.2, legend = c("cv_model1", "cv_model3"),
 ```
 
 
-Similar to linear regression, we can perform a PLS logistic regression to assess if reducing the dimension of our numeric predictors helps to improve accuracy.  There are 16 numeric features in our data set so the following code performs a 10-fold cross-validated PLS model while tuning the number of principal components to use from 1--16. The optimal model uses 14 principal components, which is not reducing the dimension by much. However, the mean accuracy of 0.866 was only marginally better than the average CV accuracy of `cv_model3` (0.863), likely within the margin of error.
+Similar to linear regression, we can perform a PLS logistic regression to assess if reducing the dimension of our numeric predictors helps to improve accuracy.  There are 16 numeric features in our data set so the following code performs a 10-fold cross-validated PLS model while tuning the number of principal components to use from 1--16. The optimal model uses 14 principal components, which is not reducing the dimension by much. However, the mean accuracy of 0.876 is no better than the average CV accuracy of `cv_model3` (0.876).
 
 ```{r pls-logistic-regression, fig.height=3.5, fig.width=6, fig.cap="The 10-fold cross validation RMSE obtained using PLS with 1--16 principal components."}
-# Perform 10-fold CV on a PLS model tuning the number of PCs to use as predictors
+# Perform 10-fold CV on a PLS model tuning the number of PCs to 
+# use as predictors
 set.seed(123)
 cv_model_pls <- train(
   Attrition ~ ., 
@@ -303,7 +311,7 @@ More recently, @dungang2018residuals introduced the concept of _surrogate residu
 
 ## Feature interpretation
 
-Similar to linear regression, once our preferred logistic regression model is identified, we need to interpret how the features are influencing the results.  As with normal linear regression models, variable importance for logistic regression models can be computed using the absolute value of the $z$-statistic for each coefficient (albeit with the same issues previously discussed). Using `vip::vip()` we can extract our top 20 influential variables.  Figure \@ref(fig:glm-vip) illustrates that `OverTime` is the most influential followed by `JobSatisfaction`, `NumCompaniesWorked`, and `EnvironmentSatisfaction`. 
+Similar to linear regression, once our preferred logistic regression model is identified, we need to interpret how the features are influencing the results.  As with normal linear regression models, variable importance for logistic regression models can be computed using the absolute value of the $z$-statistic for each coefficient (albeit with the same issues previously discussed). Using `vip::vip()` we can extract our top 20 influential variables.  Figure \@ref(fig:glm-vip) illustrates that `OverTime` is the most influential followed by `JobSatisfaction`, and `EnvironmentSatisfaction`. 
 
 ```{r glm-vip, fig.cap="Top 20 most important variables for the PLS model."}
 vip(cv_model3, num_features = 20)
@@ -314,7 +322,7 @@ Similar to linear regression, logistic regression assumes a monotonic linear rel
 Furthermore, the PDPs for the top three categorical predictors (`OverTime`, `JobSatisfaction`, and `EnvironmentSatisfaction`) illustrate the change in predicted probability of attrition based on the employee's status for each predictor.
 
 ```{block, type="tip"}
-See the supplemental material at xxxxx_TBD for the code to reproduce the plots in Figure \@ref(glm-pdp).
+See the online supplemental material for the code to reproduce the plots in Figure \@ref(fig:glm-pdp).
 ```
 
 ```{r glm-pdp, echo=FALSE, fig.height=5, fig.width=7, fig.cap="Partial dependence plots for the first four most important variables.  We can see how the predicted probability of attrition changes for each value of the influential predictors."}

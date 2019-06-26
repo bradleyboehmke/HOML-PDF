@@ -21,3 +21,5 @@ kableExtra
 vip
 AppliedPredictiveModeling
 pls
+gplots
+ROCR

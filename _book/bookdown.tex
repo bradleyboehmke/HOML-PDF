@@ -387,7 +387,7 @@ This book was built with the following packages and R version. All code was exec
 
 \CommentTok{# package & session info}
 \NormalTok{sessioninfo}\OperatorTok{::}\KeywordTok{session_info}\NormalTok{(pkgs)}
-\CommentTok{#> - Session info --------------------------------------}
+\CommentTok{#> - Session info ----------------------------------------------------------}
 \CommentTok{#>  setting  value                       }
 \CommentTok{#>  version  R version 3.6.0 (2019-04-26)}
 \CommentTok{#>  os       macOS Sierra 10.12.6        }
@@ -399,7 +399,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>  tz       America/New_York            }
 \CommentTok{#>  date     2019-06-26                  }
 \CommentTok{#> }
-\CommentTok{#> - Packages ------------------------------------------}
+\CommentTok{#> - Packages --------------------------------------------------------------}
 \CommentTok{#>  ! package       * version    date       lib}
 \CommentTok{#>    abind           1.4-5      2016-07-21 [1]}
 \CommentTok{#>    AmesHousing     0.0.3      2017-12-17 [1]}
@@ -543,8 +543,8 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    rlang           0.3.4      2019-04-07 [1]}
 \CommentTok{#>    rmarkdown       1.13       2019-05-22 [1]}
 \CommentTok{#>    ROCR          * 1.0-7      2015-03-26 [1]}
-\CommentTok{#>    rpart           4.1-15     2019-04-12 [1]}
-\CommentTok{#>    rpart.plot      3.0.7      2019-04-12 [1]}
+\CommentTok{#>    rpart         * 4.1-15     2019-04-12 [1]}
+\CommentTok{#>    rpart.plot    * 3.0.7      2019-04-12 [1]}
 \CommentTok{#>    rsample       * 0.0.4      2019-01-07 [1]}
 \CommentTok{#>    rstudioapi      0.10       2019-03-19 [1]}
 \CommentTok{#>    scales          1.0.0      2018-08-09 [1]}
@@ -1086,31 +1086,27 @@ Consequently, the exemplar data sets we use throughout this book have, for the m
 \CommentTok{# response variable}
 \NormalTok{my_basket}
 \CommentTok{## # A tibble: 2,000 x 42}
-\CommentTok{##    `7up` lasagna pepsi   yop `red-wine` cheese   bbq}
-\CommentTok{##    <dbl>   <dbl> <dbl> <dbl>      <dbl>  <dbl> <dbl>}
-\CommentTok{##  1     0       0     0     0          0      0     0}
-\CommentTok{##  2     0       0     0     0          0      0     0}
-\CommentTok{##  3     0       0     0     0          0      0     0}
-\CommentTok{##  4     0       0     0     2          1      0     0}
-\CommentTok{##  5     0       0     0     0          0      0     0}
-\CommentTok{##  6     0       0     0     0          0      0     0}
-\CommentTok{##  7     1       1     0     0          0      0     1}
-\CommentTok{##  8     0       0     0     0          0      0     0}
-\CommentTok{##  9     0       1     0     0          0      0     0}
-\CommentTok{## 10     0       0     0     0          0      0     0}
-\CommentTok{## # ... with 1,990 more rows, and 35 more variables:}
-\CommentTok{## #   bulmers <dbl>, mayonnaise <dbl>, horlics <dbl>,}
-\CommentTok{## #   `chicken-tikka` <dbl>, milk <dbl>, mars <dbl>,}
-\CommentTok{## #   coke <dbl>, lottery <dbl>, bread <dbl>,}
-\CommentTok{## #   pizza <dbl>, `sunny-delight` <dbl>, ham <dbl>,}
-\CommentTok{## #   lettuce <dbl>, kronenbourg <dbl>, leeks <dbl>,}
-\CommentTok{## #   fanta <dbl>, tea <dbl>, whiskey <dbl>, peas <dbl>,}
-\CommentTok{## #   newspaper <dbl>, muesli <dbl>, `white-wine` <dbl>,}
-\CommentTok{## #   carrots <dbl>, spinach <dbl>, pate <dbl>,}
-\CommentTok{## #   `instant-coffee` <dbl>, twix <dbl>,}
-\CommentTok{## #   potatoes <dbl>, fosters <dbl>, soup <dbl>,}
-\CommentTok{## #   `toad-in-hole` <dbl>, `coco-pops` <dbl>,}
-\CommentTok{## #   kitkat <dbl>, broccoli <dbl>, cigarettes <dbl>}
+\CommentTok{##    `7up` lasagna pepsi   yop `red-wine` cheese   bbq bulmers mayonnaise}
+\CommentTok{##    <dbl>   <dbl> <dbl> <dbl>      <dbl>  <dbl> <dbl>   <dbl>      <dbl>}
+\CommentTok{##  1     0       0     0     0          0      0     0       0          0}
+\CommentTok{##  2     0       0     0     0          0      0     0       0          0}
+\CommentTok{##  3     0       0     0     0          0      0     0       0          0}
+\CommentTok{##  4     0       0     0     2          1      0     0       0          0}
+\CommentTok{##  5     0       0     0     0          0      0     0       2          0}
+\CommentTok{##  6     0       0     0     0          0      0     0       0          0}
+\CommentTok{##  7     1       1     0     0          0      0     1       0          0}
+\CommentTok{##  8     0       0     0     0          0      0     0       0          0}
+\CommentTok{##  9     0       1     0     0          0      0     0       0          0}
+\CommentTok{## 10     0       0     0     0          0      0     0       0          0}
+\CommentTok{## # ... with 1,990 more rows, and 33 more variables: horlics <dbl>,}
+\CommentTok{## #   `chicken-tikka` <dbl>, milk <dbl>, mars <dbl>, coke <dbl>,}
+\CommentTok{## #   lottery <dbl>, bread <dbl>, pizza <dbl>, `sunny-delight` <dbl>,}
+\CommentTok{## #   ham <dbl>, lettuce <dbl>, kronenbourg <dbl>, leeks <dbl>, fanta <dbl>,}
+\CommentTok{## #   tea <dbl>, whiskey <dbl>, peas <dbl>, newspaper <dbl>, muesli <dbl>,}
+\CommentTok{## #   `white-wine` <dbl>, carrots <dbl>, spinach <dbl>, pate <dbl>,}
+\CommentTok{## #   `instant-coffee` <dbl>, twix <dbl>, potatoes <dbl>, fosters <dbl>,}
+\CommentTok{## #   soup <dbl>, `toad-in-hole` <dbl>, `coco-pops` <dbl>, kitkat <dbl>,}
+\CommentTok{## #   broccoli <dbl>, cigarettes <dbl>}
 \end{Highlighting}
 \end{Shaded}
 \end{itemize}
@@ -1158,14 +1154,14 @@ This chapter leverages the following packages.
 \CommentTok{##  Connection successful!}
 \CommentTok{## }
 \CommentTok{## R is connected to the H2O cluster: }
-\CommentTok{##     H2O cluster uptime:         17 minutes 19 seconds }
+\CommentTok{##     H2O cluster uptime:         18 hours 4 minutes }
 \CommentTok{##     H2O cluster timezone:       America/New_York }
 \CommentTok{##     H2O data parsing timezone:  UTC }
 \CommentTok{##     H2O cluster version:        3.22.1.1 }
-\CommentTok{##     H2O cluster version age:    5 months and 28 days !!! }
+\CommentTok{##     H2O cluster version age:    5 months and 29 days !!! }
 \CommentTok{##     H2O cluster name:           H2O_started_from_R_b294776_vmp196 }
 \CommentTok{##     H2O cluster total nodes:    1 }
-\CommentTok{##     H2O cluster total memory:   3.28 GB }
+\CommentTok{##     H2O cluster total memory:   3.31 GB }
 \CommentTok{##     H2O cluster total cores:    8 }
 \CommentTok{##     H2O cluster allowed cores:  8 }
 \CommentTok{##     H2O cluster healthy:        TRUE }
@@ -1852,8 +1848,7 @@ Looking at our results we see that the best model coincided with \(k=\) 5, which
 \CommentTok{##   24  47256  0.6837    30413}
 \CommentTok{##   25  47454  0.6819    30555}
 \CommentTok{## }
-\CommentTok{## RMSE was used to select the optimal model using}
-\CommentTok{##  the smallest value.}
+\CommentTok{## RMSE was used to select the optimal model using the smallest value.}
 \CommentTok{## The final value used for the model was k = 5.}
 
 \CommentTok{# plot cross validation results}
@@ -2263,48 +2258,27 @@ If both of these criteria are true then it is often adventageous to remove the v
 \NormalTok{caret}\OperatorTok{::}\KeywordTok{nearZeroVar}\NormalTok{(ames_train, }\DataTypeTok{saveMetrics=} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{filter}\NormalTok{(nzv)}
-\CommentTok{##               rowname freqRatio percentUnique zeroVar}
-\CommentTok{## 1              Street    255.75       0.09737   FALSE}
-\CommentTok{## 2               Alley     24.69       0.14606   FALSE}
-\CommentTok{## 3        Land_Contour     21.88       0.19474   FALSE}
-\CommentTok{## 4           Utilities   2052.00       0.14606   FALSE}
-\CommentTok{## 5          Land_Slope     21.68       0.14606   FALSE}
-\CommentTok{## 6         Condition_2    184.73       0.34080   FALSE}
-\CommentTok{## 7           Roof_Matl    112.50       0.29211   FALSE}
-\CommentTok{## 8           Bsmt_Cond     24.03       0.29211   FALSE}
-\CommentTok{## 9      BsmtFin_Type_2     23.13       0.34080   FALSE}
-\CommentTok{## 10            Heating     91.82       0.29211   FALSE}
-\CommentTok{## 11    Low_Qual_Fin_SF    674.33       1.41188   FALSE}
-\CommentTok{## 12      Kitchen_AbvGr     22.85       0.19474   FALSE}
-\CommentTok{## 13         Functional     35.30       0.38948   FALSE}
-\CommentTok{## 14     Enclosed_Porch    109.06       7.20545   FALSE}
-\CommentTok{## 15 Three_season_porch    674.67       1.26582   FALSE}
-\CommentTok{## 16       Screen_Porch    186.90       4.81986   FALSE}
-\CommentTok{## 17          Pool_Area   2046.00       0.43817   FALSE}
-\CommentTok{## 18            Pool_QC    682.00       0.24343   FALSE}
-\CommentTok{## 19       Misc_Feature     29.58       0.29211   FALSE}
-\CommentTok{## 20           Misc_Val    124.00       1.26582   FALSE}
-\CommentTok{##     nzv}
-\CommentTok{## 1  TRUE}
-\CommentTok{## 2  TRUE}
-\CommentTok{## 3  TRUE}
-\CommentTok{## 4  TRUE}
-\CommentTok{## 5  TRUE}
-\CommentTok{## 6  TRUE}
-\CommentTok{## 7  TRUE}
-\CommentTok{## 8  TRUE}
-\CommentTok{## 9  TRUE}
-\CommentTok{## 10 TRUE}
-\CommentTok{## 11 TRUE}
-\CommentTok{## 12 TRUE}
-\CommentTok{## 13 TRUE}
-\CommentTok{## 14 TRUE}
-\CommentTok{## 15 TRUE}
-\CommentTok{## 16 TRUE}
-\CommentTok{## 17 TRUE}
-\CommentTok{## 18 TRUE}
-\CommentTok{## 19 TRUE}
-\CommentTok{## 20 TRUE}
+\CommentTok{##               rowname freqRatio percentUnique zeroVar  nzv}
+\CommentTok{## 1              Street    255.75       0.09737   FALSE TRUE}
+\CommentTok{## 2               Alley     24.69       0.14606   FALSE TRUE}
+\CommentTok{## 3        Land_Contour     21.88       0.19474   FALSE TRUE}
+\CommentTok{## 4           Utilities   2052.00       0.14606   FALSE TRUE}
+\CommentTok{## 5          Land_Slope     21.68       0.14606   FALSE TRUE}
+\CommentTok{## 6         Condition_2    184.73       0.34080   FALSE TRUE}
+\CommentTok{## 7           Roof_Matl    112.50       0.29211   FALSE TRUE}
+\CommentTok{## 8           Bsmt_Cond     24.03       0.29211   FALSE TRUE}
+\CommentTok{## 9      BsmtFin_Type_2     23.13       0.34080   FALSE TRUE}
+\CommentTok{## 10            Heating     91.82       0.29211   FALSE TRUE}
+\CommentTok{## 11    Low_Qual_Fin_SF    674.33       1.41188   FALSE TRUE}
+\CommentTok{## 12      Kitchen_AbvGr     22.85       0.19474   FALSE TRUE}
+\CommentTok{## 13         Functional     35.30       0.38948   FALSE TRUE}
+\CommentTok{## 14     Enclosed_Porch    109.06       7.20545   FALSE TRUE}
+\CommentTok{## 15 Three_season_porch    674.67       1.26582   FALSE TRUE}
+\CommentTok{## 16       Screen_Porch    186.90       4.81986   FALSE TRUE}
+\CommentTok{## 17          Pool_Area   2046.00       0.43817   FALSE TRUE}
+\CommentTok{## 18            Pool_QC    682.00       0.24343   FALSE TRUE}
+\CommentTok{## 19       Misc_Feature     29.58       0.29211   FALSE TRUE}
+\CommentTok{## 20           Misc_Val    124.00       1.26582   FALSE TRUE}
 \end{Highlighting}
 \end{Shaded}
 
@@ -2387,8 +2361,8 @@ Some packages (e.g., \textbf{glmnet}, and \textbf{caret}) have built-in options 
 \CommentTok{## Operations:}
 \CommentTok{## }
 \CommentTok{## Box-Cox transformation on all_outcomes()}
-\CommentTok{## Centering for 2 items}
-\CommentTok{## Scaling for 2 items}
+\CommentTok{## Centering for all_numeric(), -all_outcomes()}
+\CommentTok{## Scaling for all_numeric(), -all_outcomes()}
 \end{Highlighting}
 \end{Shaded}
 
@@ -2659,20 +2633,19 @@ We should be careful with label encoding unordered categorical features because 
 \begin{Highlighting}[]
 \NormalTok{ames_train }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(}\KeywordTok{contains}\NormalTok{(}\StringTok{"Qual"}\NormalTok{))}
 \CommentTok{## # A tibble: 2,054 x 6}
-\CommentTok{##    Overall_Qual Exter_Qual Bsmt_Qual Low_Qual_Fin_SF}
-\CommentTok{##    <fct>        <fct>      <fct>               <int>}
-\CommentTok{##  1 Above_Avera~ Typical    Typical                 0}
-\CommentTok{##  2 Average      Typical    Typical                 0}
-\CommentTok{##  3 Above_Avera~ Typical    Typical                 0}
-\CommentTok{##  4 Good         Good       Typical                 0}
-\CommentTok{##  5 Above_Avera~ Typical    Typical                 0}
-\CommentTok{##  6 Very_Good    Good       Good                    0}
-\CommentTok{##  7 Very_Good    Good       Good                    0}
-\CommentTok{##  8 Good         Typical    Typical                 0}
-\CommentTok{##  9 Above_Avera~ Typical    Good                    0}
-\CommentTok{## 10 Above_Avera~ Typical    Good                    0}
-\CommentTok{## # ... with 2,044 more rows, and 2 more variables:}
-\CommentTok{## #   Kitchen_Qual <fct>, Garage_Qual <fct>}
+\CommentTok{##    Overall_Qual Exter_Qual Bsmt_Qual Low_Qual_Fin_SF Kitchen_Qual}
+\CommentTok{##    <fct>        <fct>      <fct>               <int> <fct>       }
+\CommentTok{##  1 Above_Avera~ Typical    Typical                 0 Typical     }
+\CommentTok{##  2 Average      Typical    Typical                 0 Typical     }
+\CommentTok{##  3 Above_Avera~ Typical    Typical                 0 Good        }
+\CommentTok{##  4 Good         Good       Typical                 0 Excellent   }
+\CommentTok{##  5 Above_Avera~ Typical    Typical                 0 Good        }
+\CommentTok{##  6 Very_Good    Good       Good                    0 Good        }
+\CommentTok{##  7 Very_Good    Good       Good                    0 Good        }
+\CommentTok{##  8 Good         Typical    Typical                 0 Good        }
+\CommentTok{##  9 Above_Avera~ Typical    Good                    0 Typical     }
+\CommentTok{## 10 Above_Avera~ Typical    Good                    0 Typical     }
+\CommentTok{## # ... with 2,044 more rows, and 1 more variable: Garage_Qual <fct>}
 \end{Highlighting}
 \end{Shaded}
 
@@ -2933,9 +2906,9 @@ The first step is where you define your blueprint (aka recipe). With this proces
 \CommentTok{## }
 \CommentTok{## Sparse, unbalanced variable filter on all_nominal()}
 \CommentTok{## Integer encoding for matches("Qual|Cond|QC|Qu")}
-\CommentTok{## Centering for 2 items}
-\CommentTok{## Scaling for 2 items}
-\CommentTok{## PCA extraction with 2 items}
+\CommentTok{## Centering for all_numeric(), -all_outcomes()}
+\CommentTok{## Scaling for all_numeric(), -all_outcomes()}
+\CommentTok{## PCA extraction with all_numeric(), -all_outcomes()}
 \end{Highlighting}
 \end{Shaded}
 
@@ -2957,11 +2930,11 @@ Next, we need to train this blueprint on some training data. Remember, there are
 \CommentTok{## }
 \CommentTok{## Operations:}
 \CommentTok{## }
-\CommentTok{## Sparse, unbalanced variable filter removed Street, ... [trained]}
-\CommentTok{## Integer encoding for Condition_1, ... [trained]}
-\CommentTok{## Centering for Lot_Frontage, ... [trained]}
-\CommentTok{## Scaling for Lot_Frontage, ... [trained]}
-\CommentTok{## PCA extraction with Lot_Frontage, ... [trained]}
+\CommentTok{## Sparse, unbalanced variable filter removed Street, Alley, ... [trained]}
+\CommentTok{## Integer encoding for Condition_1, Overall_Qual, Overall_Cond, ... [trained]}
+\CommentTok{## Centering for Lot_Frontage, Lot_Area, ... [trained]}
+\CommentTok{## Scaling for Lot_Frontage, Lot_Area, ... [trained]}
+\CommentTok{## PCA extraction with Lot_Frontage, Lot_Area, ... [trained]}
 \end{Highlighting}
 \end{Shaded}
 
@@ -2973,29 +2946,25 @@ Lastly, we can apply our blueprint to new data (e.g., the training data or futur
 \NormalTok{baked_test <-}\StringTok{ }\KeywordTok{bake}\NormalTok{(prepare, }\DataTypeTok{new_data =}\NormalTok{ ames_test)}
 \NormalTok{baked_train}
 \CommentTok{## # A tibble: 2,054 x 27}
-\CommentTok{##    MS_SubClass MS_Zoning Lot_Shape Lot_Config}
-\CommentTok{##    <fct>       <fct>     <fct>     <fct>     }
-\CommentTok{##  1 One_Story_~ Resident~ Slightly~ Corner    }
-\CommentTok{##  2 One_Story_~ Resident~ Regular   Inside    }
-\CommentTok{##  3 One_Story_~ Resident~ Slightly~ Corner    }
-\CommentTok{##  4 One_Story_~ Resident~ Regular   Corner    }
-\CommentTok{##  5 Two_Story_~ Resident~ Slightly~ Inside    }
-\CommentTok{##  6 One_Story_~ Resident~ Slightly~ Inside    }
-\CommentTok{##  7 One_Story_~ Resident~ Slightly~ Inside    }
-\CommentTok{##  8 Two_Story_~ Resident~ Regular   Inside    }
-\CommentTok{##  9 Two_Story_~ Resident~ Slightly~ Corner    }
-\CommentTok{## 10 One_Story_~ Resident~ Slightly~ Inside    }
-\CommentTok{## # ... with 2,044 more rows, and 23 more variables:}
-\CommentTok{## #   Neighborhood <fct>, Bldg_Type <fct>,}
-\CommentTok{## #   House_Style <fct>, Roof_Style <fct>,}
-\CommentTok{## #   Exterior_1st <fct>, Exterior_2nd <fct>,}
-\CommentTok{## #   Mas_Vnr_Type <fct>, Foundation <fct>,}
-\CommentTok{## #   Bsmt_Exposure <fct>, BsmtFin_Type_1 <fct>,}
-\CommentTok{## #   Central_Air <fct>, Electrical <fct>,}
-\CommentTok{## #   Garage_Type <fct>, Garage_Finish <fct>,}
-\CommentTok{## #   Paved_Drive <fct>, Fence <fct>, Sale_Type <fct>,}
-\CommentTok{## #   Sale_Price <int>, PC1 <dbl>, PC2 <dbl>, PC3 <dbl>,}
-\CommentTok{## #   PC4 <dbl>, PC5 <dbl>}
+\CommentTok{##    MS_SubClass MS_Zoning Lot_Shape Lot_Config Neighborhood Bldg_Type}
+\CommentTok{##    <fct>       <fct>     <fct>     <fct>      <fct>        <fct>    }
+\CommentTok{##  1 One_Story_~ Resident~ Slightly~ Corner     North_Ames   OneFam   }
+\CommentTok{##  2 One_Story_~ Resident~ Regular   Inside     North_Ames   OneFam   }
+\CommentTok{##  3 One_Story_~ Resident~ Slightly~ Corner     North_Ames   OneFam   }
+\CommentTok{##  4 One_Story_~ Resident~ Regular   Corner     North_Ames   OneFam   }
+\CommentTok{##  5 Two_Story_~ Resident~ Slightly~ Inside     Gilbert      OneFam   }
+\CommentTok{##  6 One_Story_~ Resident~ Slightly~ Inside     Stone_Brook  TwnhsE   }
+\CommentTok{##  7 One_Story_~ Resident~ Slightly~ Inside     Stone_Brook  TwnhsE   }
+\CommentTok{##  8 Two_Story_~ Resident~ Regular   Inside     Gilbert      OneFam   }
+\CommentTok{##  9 Two_Story_~ Resident~ Slightly~ Corner     Gilbert      OneFam   }
+\CommentTok{## 10 One_Story_~ Resident~ Slightly~ Inside     Gilbert      OneFam   }
+\CommentTok{## # ... with 2,044 more rows, and 21 more variables: House_Style <fct>,}
+\CommentTok{## #   Roof_Style <fct>, Exterior_1st <fct>, Exterior_2nd <fct>,}
+\CommentTok{## #   Mas_Vnr_Type <fct>, Foundation <fct>, Bsmt_Exposure <fct>,}
+\CommentTok{## #   BsmtFin_Type_1 <fct>, Central_Air <fct>, Electrical <fct>,}
+\CommentTok{## #   Garage_Type <fct>, Garage_Finish <fct>, Paved_Drive <fct>,}
+\CommentTok{## #   Fence <fct>, Sale_Type <fct>, Sale_Price <int>, PC1 <dbl>, PC2 <dbl>,}
+\CommentTok{## #   PC3 <dbl>, PC4 <dbl>, PC5 <dbl>}
 \end{Highlighting}
 \end{Shaded}
 
@@ -3053,7 +3022,7 @@ Next, we apply the same resampling method and hyperparameter search grid as we d
 \end{Highlighting}
 \end{Shaded}
 
-Looking at our results we see that the best model was associated with \(k=\) 12, which resulted in a cross-validated RMSE of 32,991. Figure \ref{fig:knn-with-blueprint-assess} illustrates the cross-validated error rate across the spectrum of hyperparameter values that we specified.
+Looking at our results we see that the best model was associated with \(k=\) 11, which resulted in a cross-validated RMSE of 32,938. Figure \ref{fig:knn-with-blueprint-assess} illustrates the cross-validated error rate across the spectrum of hyperparameter values that we specified.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -3066,38 +3035,37 @@ Looking at our results we see that the best model was associated with \(k=\) 12,
 \CommentTok{## }
 \CommentTok{## Recipe steps: nzv, integer, center, scale, dummy }
 \CommentTok{## Resampling: Cross-Validated (10 fold, repeated 5 times) }
-\CommentTok{## Summary of sample sizes: 1848, 1850, 1848, 1850, 1850, 1848, ... }
+\CommentTok{## Summary of sample sizes: 1849, 1847, 1849, 1847, 1850, 1849, ... }
 \CommentTok{## Resampling results across tuning parameters:}
 \CommentTok{## }
 \CommentTok{##   k   RMSE   Rsquared  MAE  }
-\CommentTok{##    2  36949  0.7931    22711}
-\CommentTok{##    3  35724  0.8071    21985}
-\CommentTok{##    4  34731  0.8194    21332}
-\CommentTok{##    5  34127  0.8271    20948}
-\CommentTok{##    6  33910  0.8314    20777}
-\CommentTok{##    7  33414  0.8389    20670}
-\CommentTok{##    8  33237  0.8428    20568}
-\CommentTok{##    9  33145  0.8452    20541}
-\CommentTok{##   10  33043  0.8476    20499}
-\CommentTok{##   11  33006  0.8485    20508}
-\CommentTok{##   12  32991  0.8495    20541}
-\CommentTok{##   13  33095  0.8491    20610}
-\CommentTok{##   14  33116  0.8496    20631}
-\CommentTok{##   15  33075  0.8508    20657}
-\CommentTok{##   16  33105  0.8510    20696}
-\CommentTok{##   17  33194  0.8509    20738}
-\CommentTok{##   18  33289  0.8504    20828}
-\CommentTok{##   19  33373  0.8500    20889}
-\CommentTok{##   20  33468  0.8497    20963}
-\CommentTok{##   21  33529  0.8498    21020}
-\CommentTok{##   22  33581  0.8498    21065}
-\CommentTok{##   23  33652  0.8496    21133}
-\CommentTok{##   24  33702  0.8498    21202}
-\CommentTok{##   25  33710  0.8504    21236}
+\CommentTok{##    2  36656  0.7964    22496}
+\CommentTok{##    3  35576  0.8088    21758}
+\CommentTok{##    4  34562  0.8205    21281}
+\CommentTok{##    5  34074  0.8269    20966}
+\CommentTok{##    6  33660  0.8324    20793}
+\CommentTok{##    7  33332  0.8379    20659}
+\CommentTok{##    8  33209  0.8414    20575}
+\CommentTok{##    9  33049  0.8450    20543}
+\CommentTok{##   10  32959  0.8470    20530}
+\CommentTok{##   11  32938  0.8482    20556}
+\CommentTok{##   12  32961  0.8488    20557}
+\CommentTok{##   13  32991  0.8494    20631}
+\CommentTok{##   14  33069  0.8494    20683}
+\CommentTok{##   15  33091  0.8497    20719}
+\CommentTok{##   16  33095  0.8503    20734}
+\CommentTok{##   17  33096  0.8511    20740}
+\CommentTok{##   18  33154  0.8510    20784}
+\CommentTok{##   19  33241  0.8510    20850}
+\CommentTok{##   20  33306  0.8508    20899}
+\CommentTok{##   21  33423  0.8501    20989}
+\CommentTok{##   22  33475  0.8503    21053}
+\CommentTok{##   23  33546  0.8501    21106}
+\CommentTok{##   24  33580  0.8504    21164}
+\CommentTok{##   25  33617  0.8507    21226}
 \CommentTok{## }
-\CommentTok{## RMSE was used to select the optimal model using}
-\CommentTok{##  the smallest value.}
-\CommentTok{## The final value used for the model was k = 12.}
+\CommentTok{## RMSE was used to select the optimal model using the smallest value.}
+\CommentTok{## The final value used for the model was k = 11.}
 
 \CommentTok{# plot cross validation results}
 \KeywordTok{ggplot}\NormalTok{(knn_fit2)}
@@ -3213,15 +3181,11 @@ The \texttt{coef()} function extracts the estimated coefficients from the model.
 \CommentTok{## -413052  -30218   -1612   23383  330421 }
 \CommentTok{## }
 \CommentTok{## Coefficients:}
-\CommentTok{##             Estimate Std. Error t value}
-\CommentTok{## (Intercept)  7989.35    3892.40    2.05}
-\CommentTok{## Gr_Liv_Area   115.59       2.46   46.90}
-\CommentTok{##                        Pr(>|t|)    }
-\CommentTok{## (Intercept)                0.04 *  }
-\CommentTok{## Gr_Liv_Area <0.0000000000000002 ***}
+\CommentTok{##             Estimate Std. Error t value            Pr(>|t|)    }
+\CommentTok{## (Intercept)  7989.35    3892.40    2.05                0.04 *  }
+\CommentTok{## Gr_Liv_Area   115.59       2.46   46.90 <0.0000000000000002 ***}
 \CommentTok{## ---}
-\CommentTok{## Signif. codes:  }
-\CommentTok{## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1}
+\CommentTok{## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1}
 \CommentTok{## }
 \CommentTok{## Residual standard error: 55800 on 2052 degrees of freedom}
 \CommentTok{## Multiple R-squared:  0.517,  Adjusted R-squared:  0.517 }
@@ -3360,10 +3324,10 @@ Note that in R, we use the \texttt{:} operator to include an interaction (techni
 \CommentTok{##     data = ames_train)}
 \CommentTok{## }
 \CommentTok{## Coefficients:}
-\CommentTok{##            (Intercept)             Gr_Liv_Area  }
-\CommentTok{##              30353.414               -1243.040  }
-\CommentTok{##             Year_Built  Gr_Liv_Area:Year_Built  }
-\CommentTok{##                  0.149                   0.681}
+\CommentTok{##            (Intercept)             Gr_Liv_Area              Year_Built  }
+\CommentTok{##              30353.414               -1243.040                   0.149  }
+\CommentTok{## Gr_Liv_Area:Year_Built  }
+\CommentTok{##                  0.681}
 \end{Highlighting}
 \end{Shaded}
 
@@ -3406,18 +3370,18 @@ where \(X_i\) for \(i = 1, 2, \dots, p\) are the predictors of interest. Note so
 \CommentTok{# print estimated coefficients in a tidy data frame}
 \NormalTok{broom}\OperatorTok{::}\KeywordTok{tidy}\NormalTok{(model3)  }
 \CommentTok{## # A tibble: 292 x 5}
-\CommentTok{##    term            estimate std.error statistic p.value}
-\CommentTok{##    <chr>              <dbl>     <dbl>     <dbl>   <dbl>}
-\CommentTok{##  1 (Intercept)      -1.20e7 10949313.    -1.09    0.274}
-\CommentTok{##  2 MS_SubClassOne~   3.37e3     3655.     0.921   0.357}
-\CommentTok{##  3 MS_SubClassOne~   1.21e4    11926.     1.02    0.309}
-\CommentTok{##  4 MS_SubClassOne~   1.16e4    12833.     0.902   0.367}
-\CommentTok{##  5 MS_SubClassOne~   6.67e3     6552.     1.02    0.309}
-\CommentTok{##  6 MS_SubClassTwo~  -1.81e3     6018.    -0.301   0.763}
-\CommentTok{##  7 MS_SubClassTwo~   1.02e4     6612.     1.54    0.124}
-\CommentTok{##  8 MS_SubClassTwo~  -1.62e4    10468.    -1.54    0.123}
-\CommentTok{##  9 MS_SubClassSpl~  -1.03e4    11585.    -0.888   0.375}
-\CommentTok{## 10 MS_SubClassSpl~  -3.13e3     7577.    -0.413   0.680}
+\CommentTok{##    term                                estimate std.error statistic p.value}
+\CommentTok{##    <chr>                                  <dbl>     <dbl>     <dbl>   <dbl>}
+\CommentTok{##  1 (Intercept)                          -1.20e7 10949313.    -1.09    0.274}
+\CommentTok{##  2 MS_SubClassOne_Story_1945_and_Old~    3.37e3     3655.     0.921   0.357}
+\CommentTok{##  3 MS_SubClassOne_Story_with_Finishe~    1.21e4    11926.     1.02    0.309}
+\CommentTok{##  4 MS_SubClassOne_and_Half_Story_Unf~    1.16e4    12833.     0.902   0.367}
+\CommentTok{##  5 MS_SubClassOne_and_Half_Story_Fin~    6.67e3     6552.     1.02    0.309}
+\CommentTok{##  6 MS_SubClassTwo_Story_1946_and_New~   -1.81e3     6018.    -0.301   0.763}
+\CommentTok{##  7 MS_SubClassTwo_Story_1945_and_Old~    1.02e4     6612.     1.54    0.124}
+\CommentTok{##  8 MS_SubClassTwo_and_Half_Story_All~   -1.62e4    10468.    -1.54    0.123}
+\CommentTok{##  9 MS_SubClassSplit_or_Multilevel       -1.03e4    11585.    -0.888   0.375}
+\CommentTok{## 10 MS_SubClassSplit_Foyer               -3.13e3     7577.    -0.413   0.680}
 \CommentTok{## # ... with 282 more rows}
 \end{Highlighting}
 \end{Shaded}
@@ -3450,8 +3414,7 @@ We've fit three main effects models to the Ames housing data: a single predictor
 \CommentTok{##   RMSE   Rsquared  MAE  }
 \CommentTok{##   55670  0.5214    38380}
 \CommentTok{## }
-\CommentTok{## Tuning parameter 'intercept' was held constant at}
-\CommentTok{##  a value of TRUE}
+\CommentTok{## Tuning parameter 'intercept' was held constant at a value of TRUE}
 \end{Highlighting}
 \end{Shaded}
 
@@ -3487,8 +3450,8 @@ We can perform cross-validation on the other two models in a similar fashion, wh
 \NormalTok{)))}
 \CommentTok{## }
 \CommentTok{## Call:}
-\CommentTok{## summary.resamples(object = resamples(list(model1}
-\CommentTok{##  = cv_model1, model2 = cv_model2, model3 = cv_model3)))}
+\CommentTok{## summary.resamples(object = resamples(list(model1 = cv_model1, model2}
+\CommentTok{##  = cv_model2, model3 = cv_model3)))}
 \CommentTok{## }
 \CommentTok{## Models: model1, model2, model3 }
 \CommentTok{## Number of resamples: 10 }
@@ -3506,14 +3469,10 @@ We can perform cross-validation on the other two models in a similar fashion, wh
 \CommentTok{## model3 20945   25674  33769 37304   42967 80339    0}
 \CommentTok{## }
 \CommentTok{## Rsquared }
-\CommentTok{##          Min. 1st Qu. Median   Mean 3rd Qu.   Max.}
-\CommentTok{## model1 0.3805  0.4832 0.5277 0.5214  0.5883 0.6403}
-\CommentTok{## model2 0.5304  0.6666 0.6860 0.6716  0.7084 0.7371}
-\CommentTok{## model3 0.4204  0.7462 0.8287 0.7967  0.9099 0.9224}
-\CommentTok{##        NA's}
-\CommentTok{## model1    0}
-\CommentTok{## model2    0}
-\CommentTok{## model3    0}
+\CommentTok{##          Min. 1st Qu. Median   Mean 3rd Qu.   Max. NA's}
+\CommentTok{## model1 0.3805  0.4832 0.5277 0.5214  0.5883 0.6403    0}
+\CommentTok{## model2 0.5304  0.6666 0.6860 0.6716  0.7084 0.7371    0}
+\CommentTok{## model3 0.4204  0.7462 0.8287 0.7967  0.9099 0.9224    0}
 \end{Highlighting}
 \end{Shaded}
 
@@ -3965,10 +3924,10 @@ For \texttt{model1}, the estimated coefficient for \texttt{MonthlyIncome} is \(\
 \begin{Highlighting}[]
 \KeywordTok{tidy}\NormalTok{(model1)}
 \CommentTok{## # A tibble: 2 x 5}
-\CommentTok{##   term         estimate std.error statistic     p.value}
-\CommentTok{##   <chr>           <dbl>     <dbl>     <dbl>       <dbl>}
-\CommentTok{## 1 (Intercept) -0.924    0.155         -5.96     2.59e-9}
-\CommentTok{## 2 MonthlyInc~ -0.000130 0.0000264     -4.93     8.36e-7}
+\CommentTok{##   term           estimate std.error statistic       p.value}
+\CommentTok{##   <chr>             <dbl>     <dbl>     <dbl>         <dbl>}
+\CommentTok{## 1 (Intercept)   -0.924    0.155         -5.96 0.00000000259}
+\CommentTok{## 2 MonthlyIncome -0.000130 0.0000264     -4.93 0.000000836}
 \KeywordTok{tidy}\NormalTok{(model2)}
 \CommentTok{## # A tibble: 2 x 5}
 \CommentTok{##   term        estimate std.error statistic  p.value}
@@ -4091,14 +4050,10 @@ With a basic understanding of logistic regression under our belt, similar to lin
 \NormalTok{    )}
 \NormalTok{  )}
 \NormalTok{)}\OperatorTok{$}\NormalTok{statistics}\OperatorTok{$}\NormalTok{Accuracy}
-\CommentTok{##          Min. 1st Qu. Median   Mean 3rd Qu.   Max.}
-\CommentTok{## model1 0.8350  0.8350 0.8365 0.8388  0.8431 0.8447}
-\CommentTok{## model2 0.8350  0.8350 0.8365 0.8388  0.8431 0.8447}
-\CommentTok{## model3 0.8365  0.8495 0.8792 0.8758  0.8908 0.9314}
-\CommentTok{##        NA's}
-\CommentTok{## model1    0}
-\CommentTok{## model2    0}
-\CommentTok{## model3    0}
+\CommentTok{##          Min. 1st Qu. Median   Mean 3rd Qu.   Max. NA's}
+\CommentTok{## model1 0.8350  0.8350 0.8365 0.8388  0.8431 0.8447    0}
+\CommentTok{## model2 0.8350  0.8350 0.8365 0.8388  0.8431 0.8447    0}
+\CommentTok{## model3 0.8365  0.8495 0.8792 0.8758  0.8908 0.9314    0}
 \end{Highlighting}
 \end{Shaded}
 
@@ -4805,12 +4760,9 @@ We saw that regularization significantly improved our predictive accuracy for th
   \DataTypeTok{logistic_model =}\NormalTok{ glm_mod, }
   \DataTypeTok{penalized_model =}\NormalTok{ penalized_mod}
 \NormalTok{  )))}\OperatorTok{$}\NormalTok{statistics}\OperatorTok{$}\NormalTok{Accuracy}
-\CommentTok{##                   Min. 1st Qu. Median   Mean 3rd Qu.}
-\CommentTok{## logistic_model  0.8365  0.8495 0.8792 0.8758  0.8908}
-\CommentTok{## penalized_model 0.8447  0.8759 0.8835 0.8836  0.8915}
-\CommentTok{##                   Max. NA's}
-\CommentTok{## logistic_model  0.9314    0}
-\CommentTok{## penalized_model 0.9412    0}
+\CommentTok{##                   Min. 1st Qu. Median   Mean 3rd Qu.   Max. NA's}
+\CommentTok{## logistic_model  0.8365  0.8495 0.8792 0.8758  0.8908 0.9314    0}
+\CommentTok{## penalized_model 0.8447  0.8759 0.8835 0.8836  0.8915 0.9412    0}
 \end{Highlighting}
 \end{Shaded}
 
@@ -4946,7 +4898,7 @@ The following applies a basic MARS model to our \textbf{ames} example. The resul
 \KeywordTok{print}\NormalTok{(mars1)}
 \CommentTok{## Selected 36 of 41 terms, and 24 of 307 predictors}
 \CommentTok{## Termination condition: RSq changed by less than 0.001 at 41 terms}
-\CommentTok{## Importance: First_Flr_SF, Second_Flr_SF, ...}
+\CommentTok{## Importance: First_Flr_SF, Second_Flr_SF, Year_Built, ...}
 \CommentTok{## Number of terms at each degree of interaction: 1 35 (additive model)}
 \CommentTok{## GCV 511235214    RSS 978736420657    GRSq 0.9206    RSq 0.9259}
 \end{Highlighting}
@@ -5157,28 +5109,28 @@ Its important to realize that variable importance will only measure the impact o
 \StringTok{  }\NormalTok{broom}\OperatorTok{::}\KeywordTok{tidy}\NormalTok{() }\OperatorTok{%>%}\StringTok{  }
 \StringTok{  }\KeywordTok{filter}\NormalTok{(stringr}\OperatorTok{::}\KeywordTok{str_detect}\NormalTok{(names, }\StringTok{"}\CharTok{\textbackslash{}\textbackslash{}}\StringTok{*"}\NormalTok{)) }
 \CommentTok{## # A tibble: 20 x 2}
-\CommentTok{##    names                                              x}
-\CommentTok{##    <chr>                                          <dbl>}
-\CommentTok{##  1 h(Year_Built-2002) * h(2362-Gr_Liv_Area)    -6.98e+0}
-\CommentTok{##  2 h(Year_Remod_Add-2007) * h(Total_Bsmt_S~     8.93e+0}
-\CommentTok{##  3 h(2007-Year_Remod_Add) * h(Total_Bsmt_S~    -1.22e+0}
-\CommentTok{##  4 NeighborhoodEdwards * h(Year_Built-2002~    -6.71e+1}
-\CommentTok{##  5 h(Lot_Area-3874) * h(3-Garage_Cars)         -1.17e+0}
-\CommentTok{##  6 Bsmt_ExposureGd * h(Total_Bsmt_SF-1136)      3.12e+1}
-\CommentTok{##  7 NeighborhoodCrawford * h(2002-Year_Buil~     4.25e+2}
-\CommentTok{##  8 h(2002-Year_Built) * h(Year_Remod_Add-1~     7.90e+0}
-\CommentTok{##  9 h(2002-Year_Built) * h(1974-Year_Remod_~     5.42e+0}
-\CommentTok{## 10 h(Kitchen_AbvGr-1) * FunctionalTyp          -1.55e+4}
-\CommentTok{## 11 Overall_QualVery_Excellent * Functional~     9.68e+4}
-\CommentTok{## 12 Overall_QualGood * FunctionalTyp             1.32e+4}
-\CommentTok{## 13 h(Lot_Area-3874) * h(Latitude-42.0014)       7.65e+0}
-\CommentTok{## 14 h(Lot_Area-3874) * h(42.0014-Latitude)      -1.23e+2}
-\CommentTok{## 15 h(Total_Bsmt_SF-1136) * h(115-Screen_Po~    -3.04e-1}
-\CommentTok{## 16 h(Lot_Area-3874) * h(Gr_Liv_Area-2411) ~    -2.99e-3}
-\CommentTok{## 17 h(Lot_Area-3874) * h(2411-Gr_Liv_Area) ~     5.29e-4}
-\CommentTok{## 18 Overall_CondGood * h(2002-Year_Built)        3.33e+2}
-\CommentTok{## 19 Overall_CondVery_Good * h(2002-Year_Bui~     3.68e+2}
-\CommentTok{## 20 Overall_CondAbove_Average * h(2790-Gr_L~     6.20e+0}
+\CommentTok{##    names                                                                  x}
+\CommentTok{##    <chr>                                                              <dbl>}
+\CommentTok{##  1 h(Year_Built-2002) * h(2362-Gr_Liv_Area)                        -6.98e+0}
+\CommentTok{##  2 h(Year_Remod_Add-2007) * h(Total_Bsmt_SF-1136)                   8.93e+0}
+\CommentTok{##  3 h(2007-Year_Remod_Add) * h(Total_Bsmt_SF-1136)                  -1.22e+0}
+\CommentTok{##  4 NeighborhoodEdwards * h(Year_Built-2002) * h(Gr_Liv_Area-2~     -6.71e+1}
+\CommentTok{##  5 h(Lot_Area-3874) * h(3-Garage_Cars)                             -1.17e+0}
+\CommentTok{##  6 Bsmt_ExposureGd * h(Total_Bsmt_SF-1136)                          3.12e+1}
+\CommentTok{##  7 NeighborhoodCrawford * h(2002-Year_Built)                        4.25e+2}
+\CommentTok{##  8 h(2002-Year_Built) * h(Year_Remod_Add-1974)                      7.90e+0}
+\CommentTok{##  9 h(2002-Year_Built) * h(1974-Year_Remod_Add)                      5.42e+0}
+\CommentTok{## 10 h(Kitchen_AbvGr-1) * FunctionalTyp                              -1.55e+4}
+\CommentTok{## 11 Overall_QualVery_Excellent * FunctionalTyp                       9.68e+4}
+\CommentTok{## 12 Overall_QualGood * FunctionalTyp                                 1.32e+4}
+\CommentTok{## 13 h(Lot_Area-3874) * h(Latitude-42.0014)                           7.65e+0}
+\CommentTok{## 14 h(Lot_Area-3874) * h(42.0014-Latitude)                          -1.23e+2}
+\CommentTok{## 15 h(Total_Bsmt_SF-1136) * h(115-Screen_Porch)                     -3.04e-1}
+\CommentTok{## 16 h(Lot_Area-3874) * h(Gr_Liv_Area-2411) * h(3-Garage_Cars)       -2.99e-3}
+\CommentTok{## 17 h(Lot_Area-3874) * h(2411-Gr_Liv_Area) * h(3-Garage_Cars)        5.29e-4}
+\CommentTok{## 18 Overall_CondGood * h(2002-Year_Built)                            3.33e+2}
+\CommentTok{## 19 Overall_CondVery_Good * h(2002-Year_Built)                       3.68e+2}
+\CommentTok{## 20 Overall_CondAbove_Average * h(2790-Gr_Liv_Area)                  6.20e+0}
 \end{Highlighting}
 \end{Shaded}
 
@@ -5671,48 +5623,27 @@ Feature importance for KNNs are computed by finding the features with the smalle
 \CommentTok{##   variables are sorted by maximum importance across the classes}
 \CommentTok{##   only 20 most important variables shown (out of 249)}
 \CommentTok{## }
-\CommentTok{##         X0    X1    X2    X3    X4    X5    X6    X7}
-\CommentTok{## V435 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0}
-\CommentTok{## V407  99.4  99.4  99.4  99.4  99.4  99.4  99.4  99.4}
-\CommentTok{## V463  97.9  97.9  97.9  97.9  97.9  97.9  97.9  97.9}
-\CommentTok{## V379  97.4  97.4  97.4  97.4  97.4  97.4  97.4  97.4}
-\CommentTok{## V434  95.9  95.9  95.9  95.9  95.9  95.9  96.7  95.9}
-\CommentTok{## V380  96.1  96.1  96.1  96.1  96.1  96.1  96.1  96.1}
-\CommentTok{## V462  95.6  95.6  95.6  95.6  95.6  95.6  95.6  95.6}
-\CommentTok{## V408  95.4  95.4  95.4  95.4  95.4  95.4  95.4  95.4}
-\CommentTok{## V352  93.5  93.5  93.5  93.5  93.5  93.5  93.5  93.5}
-\CommentTok{## V490  93.1  93.1  93.1  93.1  93.1  93.1  93.1  93.1}
-\CommentTok{## V406  92.9  92.9  92.9  92.9  92.9  92.9  92.9  92.9}
-\CommentTok{## V437  70.8  60.4  92.8  52.0  71.1  83.4  75.5  91.1}
-\CommentTok{## V351  92.4  92.4  92.4  92.4  92.4  92.4  92.4  92.4}
-\CommentTok{## V409  70.5  76.1  88.1  54.5  79.9  77.7  84.9  91.9}
-\CommentTok{## V436  90.0  90.0  90.9  90.0  90.0  90.0  91.4  90.0}
-\CommentTok{## V464  76.7  76.5  90.2  76.5  76.5  76.6  77.7  82.0}
-\CommentTok{## V491  89.5  89.5  89.5  89.5  89.5  89.5  89.5  89.5}
-\CommentTok{## V598  68.0  68.0  88.4  68.0  68.0  84.9  68.0  88.2}
-\CommentTok{## V465  63.1  36.6  87.7  38.2  50.7  80.6  59.9  84.3}
-\CommentTok{## V433  63.7  55.7  76.7  55.7  57.4  55.7  87.6  68.4}
-\CommentTok{##         X8   X9}
-\CommentTok{## V435 100.0 80.6}
-\CommentTok{## V407  99.4 75.2}
-\CommentTok{## V463  97.9 83.3}
-\CommentTok{## V379  97.4 86.6}
-\CommentTok{## V434  95.9 76.2}
-\CommentTok{## V380  96.1 88.0}
-\CommentTok{## V462  95.6 83.4}
-\CommentTok{## V408  95.4 75.0}
-\CommentTok{## V352  93.5 87.1}
-\CommentTok{## V490  93.1 81.9}
-\CommentTok{## V406  92.9 74.6}
-\CommentTok{## V437  52.0 70.8}
-\CommentTok{## V351  92.4 82.1}
-\CommentTok{## V409  52.7 76.1}
-\CommentTok{## V436  90.0 78.8}
-\CommentTok{## V464  76.5 76.7}
-\CommentTok{## V491  89.5 77.4}
-\CommentTok{## V598  68.0 38.8}
-\CommentTok{## V465  57.1 63.1}
-\CommentTok{## V433  55.7 63.7}
+\CommentTok{##         X0    X1    X2    X3    X4    X5    X6    X7    X8   X9}
+\CommentTok{## V435 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 80.6}
+\CommentTok{## V407  99.4  99.4  99.4  99.4  99.4  99.4  99.4  99.4  99.4 75.2}
+\CommentTok{## V463  97.9  97.9  97.9  97.9  97.9  97.9  97.9  97.9  97.9 83.3}
+\CommentTok{## V379  97.4  97.4  97.4  97.4  97.4  97.4  97.4  97.4  97.4 86.6}
+\CommentTok{## V434  95.9  95.9  95.9  95.9  95.9  95.9  96.7  95.9  95.9 76.2}
+\CommentTok{## V380  96.1  96.1  96.1  96.1  96.1  96.1  96.1  96.1  96.1 88.0}
+\CommentTok{## V462  95.6  95.6  95.6  95.6  95.6  95.6  95.6  95.6  95.6 83.4}
+\CommentTok{## V408  95.4  95.4  95.4  95.4  95.4  95.4  95.4  95.4  95.4 75.0}
+\CommentTok{## V352  93.5  93.5  93.5  93.5  93.5  93.5  93.5  93.5  93.5 87.1}
+\CommentTok{## V490  93.1  93.1  93.1  93.1  93.1  93.1  93.1  93.1  93.1 81.9}
+\CommentTok{## V406  92.9  92.9  92.9  92.9  92.9  92.9  92.9  92.9  92.9 74.6}
+\CommentTok{## V437  70.8  60.4  92.8  52.0  71.1  83.4  75.5  91.1  52.0 70.8}
+\CommentTok{## V351  92.4  92.4  92.4  92.4  92.4  92.4  92.4  92.4  92.4 82.1}
+\CommentTok{## V409  70.5  76.1  88.1  54.5  79.9  77.7  84.9  91.9  52.7 76.1}
+\CommentTok{## V436  90.0  90.0  90.9  90.0  90.0  90.0  91.4  90.0  90.0 78.8}
+\CommentTok{## V464  76.7  76.5  90.2  76.5  76.5  76.6  77.7  82.0  76.5 76.7}
+\CommentTok{## V491  89.5  89.5  89.5  89.5  89.5  89.5  89.5  89.5  89.5 77.4}
+\CommentTok{## V598  68.0  68.0  88.4  68.0  68.0  84.9  68.0  88.2  68.0 38.8}
+\CommentTok{## V465  63.1  36.6  87.7  38.2  50.7  80.6  59.9  84.3  57.1 63.1}
+\CommentTok{## V433  63.7  55.7  76.7  55.7  57.4  55.7  87.6  68.4  55.7 63.7}
 \end{Highlighting}
 \end{Shaded}
 
@@ -5737,7 +5668,8 @@ We can plot these results to get an understanding of what pixel features are dri
 \NormalTok{imp <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(imp, edges) }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{ID  =} \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{str_extract}\NormalTok{(feature, }\StringTok{"}\CharTok{\textbackslash{}\textbackslash{}}\StringTok{d+"}\NormalTok{))) }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{arrange}\NormalTok{(ID)}
-\KeywordTok{image}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(imp}\OperatorTok{$}\NormalTok{imp, }\DecValTok{28}\NormalTok{, }\DecValTok{28}\NormalTok{), }\DataTypeTok{col =} \KeywordTok{gray}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\FloatTok{0.05}\NormalTok{)))}
+\KeywordTok{image}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(imp}\OperatorTok{$}\NormalTok{imp, }\DecValTok{28}\NormalTok{, }\DecValTok{28}\NormalTok{), }\DataTypeTok{col =} \KeywordTok{gray}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\FloatTok{0.05}\NormalTok{)), }
+      \DataTypeTok{xaxt=}\StringTok{"n"}\NormalTok{, }\DataTypeTok{yaxt=}\StringTok{"n"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -5803,6 +5735,376 @@ KNNs are a very simplistic, and intuitive, algorithm that can provide average to
 Although KNNs rarely provide the best predictive performance, they have many benefits; for example, in feature engineering and in data cleaning and preprocessing. We discussed KNN for imputation in Section \ref{impute}. \citet{bruce2017practical} discuss another approach that uses KNNs to add a \emph{local knowledge} feature. This includes running a KNN to estimate the predicted output or class and using this predicted value as a new feature for downstream modeling. However, this approach also invites more opportunities for target leakage.
 
 Other alternatives to traditional KNNs such as using invariant metrics, tangent distance metrics, and adaptive nearest neighbor methods are also discussed in \citet{esl} and are worth exploring.
+
+\hypertarget{DT}{%
+\chapter{Decision Trees}\label{DT}}
+
+\emph{Tree-based models}\index{tree-based models} are a class of nonparametric algorithms that work by partitioning the feature space into a number of smaller (non-overlapping) regions with similar response values using a set of \emph{splitting rules}\index{splitting rules}. Predictions are obtained by fitting a simpler model (e.g., a constant like the average response value) in each region. Such \emph{divide-and-conquor} methods can produce simple rules that are easy to interpret and visualize with \emph{tree diagrams}\index{tree diagrams}. As we'll see, decision trees offer many benefits; however, they typically lack in predictive performance compared to more complex algorithms like neural networks and MARS. However, future chapters will discuss powerful ensemble algorithms---like random forests and gradient boosting machines---which are constructed by combining togther many decision trees in a clever way. This chapter will provide you with a strong foundation in decision trees.
+
+\hypertarget{prerequisites-7}{%
+\section{Prerequisites}\label{prerequisites-7}}
+
+In this chapter we'll use the following packages:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Helper packages}
+\KeywordTok{library}\NormalTok{(dplyr)       }\CommentTok{# for data wrangling}
+\KeywordTok{library}\NormalTok{(ggplot2)     }\CommentTok{# for awesome plotting}
+
+\CommentTok{# Modeling packages}
+\KeywordTok{library}\NormalTok{(rpart)       }\CommentTok{# direct engine for decision tree application}
+\KeywordTok{library}\NormalTok{(caret)       }\CommentTok{# meta engine for decision tree application}
+
+\CommentTok{# Model interpretability packages}
+\KeywordTok{library}\NormalTok{(rpart.plot)  }\CommentTok{# for plotting decision trees}
+\KeywordTok{library}\NormalTok{(vip)         }\CommentTok{# for feature importance}
+\KeywordTok{library}\NormalTok{(pdp)         }\CommentTok{# for feature effects}
+\end{Highlighting}
+\end{Shaded}
+
+We'll continue to illustrate the main concepts using the Ames housing example from Section \ref{put-process-together}.
+
+\hypertarget{structure}{%
+\section{Structure}\label{structure}}
+
+There are many methodologies for constructing decision trees but the most well-known is the \textbf{c}lassification \textbf{a}nd \textbf{r}egression \textbf{t}ree\index{classification and regression tree} (CART) algorithm proposed in \citet{breiman2017classification}.\footnote{Other decision tree algorithms include the Iterative Dichotomiser 3 \citep{quinlan1986induction}, C4.5 \citep{quinlan1996bagging}, Chi-square automatic interaction detection \citep{kass1980exploratory}, Conditional inference trees \citep{hothorn2006unbiased}, and more.} A basic decision tree partitions the training data into homogeneous subgroups (i.e., groups with similar response values) and then fits a simple \emph{constant} in each subgroup (e.g., the mean of the within group response values for regression). The subgroups (also called nodes) are formed recursively using binary partitions formed by asking simple yes-or-no questions about each feature (e.g., is \texttt{age\ \textless{}\ 18}?). This is done a number of times until a suitable stopping critera is satisfied (e.g., a maximum depth of the tree is reached). After all the partitioning has been done, the model predicts the output based on (1) the average response values for all observations that fall in that subgroup (regression problem), or (2) the class that has majority representation (classification problem). For classification, predicted probabilites can be obtained using the proportion of each class within the subgroup.
+
+What results is an inverted tree-like structure such as that in Figure \ref{fig:exemplar-decision-tree}. In essence, our tree is a set of rules that allows us to make predictions by asking simple yes-or-no questions about each feature. For example, if the customer is loyal, has household income greater than \$150,000, and is shopping in a store, the examplar tree diagram in Figure \ref{fig:exemplar-decision-tree} would predict that the customer will redeem a coupon.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth,height=1\textheight]{images/exemplar-decision-tree} 
+
+}
+
+\caption{Exemplar decision tree predicting if a customer will redeem a coupon (yes or no) based on the customer's loyalty, household income, last month's spend, coupon placement, and shopping mode.}\label{fig:exemplar-decision-tree}
+\end{figure}
+
+We refer to the first subgroup at the top of the tree as the \emph{root node}\index{root node} (this node contains all of the training data). The final subgroups at the bottom of the tree are called the \emph{terminal nodes}\index{terminal nodes} or \emph{leaves}\index{leaves}. Every subgroup inbetween is refrred to as an internal node. The connection between nodes are called \emph{branches}\index{branches}.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth,height=0.8\textheight]{images/decision-tree-terminology} 
+
+}
+
+\caption{Terminology of a decision tree.}\label{fig:decision-tree-terminology}
+\end{figure}
+
+\hypertarget{partitioning}{%
+\section{Partitioning}\label{partitioning}}
+
+As illustrated above, CART uses \emph{binary recursive partitioning}\index{binary recursive partitioning} (it's recursive because each split or rule depends on the the splits above it). The objective at each node is to find the ``best'' feature (\(x_i\)) to partition the remaing data into one of two regions (\(R_1\) and \(R_2\)) such that the overall error between the actual response (\(y_i\)) and the predicted constant (\(c_i\)) is minimized. For regression problems, the objective function seeks to minimize SSE as in \eqref{eq:partobjective}. For classification problems, the partitioning is usually made to optimize cross-entropy or the Gini index (see Section \ref{model-eval}).\footnote{Gini index and cross-entropy are the two most commonly applied loss functions used for decision trees. Classification error is rarely used to determine partitions as they are less sensitive to poor performing splits \citep{esl}.}
+
+\begin{note}
+In both regression and classification trees, the objective of
+partitioning is to minimize dissimilarity in the terminal nodes.
+However, we suggest @therneau1997introduction for a more thorough
+discussion regarding binary recursive partitioning.
+\end{note}
+
+\begin{equation}
+\label{eq:partobjective}
+\texttt{minimize} \bigg\{ SSE = \sum_{i \in R_1}(y_i - c_1)^2 + \sum_{i \in R_2}(y_i - c_2)^2 \bigg\}
+\end{equation}
+
+Having found the best feature/split combination, the data are partitioned into two regions and the splitting process is repeated on each of the two regions (hence the name binary recursive partioning). This process is continued until a suitable stopping criterion is reached (e.g., a maximum depth is reached or the tree becomes ``too complex'').
+
+It's important to note that a single feature can be used multiple times in a tree. For example, say we have data generated from a simple \(\sin\) function with \(Y_i \stackrel{iid}{\sim} \left(\sin\left(X_i\right), \sigma^2\right)\) errors (for \(i = 1, 2, \dots, 500\)). A regression tree built with a single root node (often referred to as a decision stump) leads to a split occurring at \(x = 3.1\).
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.48\linewidth]{bookdown_files/figure-latex/decision-stump-1} \includegraphics[width=0.48\linewidth]{bookdown_files/figure-latex/decision-stump-2} 
+
+}
+
+\caption{Decision tree illustrating the single split on feature x (left). The resulting decision boundary illustrates the predicted value when x < 3.1 (0.64), and when x > 3.1 (-0.67) (right).}\label{fig:decision-stump}
+\end{figure}
+
+If we build a deeper tree, we'll continue to split on the same feature (\(x\)) as illustrated in Figure \ref{fig:depth-3-decision-tree}. This is because \(x\) is the only feature available to split on so it will continue finding the optimal splits along this feature's values until a pre-determined stopping criteria is reached.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.48\linewidth]{bookdown_files/figure-latex/depth-3-decision-tree-1} \includegraphics[width=0.48\linewidth]{bookdown_files/figure-latex/depth-3-decision-tree-2} 
+
+}
+
+\caption{Decision tree illustrating with depth = 3, resulting in 7 decision splits along values of feature x and 8 prediction regions (left). The resulting decision boundary (right).}\label{fig:depth-3-decision-tree}
+\end{figure}
+
+However, even when many features are available, a single feature may still dominate if it continues to provide the best split after each successive partition. For example, a decision tree applied to the iris data set \citep{fisher1936use} where the species of the flower (setosa, versicolor, and virginica) is predicted based on two features (sepal width and sepal length) results in an optimal decision tree with two splits on each feature. Also, note how the decision boundary in a classification problem results in rectangular regions enclosing the observations. The predicted value is the response class with the greatest proportion within the enclosed region.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.48\linewidth]{bookdown_files/figure-latex/iris-decision-tree-1} \includegraphics[width=0.48\linewidth]{bookdown_files/figure-latex/iris-decision-tree-2} 
+
+}
+
+\caption{Decision tree for the iris classification problem (left). The decision boundary results in rectangular regions that enclose the observations.  The class with the highest proportion in each region is the predicted value (right).}\label{fig:iris-decision-tree}
+\end{figure}
+
+\hypertarget{how-deep}{%
+\section{How deep?}\label{how-deep}}
+
+This leads to an important question, how deep (i.e., complex) should we make the tree? If we grow an overly complex tree as in Figure \ref{fig:deep-overfit-tree}, we tend to overfit to our training data resulting in poor generalization performance.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.48\linewidth]{bookdown_files/figure-latex/deep-overfit-tree-1} \includegraphics[width=0.48\linewidth]{bookdown_files/figure-latex/deep-overfit-tree-2} 
+
+}
+
+\caption{Overfit decision tree with 56 splits.}\label{fig:deep-overfit-tree}
+\end{figure}
+
+Consequently, there is a balance to be achieved in the depth and complexity of the tree to optimize predictive performance on future unseen data. To find this balance, we have two primary approaches - (1) early stopping and (2) pruning.
+
+\hypertarget{early-stopping}{%
+\subsection{Early stopping}\label{early-stopping}}
+
+Early stopping\index{early stopping} explicitly restricts the growth of the tree. There are several ways we can restrict tree growth but two of the most common approaches is to restrict the tree depth to a certain level or to restrict the minimum number of observations allowed in any terminal node. When limiting tree depth we stop splitting after a certain depth (e.g., only grow a tree that has a depth of 5 levels). The shallower the tree the less variance we have in our predictions; however, at some point we can start to inject too much bias as shallow trees (e.g., stumps) are not able to capture interactions and complex patterns in our data.
+
+When restricting minimum terminal node size (e.g., leaf nodes must contain at least 10 observations for predictions) we are deciding to not split intermediate nodes which contains too few data points. At the far end of the spectrum, a terminal node's size of one allows for a single observation to be captured in the leaf node and used as a prediction (in this case, we're interpolating the training data). This results in high variance and poor generalizability. On the other hand, large values restrict further splits therefore reducing variance.
+
+These two approaches can be implemented independently of one another; however, they do have interaction effects as illustrated by Figure \ref{fig:dt-early-stopping}.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/dt-early-stopping-1} 
+
+}
+
+\caption{Illustration of how early stopping affects the decision boundary of a regression decision tree. The columns illustrate how tree depth impacts the decision boundary and the rows illustrate how the minimun number of observations in the terminal node influences the decision boundary.}\label{fig:dt-early-stopping}
+\end{figure}
+
+\hypertarget{pruning}{%
+\subsection{Pruning}\label{pruning}}
+
+An alternative to explicitly specifying the depth of a decision tree is to grow a very large, complex tree and then \emph{prune}\index{prune} it back to find an optimal subtree. We find the optimal subtree by using a \emph{cost complexity parameter}\index{cost complexity parameter} (\(\alpha\)) that penalizes our objective function in \eqref{eq:partobjective} for the number of terminal nodes of the tree (\(T\)) as in \eqref{eq:prune}.
+
+\begin{equation}
+\label{eq:prune}
+ \texttt{minimize} \left\{ SSE + \alpha \vert T \vert \right\}
+\end{equation}
+
+For a given value of \(\alpha\) we find the smallest pruned tree that has the lowest penalized error. You may recognize the close association to the lasso penalty discussed in Chapter \ref{regularized-regression}. As with the regularization methods, smaller penalties tend to produce more complex models, which results in larger trees. Whereas larger penalties results in much smaller trees. Consequently, as a tree grows larger, the reduction in the SSE must be greater than the cost complexity penalty. Typically, we evaluate multiple models across a spectrum of \(\alpha\) and use CV to identify the optimal value and, therefore, the optimal subtree that generalizes best to unseen data.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/pruned-tree-1} 
+
+}
+
+\caption{To prune a tree, we grow an overly complex tree (left) and then use a cost complexity parameter to identify the optimal subtree (right).}\label{fig:pruned-tree}
+\end{figure}
+
+\hypertarget{ames-housing-example}{%
+\section{Ames housing example}\label{ames-housing-example}}
+
+We can fit a regression tree using \texttt{rpart} and then visualize it using \texttt{rpart.plot}. The fitting process and the visual output of regression trees and classification trees are very similar. Both use the formula method for expressing the model (similar to \texttt{lm()}). However, when fitting a regression tree, we need to set \texttt{method\ =\ "anova"}. By default, \texttt{rpart()} will make an intelligent guess as to what method to use based on the data type of your response column, but it's good practice to set this explicitly.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ames_dt1 <-}\StringTok{ }\KeywordTok{rpart}\NormalTok{(}
+  \DataTypeTok{formula =}\NormalTok{ Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{.,}
+  \DataTypeTok{data    =}\NormalTok{ ames_train,}
+  \DataTypeTok{method  =} \StringTok{"anova"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Once we've fit our model we can take a peak at the decision tree output. This prints various information about the different splits. For example, we start with \texttt{2054} observations at the root node and the first variable we split on (i.e., the first variable gave the largest reduction in SSE) is \texttt{Overall\_Qual}. We see that at the first node all observations with \texttt{Overall\_Qual=Very\_Poor,Poor,Fair,Below\_Average,Average,Above\_Average,Good} go to the 2nd (\texttt{2)}) branch. The total number of observations that follow this branch (\texttt{1721}), their average sales price (\texttt{156200}) and SSE (\texttt{3.964e+12}) are listed. If you look for the 3rd branch (\texttt{3)}) you will see that \texttt{333} observations with \texttt{Overall\_Qual=Very\_Good,Excellent,Very\_Excellent} follow this branch and their average sales prices is \texttt{304600} and the SEE in this region is \texttt{2.917e+12}. Basically, this is telling us that \texttt{Overall\_Qual} is an important predictor os sales price with those homes on the upper end of the quality spectrum having almost double the average sales price.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ames_dt1}
+\CommentTok{## n= 2054 }
+\CommentTok{## }
+\CommentTok{## node), split, n, deviance, yval}
+\CommentTok{##       * denotes terminal node}
+\CommentTok{## }
+\CommentTok{##  1) root 2054 13220000000000 181200  }
+\CommentTok{##    2) Overall_Qual=Very_Poor,Poor,Fair,Below_Average,Average,Above_Average,Good 1708  3964000000000 156200  }
+\CommentTok{##      4) Neighborhood=North_Ames,Old_Town,Edwards,Sawyer,Mitchell,Brookside,Iowa_DOT_and_Rail_Road,South_and_West_of_Iowa_State_University,Meadow_Village,Briardale,Northpark_Villa,Blueste,Landmark 1022  1251000000000 132000  }
+\CommentTok{##        8) Overall_Qual=Very_Poor,Poor,Fair,Below_Average 195   167100000000  98540 *}
+\CommentTok{##        9) Overall_Qual=Average,Above_Average,Good 827   814800000000 139900  }
+\CommentTok{##         18) First_Flr_SF< 1214 631   383900000000 132200 *}
+\CommentTok{##         19) First_Flr_SF>=1214 196   273600000000 164600 *}
+\CommentTok{##      5) Neighborhood=College_Creek,Somerset,Northridge_Heights,Gilbert,Northwest_Ames,Sawyer_West,Crawford,Timberland,Northridge,Stone_Brook,Clear_Creek,Bloomington_Heights,Veenker,Green_Hills 686  1220000000000 192300  }
+\CommentTok{##       10) Gr_Liv_Area< 1725 492   517800000000 177800  }
+\CommentTok{##         20) Total_Bsmt_SF< 1334 353   233300000000 166900 *}
+\CommentTok{##         21) Total_Bsmt_SF>=1334 139   136900000000 205400 *}
+\CommentTok{##       11) Gr_Liv_Area>=1725 194   337600000000 229000 *}
+\CommentTok{##    3) Overall_Qual=Very_Good,Excellent,Very_Excellent 346  2917000000000 304600  }
+\CommentTok{##      6) Overall_Qual=Very_Good 249   955400000000 272300  }
+\CommentTok{##       12) Gr_Liv_Area< 1969 152   313500000000 244100 *}
+\CommentTok{##       13) Gr_Liv_Area>=1969 97   331700000000 316500 *}
+\CommentTok{##      7) Overall_Qual=Excellent,Very_Excellent 97  1036000000000 387400  }
+\CommentTok{##       14) Total_Bsmt_SF< 1903 65   231900000000 349000 *}
+\CommentTok{##       15) Total_Bsmt_SF>=1903 32   513500000000 465500  }
+\CommentTok{##         30) Year_Built>=2004 25   270300000000 429800 *}
+\CommentTok{##         31) Year_Built< 2004 7    97410000000 593100 *}
+\end{Highlighting}
+\end{Shaded}
+
+We can visualize our tree model with \texttt{rpart.plot()}. The \texttt{rpart.plot()} function has many plotting options, which we'll leave to the reader to explore. However, in the default print it will show the percentage of data that fall in each node and the predicted outcome for that node. One thing you may notice is that this tree contains 10 internal nodes resulting in 11 terminal nodes. In other words, this tree is partitioning on only 10 features even though there are 80 variables in the training data. Why is that?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{rpart.plot}\NormalTok{(ames_dt1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/basic-ames-tree-plot-1} 
+
+}
+
+\caption{Diagram displaying the pruned decision tree for the Ames Housing data.}\label{fig:basic-ames-tree-plot}
+\end{figure}
+
+Behind the scenes \texttt{rpart()} is automatically applying a range of cost complexity (\(\alpha\) values to prune the tree). To compare the error for each \(\alpha\) value, \texttt{rpart()} performs a 10-fold CV (by default). In this example we find diminishing returns after 1\texttt{2} terminal nodes as illustrated in Figure \ref{fig:plot-cp} (\(y\)-axis is the CV error, lower \(x\)-axis is the cost complexity (\(\alpha\)) value, upper \(x\)-axis is the number of terminal nodes (i.e., tree size = \(\vert T \vert\)). You may also notice the dashed line which goes through the point \(\vert T \vert = 8\). \citet{breiman2017classification} suggested that in actual practice, its common to instead use the smallest tree within 1 standard error (SE) of the minimum CV error (this is called the \emph{1-SE rule}). Thus, we could use a tree with 8 terminal nodes and reasonably expect to experience similar results within a small margin of error.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plotcp}\NormalTok{(ames_dt1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/plot-cp-1} 
+
+}
+
+\caption{Pruning complexity parameter (cp) plot illustrating the relative cross validation error (y-axis) for various cp values (lower x-axis). Smaller cp values lead to larger trees (upper x-axis). Using the 1-SE rule, a tree size of 10-12 provides optimal cross validation results.}\label{fig:plot-cp}
+\end{figure}
+
+To illustrate the point of selecting a tree with 11 terminal nodes (or 8 if you go by the 1-SE rule), we can force \texttt{rpart()} to generate a full tree by setting \texttt{cp\ =\ 0} (no penalty results in a fully grown tree). Figure \ref{fig:no-cp-tree} shows that after 11 terminal nodes, we see diminishing returns in error reduction as the tree grows deeper. Thus, we can signifcantly prune our tree and still achieve minimal expected error.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ames_dt2 <-}\StringTok{ }\KeywordTok{rpart}\NormalTok{(}
+    \DataTypeTok{formula =}\NormalTok{ Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{.,}
+    \DataTypeTok{data    =}\NormalTok{ ames_train,}
+    \DataTypeTok{method  =} \StringTok{"anova"}\NormalTok{, }
+    \DataTypeTok{control =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{cp =} \DecValTok{0}\NormalTok{, }\DataTypeTok{xval =} \DecValTok{10}\NormalTok{)}
+\NormalTok{)}
+
+\KeywordTok{plotcp}\NormalTok{(ames_dt2)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v =} \DecValTok{11}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/no-cp-tree-1} 
+
+}
+
+\caption{Pruning complexity parameter plot for a fully grown tree. Significant reduction in the cross validation error is achieved with tree sizes 6-20 and then the cross validation error levels off with minimal or no additional improvements.}\label{fig:no-cp-tree}
+\end{figure}
+
+So, by default, \texttt{rpart()} is performing some automated tuning, with an optimal subtree of 10 total splits, 11 terminal nodes, and a cross-validated SSE of 0.292. Although \texttt{rpart()} does not provide the RMSE or other metrics, you can use \textbf{caret}. In both cases, smaller penalties (deeper trees) are providing better CV results.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# rpart cross validation results}
+\NormalTok{ames_dt1}\OperatorTok{$}\NormalTok{cptable}
+\CommentTok{##         CP nsplit rel error xerror    xstd}
+\CommentTok{## 1  0.47941      0    1.0000 1.0015 0.06120}
+\CommentTok{## 2  0.11290      1    0.5206 0.5226 0.03200}
+\CommentTok{## 3  0.06999      2    0.4077 0.4099 0.03112}
+\CommentTok{## 4  0.02759      3    0.3377 0.3573 0.02223}
+\CommentTok{## 5  0.02347      4    0.3101 0.3340 0.02184}
+\CommentTok{## 6  0.02201      5    0.2866 0.3302 0.02446}
+\CommentTok{## 7  0.02039      6    0.2646 0.3245 0.02422}
+\CommentTok{## 8  0.01190      7    0.2442 0.3062 0.02642}
+\CommentTok{## 9  0.01116      8    0.2323 0.3026 0.02709}
+\CommentTok{## 10 0.01104      9    0.2212 0.2972 0.02705}
+\CommentTok{## 11 0.01000     10    0.2101 0.2920 0.02705}
+
+\CommentTok{# caret cross validation results}
+\NormalTok{ames_dt3 <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{.,}
+  \DataTypeTok{data =}\NormalTok{ ames_train,}
+  \DataTypeTok{method =} \StringTok{"rpart"}\NormalTok{,}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{),}
+  \DataTypeTok{tuneLength =} \DecValTok{20}
+\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(ames_dt3)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/cp-table-1} 
+
+}
+
+\caption{Cross-validated accuracy rate for the 20 different $\alpha$ parameter values in our grid search. Lower $\alpha$ values (deeper trees) help to minimize errors.}\label{fig:cp-table}
+\end{figure}
+
+\hypertarget{dt-vip}{%
+\section{Feature interpretation}\label{dt-vip}}
+
+To measure feature importance, the reduction in the loss function (e.g., SSE) attributed to each variable at each split is tabulated. In some instances, a single variable could be used multiple times in a tree; consequently, the total reduction in the loss function across all splits by a variable are summed up and used as the total feature importance. When using \textbf{caret}, these values are standardized so that the most important feature has a value of 100 and the remaining features are scored based on their relative reduction in the loss function. Also, since there may be candidate variables that are important but are not used in a split, the top competing variables are also tabulated at each split.
+
+Figure \ref{fig:dt-vip} illustrates the top 40 features in the Ames housing decision tree. Similar to MARS (Chapter \ref{mars}), decision trees perform automated feature selection where uninformative features are not used in the model. We can see this in Figure \ref{fig:dt-vip} where the bottom four features in the plot have zero importance.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{vip}\NormalTok{(ames_dt3, }\DataTypeTok{num_features =} \DecValTok{40}\NormalTok{, }\DataTypeTok{bar =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/dt-vip-1} 
+
+}
+
+\caption{Variable importance based on the total reduction in MSE for the Ames Housing decision tree.}\label{fig:dt-vip}
+\end{figure}
+
+If we look at the same partial dependence plots that we created for the MARS models (Section \ref{mars-features}), we can see the similarity in how decision trees are modeling the relationship between the features and target. In \ref{fig:dt-pdp}, we see that \texttt{Gr\_Liv\_Area} has a non-linear relationship such that it has increasingly stronger effects on the predicted sale price for \texttt{Gr\_liv\_Area} values between 1000--2500 but then has little, if any, influence when it exceeds 2500. However, the 3-D plot of the interaction effect between \texttt{Gr\_Liv\_Area} and \texttt{Year\_Built} illustrates a key difference in how decision trees have rigid non-smooth prediction surfaces compared to MARS; in fact, MARS was developed as an imporvement to CART for regression problems.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Construct partial dependence plots}
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{partial}\NormalTok{(ames_dt3, }\DataTypeTok{pred.var =} \StringTok{"Gr_Liv_Area"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{autoplot}\NormalTok{()}
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{partial}\NormalTok{(ames_dt3, }\DataTypeTok{pred.var =} \StringTok{"Year_Built"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{autoplot}\NormalTok{()}
+\NormalTok{p3 <-}\StringTok{ }\KeywordTok{partial}\NormalTok{(ames_dt3, }\DataTypeTok{pred.var =} \KeywordTok{c}\NormalTok{(}\StringTok{"Gr_Liv_Area"}\NormalTok{, }\StringTok{"Year_Built"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{plotPartial}\NormalTok{(}\DataTypeTok{levelplot =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{zlab =} \StringTok{"yhat"}\NormalTok{, }\DataTypeTok{drape =} \OtherTok{TRUE}\NormalTok{, }
+              \DataTypeTok{colorkey =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{screen =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{z =} \DecValTok{-20}\NormalTok{, }\DataTypeTok{x =} \DecValTok{-60}\NormalTok{))}
+
+\CommentTok{# Display plots side by side}
+\NormalTok{gridExtra}\OperatorTok{::}\KeywordTok{grid.arrange}\NormalTok{(p1, p2, p3, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/dt-pdp-1} 
+
+}
+
+\caption{Partial dependence plots to understand the relationship between sale price and the living space, and year built features.}\label{fig:dt-pdp}
+\end{figure}
+
+\hypertarget{final-thoughts-5}{%
+\section{Final thoughts}\label{final-thoughts-5}}
+
+Decision trees have a number of advantages. Trees require very little pre-processing. This is not to say feature engineering may not improve upon a decision tree, but rather, that there are no pre-processing requirements. Monotonic transformations (e.g., \(\log\), \(\exp\), and \(\sqrt{}\)) are not required to meet algorithm assumptions as in many parametric models; instead, they only shift the location of the optimal split points. Outliers typically do not bias the results as much since the binary partitioning simply looks for a single location to make a split within the distribution of each feature.
+
+Decision trees can easily handle categorical features without preprocessing. For unordered categorical features with more than two levels, the classes are ordered based on the outcome (for regression problems, the mean of the response is used and for classification problems, the proportion of the positive outcome class is used). For more details see \citet{esl}, \citet{breiman1984nonlinear}, \citet{ripley2007pattern}, \citet{fisher1958grouping}, and \citet{loh1988tree}.
+
+Missing values often cause problems with statistical models and analyses. Most procedures deal with them by refusing to deal with them---incomplete observations are tossed out. However, most decision tree implementations can easily handle missing values in the features and do not require imputation. This is handled in various ways but most commonly by creating a new ``missing'' class for categorical variables or using surrogate splits (see \citet{therneau1997introduction} for details).
+
+However, individual decision trees generally do not often achieve state-of-the-art predictive accuracy. In this chapter, we saw that the best pruned decision tree, although it performed better than linear regression (Chapter \ref{linear-regression}), had a very poor RMSE (\$40,812) compared to some of the other mdoels we've built. This is driven by the fact that decision trees are comprised of simple yes-or-no rules that create rigid non-smooth decision boundaries. Furthermore, we saw that deep trees tend to have high variance (and low bias) and shallow trees tend to be overly bias (but low variance). In the chapters that follow, we'll see how we can ensemble multiple trees together into very powerful prediction models.
 
 \bibliography{book.bib,packages.bib}
 

@@ -33,3 +33,5 @@ plotmo
 earth
 pdp
 ggmap
+rpart
+rpart.plot

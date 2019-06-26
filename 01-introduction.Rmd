@@ -1,3 +1,5 @@
+\mainmatter
+
 # (PART) Fundamentals {-} 
 
 # Introduction to Machine Learning {#intro}
@@ -21,12 +23,12 @@ Machine learning (ML) continues to grow in importance for many organizations acr
 * Predicting customer churn so an organization can perform preventative intervention.
 * And many more!
 
-In essence, these tasks all seek to learn from data.  To address each scenario, we can use a given set of _features_ to train an algorithm and extract insights. These algorithms, or _learners_, can be classified according to the amount and type of supervision needed during training.  The two main groups this book focuses on are: ___supervised learners___ which construct predictive models, and ___unsupervised learners___ which build descriptive models. Which type you will need to use depends on the learning task you hope to accomplish.
+In essence, these tasks all seek to learn from data.  To address each scenario, we can use a given set of _features_\index{features} to train an algorithm and extract insights. These algorithms, or _learners_\index{learners}, can be classified according to the amount and type of supervision needed during training.  The two main groups this book focuses on are: ___supervised learners___ which construct predictive models, and ___unsupervised learners___ which build descriptive models. Which type you will need to use depends on the learning task you hope to accomplish.
 
 
 ## Supervised learning
 
-A ___predictive model___ is used for tasks that involve the prediction of a given output (or target) using other variables (or features) in the data set. Or, as stated by @apm [p. 2], predictive modeling is "...the process of developing a mathematical tool or model that generates an accurate prediction."  The learning algorithm in a predictive model attempts to discover and model the relationships among the <font color="red">target</font> variable (the variable being predicted) and the other <font color="blue">features</font> (aka predictor variables). Examples of predictive modeling include:
+A ___predictive model___\index{predictive model} is used for tasks that involve the prediction of a given output (or target) using other variables (or features) in the data set. Or, as stated by @apm [p. 2], predictive modeling is "...the process of developing a mathematical tool or model that generates an accurate prediction."  The learning algorithm in a predictive model attempts to discover and model the relationships among the <font color="red">target</font> variable (the variable being predicted) and the other <font color="blue">features</font> (aka predictor variables). Examples of predictive modeling include:
 
 * using customer attributes to predict the probability of the customer churning in the next 6 weeks;
 * using <font color="blue">home attributes</font> to predict the <font color="red">sales price</font>;
@@ -44,13 +46,13 @@ Throughout this text we'll use various terms interchangeably for:
 
 ```
 
-The predictive modeling examples above describe what is known as _supervised learning_.  The supervision refers to the fact that the target values provide a supervisory role, which indicates to the learner the task it needs to learn. Specifically, given a set of data, the learning algorithm attempts to optimize a function (the algorithmic steps) to find the combination of feature values that results in a predicted value that is as close to the actual target output as possible.
+The predictive modeling examples above describe what is known as _supervised learning_\index{supervised learning}.  The supervision refers to the fact that the target values provide a supervisory role, which indicates to the learner the task it needs to learn. Specifically, given a set of data, the learning algorithm attempts to optimize a function (the algorithmic steps) to find the combination of feature values that results in a predicted value that is as close to the actual target output as possible.
 
 ```{block, type = "note"}
 In supervised learning, the training data you feed the algorithm includes the target values.  Consequently, the solutions can be used to help _supervise_ the training process to find the optimal algorithm parameters.
 ```
 
-Most supervised learning problems can be bucketed into one of two categories: _regression_ or _classification_, which we discuss next.
+Most supervised learning problems can be bucketed into one of two categories: _regression_\index{regression} or _classification_\index{classification}, which we discuss next.
 
 ### Regression problems
 
@@ -133,9 +135,9 @@ Although there are machine learning algorithms that can be applied to regression
 
 ## Unsupervised learning
 
-___Unsupervised learning___, in contrast to supervised learning, includes a set of statistical tools to better understand and describe your data, but performs the analysis without a target variable.  In essence, unsupervised learning is concerned with identifying groups in a data set. The groups may be defined by the rows (i.e., *clustering*) or the columns (i.e., *dimension reduction*); however, the motive in each case is quite different.
+___Unsupervised learning___\index{unsupervised learning}, in contrast to supervised learning, includes a set of statistical tools to better understand and describe your data, but performs the analysis without a target variable.  In essence, unsupervised learning is concerned with identifying groups in a data set. The groups may be defined by the rows (i.e., *clustering*) or the columns (i.e., *dimension reduction*); however, the motive in each case is quite different.
 
-The goal of ___clustering___ is to segment observations into similar groups based on the observed variables; for example, to divide consumers into different homogeneous groups, a process known as market segmentation.  In __dimension reduction__, we are often concerned with reducing the number of variables in a data set. For example, classical linear regression models break down in the presence of highly correlated features.  Some dimension reduction techniques can be used to reduce the feature set to a potentially smaller set of uncorrelated variables. Such a reduced feature set is often used as input to downstream supervised learning models (e.g., principal component regression).
+The goal of ___clustering___\index{clustering} is to segment observations into similar groups based on the observed variables; for example, to divide consumers into different homogeneous groups, a process known as market segmentation.  In __dimension reduction__\index{dimension reduction}, we are often concerned with reducing the number of variables in a data set. For example, classical linear regression models break down in the presence of highly correlated features.  Some dimension reduction techniques can be used to reduce the feature set to a potentially smaller set of uncorrelated variables. Such a reduced feature set is often used as input to downstream supervised learning models (e.g., principal component regression).
 
 Unsupervised learning is often performed as part of an exploratory data analysis (EDA). However, the exercise tends to be more subjective, and there is no simple goal for the analysis, such as prediction of a response. Furthermore, it can be hard to assess the quality of results obtained from unsupervised learning methods. The reason for this is simple. If we fit a predictive model using a supervised learning technique (i.e., linear regression), then it is possible to check our work by seeing how well our model predicts the response _Y_ on observations not used in fitting the model. However, in unsupervised learning, there is no way to check our work because we don’t know the true answer---the problem is unsupervised!  
 
@@ -155,7 +157,7 @@ The goal of this book is to provide effective tools for uncovering relevant and 
 
 Chapters \@ref(linear-regression)-\@ref(svm) focus on common supervised learners ranging from simpler linear regression models to the more complicated gradient boosting machines and deep neural networks. Here we will illustrate the fundamental concepts of each base learning algorithm and how to tune its hyperparameters to maximize predictive performance.
 
-Chapters \@ref(stacking)-\@ref(iml) delve into more advanced approaches to maximize effectiveness, efficiency, and interpretation of your ML models.  We discuss how to combine multiple models to create a stacked model (aka _super learner_), which allows you to combine the strengths from each base learner and further maximize predictive accuracy. We then illustrate how to make the training and validation process more efficient with automated ML (aka AutoML). Finally, we illustrate many ways to extract insight from your "black box" models with various ML interpretation techniques.
+Chapters \@ref(stacking)-\@ref(iml) delve into more advanced approaches to maximize effectiveness, efficiency, and interpretation of your ML models.  We discuss how to combine multiple models to create a stacked model (aka _super learner_\index{super learnier}), which allows you to combine the strengths from each base learner and further maximize predictive accuracy. We then illustrate how to make the training and validation process more efficient with automated ML (aka AutoML). Finally, we illustrate many ways to extract insight from your "black box" models with various ML interpretation techniques.
 
 The latter part of the book focuses on unsupervised techniques aimed at reducing the dimensions of your data for more effective data representation (Chapters \@ref(pca)-\@ref(autoencoders)) and identifying common groups among your observations with clustering techniques (Chapters \@ref(kmeans)-\@ref(model-clustering)).
 

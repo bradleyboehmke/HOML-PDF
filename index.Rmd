@@ -29,10 +29,6 @@ lapply(c('xfun'), function(pkg) {
 
 # Preface {-}
 
-```{block, type = "note"}
-**Note to readers**: this text is a work in progress. It will eventually be published by Chapman & Hall/CRC. Prior to the formal copyediting process, we wanted to open it up to public review to get feedback on the content. Any feedback would be greatly appreciated and can be given at https://github.com/koalaverse/hands-on-machine-learning-with-r/issues. Public reviewers that help improve this book will be recognized in the Acknowledge Section.
-```
-
 Welcome to *Hands-on Machine Learning with R*.  This book provides hands-on modules for many of the most common machine learning methods to include:
 
 - Generalized low rank models

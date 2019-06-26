@@ -1,3 +1,16 @@
 base
 ggplot2
 plotly
+tidyverse
+tibble
+tidyr
+readr
+purrr
+dplyr
+stringr
+forcats
+rsample
+lattice
+caret
+h2o
+plotROC

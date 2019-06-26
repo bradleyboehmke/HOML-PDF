@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019) (preloaded format=xelatex 2019.6.25)  26 JUN 2019 08:48
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019) (preloaded format=xelatex 2019.6.25)  26 JUN 2019 09:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1255,50 +1255,11 @@ Underfull \hbox (badness 10000) has occurred while \output is active
 
 [3
 
-] [4])
+] [4] [5])
 \tf@toc=\write6
 \openout6 = `bookdown.toc'.
 
-[5]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \hbox (336.25pt too wide) has occurred while \output is active
-[]
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \hbox (336.25pt too wide) has occurred while \output is active
-[]
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \hbox (336.25pt too wide) has occurred while \output is active
-[]
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \hbox (336.25pt too wide) has occurred while \output is active
-[]
- []
-
-
-Underfull \hbox (badness 10000) has occurred while \output is active
- [][][][] 
- []
-
-[6
-
-]
+[6]
 Underfull \vbox (badness 10000) detected at line 229
  []
 
@@ -1352,6 +1313,7 @@ Underfull \hbox (badness 10000) has occurred while \output is active
  []
 
 [7
+
 
 ]
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1440,11 +1402,50 @@ Underfull \hbox (badness 10000) has occurred while \output is active
 
 [9
 
-] [10] [11])
+] [10] [11] [12])
 \tf@lof=\write8
 \openout8 = `bookdown.lof'.
 
-[12]
+[13]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (336.25pt too wide) has occurred while \output is active
+[]
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (336.25pt too wide) has occurred while \output is active
+[]
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (336.25pt too wide) has occurred while \output is active
+[]
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (336.25pt too wide) has occurred while \output is active
+[]
+ []
+
+
+Underfull \hbox (badness 10000) has occurred while \output is active
+ [][][][] 
+ []
+
+[14
+
+]
 Underfull \vbox (badness 10000) detected at line 232
  []
 
@@ -1502,10 +1503,9 @@ Underfull \hbox (badness 10000) has occurred while \output is active
  [][][][] 
  []
 
-[13
+[15
 
-
-] [14]
+] [16]
 LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <10> not available
 (Font)              Font shape `TU/lmtt/b/n' tried instead on input line 297.
 File: icons/tip.png Graphic file (type bmp)
@@ -1514,22 +1514,10 @@ File: icons/note.png Graphic file (type bmp)
 <icons/note.png>
 File: icons/warning.png Graphic file (type bmp)
 <icons/warning.png>
-[15]
+[17]
 Underfull \hbox (badness 1424) in paragraph at lines 326--327
 \TU/lmr/m/n/10 post an issue at [][]$[][][][][] [] [] [] [][][][][][] [] [][][]
  [] [][][][][][][][][][] [] [][][][][] [][] [][] [][] [][][][][][][] [][]
- []
-
-[16]
-Underfull \vbox (badness 10000) detected at line 762
- []
-
-
-Underfull \vbox (badness 10000) detected at line 762
- []
-
-[17]
-Underfull \vbox (badness 10000) detected at line 762
  []
 
 [18]
@@ -1537,15 +1525,11 @@ Underfull \vbox (badness 10000) detected at line 762
  []
 
 
-Overfull \vbox (2.22005pt too high) detected at line 762
+Underfull \vbox (badness 10000) detected at line 762
  []
 
 [19]
 Underfull \vbox (badness 10000) detected at line 762
- []
-
-
-Overfull \vbox (2.22005pt too high) detected at line 762
  []
 
 [20]
@@ -1561,7 +1545,7 @@ Underfull \vbox (badness 10000) detected at line 762
  []
 
 
-Overfull \vbox (0.76006pt too high) detected at line 762
+Overfull \vbox (2.22005pt too high) detected at line 762
  []
 
 [22]
@@ -1569,7 +1553,7 @@ Underfull \vbox (badness 10000) detected at line 762
  []
 
 
-Overfull \vbox (0.76006pt too high) detected at line 762
+Overfull \vbox (2.22005pt too high) detected at line 762
  []
 
 [23]
@@ -1588,7 +1572,23 @@ Underfull \vbox (badness 10000) detected at line 762
 Overfull \vbox (0.76006pt too high) detected at line 762
  []
 
-[25] [26]
+[25]
+Underfull \vbox (badness 10000) detected at line 762
+ []
+
+
+Overfull \vbox (0.76006pt too high) detected at line 762
+ []
+
+[26]
+Underfull \vbox (badness 10000) detected at line 762
+ []
+
+
+Overfull \vbox (0.76006pt too high) detected at line 762
+ []
+
+[27] [28]
 Underfull \vbox (badness 10000) detected at line 767
  []
 
@@ -2579,17 +2579,9 @@ pdf)
 File: bookdown_files/figure-latex/04-autocorrelation-1.pdf Graphic file (type p
 df)
 <use bookdown_files/figure-latex/04-autocorrelation-1.pdf>
-
-LaTeX Warning: Reference `regularized-regression' on page 94 undefined on input
- line 3635.
-
 [94] [95]
 
 LaTeX Warning: Reference `pca' on page 96 undefined on input line 3678.
-
-
-LaTeX Warning: Reference `regularized-regression' on page 96 undefined on input
- line 3678.
 
 
 LaTeX Warning: Reference `pca' on page 96 undefined on input line 3683.
@@ -2758,7 +2750,7 @@ File: icons/tip.png Graphic file (type bmp)
 <icons/tip.png>
 File: bookdown_files/figure-latex/glm-pdp-1.pdf Graphic file (type pdf)
 <use bookdown_files/figure-latex/glm-pdp-1.pdf>
-[120] (./bookdown.bbl [121]
+[120] [121]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
@@ -2798,6 +2790,165 @@ Underfull \hbox (badness 10000) has occurred while \output is active
 [122
 
 ]
+Underfull \vbox (badness 10000) detected at line 4273
+ []
+
+
+Overfull \hbox (336.25pt too wide) detected at line 4273
+[]
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 4273
+ []
+
+
+Overfull \hbox (336.25pt too wide) detected at line 4273
+[]
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 4273
+ []
+
+
+Overfull \hbox (336.25pt too wide) detected at line 4273
+[]
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 4273
+ []
+
+
+Overfull \hbox (336.25pt too wide) detected at line 4273
+[]
+ []
+
+Chapter 6.
+
+LaTeX Warning: Reference `hyperplanes' on page 123 undefined on input line 4301
+.
+
+
+Underfull \hbox (badness 10000) has occurred while \output is active
+ [][][][] 
+ []
+
+[123
+
+]
+File: bookdown_files/figure-latex/hyperplane-1.pdf Graphic file (type pdf)
+<use bookdown_files/figure-latex/hyperplane-1.pdf>
+[124]
+File: icons/note.png Graphic file (type bmp)
+<icons/note.png>
+[125]
+Underfull \hbox (badness 10000) detected at line 4358
+ [][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 4358
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 4360
+ [][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 4360
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 4362
+ [][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 4362
+[][][]
+ []
+
+File: bookdown_files/figure-latex/ridge-coef-example-1.pdf Graphic file (type p
+df)
+<use bookdown_files/figure-latex/ridge-coef-example-1.pdf>
+[126]
+File: bookdown_files/figure-latex/lasso-coef-example-1.pdf Graphic file (type p
+df)
+<use bookdown_files/figure-latex/lasso-coef-example-1.pdf>
+[127]
+File: bookdown_files/figure-latex/elastic-net-coef-example-1.pdf Graphic file (
+type pdf)
+<use bookdown_files/figure-latex/elastic-net-coef-example-1.pdf>
+[128]
+File: icons/note.png Graphic file (type bmp)
+<icons/note.png>
+[129]
+Underfull \hbox (badness 10000) detected at line 4469
+ [][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 4469
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 4471
+ [][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 4471
+[][][]
+ []
+
+File: bookdown_files/figure-latex/ridge1-1.pdf Graphic file (type pdf)
+<use bookdown_files/figure-latex/ridge1-1.pdf>
+File: icons/tip.png Graphic file (type bmp)
+<icons/tip.png>
+[130]
+Underfull \vbox (badness 7012) detected at line 4524
+ []
+
+[131]
+File: icons/tip.png Graphic file (type bmp)
+<icons/tip.png>
+File: bookdown_files/figure-latex/ridge-lasso-cv-models-1.pdf Graphic file (typ
+e pdf)
+<use bookdown_files/figure-latex/ridge-lasso-cv-models-1.pdf>
+[132] [133]
+File: icons/tip.png Graphic file (type bmp)
+<icons/tip.png>
+[134]
+File: bookdown_files/figure-latex/ridge-lasso-cv-viz-results-1.pdf Graphic file
+ (type pdf)
+<use bookdown_files/figure-latex/ridge-lasso-cv-viz-results-1.pdf>
+File: bookdown_files/figure-latex/glmnet-elastic-comparison-1.pdf Graphic file 
+(type pdf)
+<use bookdown_files/figure-latex/glmnet-elastic-comparison-1.pdf>
+[135]
+File: icons/warning.png Graphic file (type bmp)
+<icons/warning.png>
+[136]
+File: bookdown_files/figure-latex/glmnet-tuning-grid-1.pdf Graphic file (type p
+df)
+<use bookdown_files/figure-latex/glmnet-tuning-grid-1.pdf>
+[137]
+File: bookdown_files/figure-latex/regularize-vip-1.pdf Graphic file (type pdf)
+<use bookdown_files/figure-latex/regularize-vip-1.pdf>
+[138]
+File: bookdown_files/figure-latex/regularized-top4-pdp-1.pdf Graphic file (type
+ pdf)
+<use bookdown_files/figure-latex/regularized-top4-pdp-1.pdf>
+File: bookdown_files/figure-latex/regularized-num5-pdp-1.pdf Graphic file (type
+ pdf)
+<use bookdown_files/figure-latex/regularized-num5-pdp-1.pdf>
+[139] [140] [141] (./bookdown.bbl [142]
 Underfull \vbox (badness 10000) detected at line 1
  []
 
@@ -2843,9 +2994,10 @@ Underfull \hbox (badness 10000) has occurred while \output is active
  [][][][] 
  []
 
-[123
+[143
 
-] [124] [125]) [126] (./bookdown.ind
+
+] [144] [145]) [146] (./bookdown.ind
 Underfull \hbox (badness 10000) detected at line 1
 []
  []
@@ -2859,33 +3011,33 @@ Underfull \hbox (badness 10000) has occurred while \output is active
  [][][][] 
  []
 
-[127
+[147
 
 
 
-] [128
+] [148
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4277.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 4277.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4829.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 4829.
 (./bookdown.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 4277.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4277.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 4829.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4829.
 
 Package rerunfilecheck Info: File `bookdown.out' has not changed.
-(rerunfilecheck)             Checksum: 3143D90C203D4055FDC0AB7CC04AD312.
+(rerunfilecheck)             Checksum: CAD47A4366F8640E27AAC1C99F2C9543.
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4277.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4829.
  ) 
 Here is how much of TeX's memory you used:
- 28210 strings out of 494894
- 517554 string characters out of 6173843
- 783637 words of memory out of 5000000
- 31831 multiletter control sequences out of 15000+600000
+ 28303 strings out of 494894
+ 521009 string characters out of 6173843
+ 786167 words of memory out of 5000000
+ 31912 multiletter control sequences out of 15000+600000
  537883 words of font info for 85 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  50i,9n,115p,1615b,621s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on bookdown.pdf (154 pages).
+Output written on bookdown.pdf (176 pages).

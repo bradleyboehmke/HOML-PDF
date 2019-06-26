@@ -444,7 +444,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    fansi           0.4.0      2018-10-05 [1]}
 \CommentTok{#>    flashClust      1.01-2     2012-08-21 [1]}
 \CommentTok{#>    forcats       * 0.4.0      2019-02-17 [1]}
-\CommentTok{#>    foreach         1.4.4      2017-12-12 [1]}
+\CommentTok{#>    foreach       * 1.4.4      2017-12-12 [1]}
 \CommentTok{#>    foreign         0.8-71     2018-07-20 [1]}
 \CommentTok{#>    forge           0.2.0      2019-02-26 [1]}
 \CommentTok{#>    Formula         1.2-3      2018-05-03 [1]}
@@ -456,7 +456,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    ggrepel         0.8.1      2019-05-07 [1]}
 \CommentTok{#>    ggsci           2.9        2018-05-14 [1]}
 \CommentTok{#>    ggsignif        0.5.0      2019-02-20 [1]}
-\CommentTok{#>    glmnet          2.0-16     2018-04-02 [1]}
+\CommentTok{#>    glmnet        * 2.0-16     2018-04-02 [1]}
 \CommentTok{#>    glue            1.3.1.9000 2019-05-03 [1]}
 \CommentTok{#>    gower           0.2.0      2019-03-07 [1]}
 \CommentTok{#>    gplots        * 3.0.1.1    2019-01-27 [1]}
@@ -489,7 +489,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    maptools        0.9-5      2019-02-18 [1]}
 \CommentTok{#>    markdown        1.0        2019-06-07 [1]}
 \CommentTok{#>    MASS            7.3-51.4   2019-03-31 [1]}
-\CommentTok{#>    Matrix          1.2-17     2019-03-22 [1]}
+\CommentTok{#>    Matrix        * 1.2-17     2019-03-22 [1]}
 \CommentTok{#>    MatrixModels    0.4-1      2015-08-22 [1]}
 \CommentTok{#>    mclust          5.4.3      2019-03-14 [1]}
 \CommentTok{#>    Metrics         0.1.4      2018-07-09 [1]}
@@ -4268,6 +4268,558 @@ in Figure \ref{fig:glm-pdp}.
 \section{Final thoughts}\label{final-thoughts-1}}
 
 Logistic regression provides an alternative to linear regression for binary classification problems. However, similar to linear regression, logistic regression suffers from the many assumptions involved in the algorithm (i.e.~linear relationship of the coefficient, multicollinearity). Moreover, often we have more than two classes to predict which is commonly referred to as multinomial classification. Although multinomial extensions of logistic regression exist, the assumptions made only increase and, often, the stability of the coefficient estimates (and therefore the accuracy) decrease. Future chapters will discuss more advanced algorithms that provide a more natural and trustworthy approach to binary and multinomial classification prediction.
+
+\hypertarget{regularized-regression}{%
+\chapter{Regularized Regression}\label{regularized-regression}}
+
+Linear models (LMs) provide a simple, yet effective, approach to predictive modeling. Moreover, when certain assumptions required by LMs are met (e.g., constant variance), the estimated coefficients are unbiased and, of all linear unbiased estimates, have the lowest variance. However, in today's world, data sets being analyzed typically have a large amount of features. As the number of features grow, certain assumptions typically break down and these models tend to overfit the training data, causing our out of sample error to increase. \textbf{Regularization}\index{regularization} methods provide a means to constrain or \emph{regularize} the estimated coefficients, which can reduce the variance and decrease out of sample error.
+
+\hypertarget{prerequisites-4}{%
+\section{Prerequisites}\label{prerequisites-4}}
+
+This chapter leverages the following packages. Most of these packages are playing a supporting role while the main emphasis will be on the \textbf{glmnet} package \citep{R-glmnet}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Helper packages}
+\KeywordTok{library}\NormalTok{(recipes)  }\CommentTok{# for feature engineering}
+
+\CommentTok{# Modeling packages}
+\KeywordTok{library}\NormalTok{(glmnet)   }\CommentTok{# for implementing regularized regression}
+\KeywordTok{library}\NormalTok{(caret)    }\CommentTok{# for automating the tuning process}
+
+\CommentTok{# Model interpretability packages}
+\KeywordTok{library}\NormalTok{(vip)      }\CommentTok{# for variable importance}
+\end{Highlighting}
+\end{Shaded}
+
+To illustrate various regularization concepts we'll continue working with the \texttt{ames\_train} and \texttt{ames\_test} data sets created in Section \ref{put-process-together}; however, at the end of the chapter we'll also apply regularized regression to the employee attrition data.
+
+\hypertarget{why}{%
+\section{Why regularize?}\label{why}}
+
+The easiest way to understand regularized regression is to explain how and why it is applied to ordinary least squares (OLS). The objective in OLS regression is to find the \emph{hyperplane}\index{hyperplane}\footnote{See Section \ref{hyperplanes} for more discussion on hyperplanes.} (e.g., a straight line in two dimensions) that minimizes the sum of squared errors (SSE) between the observed and predicted response values (see \ref{fig:hyperplane} below). This means identifying the hyperplane that minimizes the grey lines, which measure the vertical distance between the observed (red dots) and predicted (blue line) response values.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/hyperplane-1} 
+
+}
+
+\caption{Fitted regression line using Ordinary Least Squares.}\label{fig:hyperplane}
+\end{figure}
+
+More formally, the objective function being minimized can be written as:
+
+\begin{equation}
+\label{eq:ols-objective}
+\text{minimize} \left( SSE = \sum^n_{i=1} \left(y_i - \hat{y}_i\right)^2 \right)
+\end{equation}
+
+As we discussed in Chapter \ref{linear-regression}, the OLS objective function performs quite well when our data adhere to a few key assumptions:
+
+\begin{itemize}
+\tightlist
+\item
+  Linear relationship;
+\item
+  There are more observations (\emph{n}) than features (\emph{p}) (\(n > p\));
+\item
+  No or little multicollinearity.
+\end{itemize}
+
+\BeginKnitrBlock{note}
+For classicial statistical inference procedures (e.g., confidence intervals based on the classic \emph{t}-statistic) to be valid, we also need to make stronger assumptions regarding normality (of the errors) and homoscedasticy (i.e., constant error variance).
+\EndKnitrBlock{note}
+
+Many real-life data sets, like those cmmon to \emph{text mining} and \emph{genomic studies} are \emph{wide}, meaning they contain a larger number of features (\(p > n\)). As \emph{p} increases, we're more likely to violate some of the OLS assumptions and alternative approaches should be considered. This was briefly illustrated in Chapter \ref{linear-regression} where the presence of multicollinearity was diminishing the interpretability of our estimated coefficients due to inflated variance. By reducing multicollinearity, we were able to increase our model's accuracy. Of course, multicollinearity can also occur when \(n > p\).
+
+Having a large number of features invites additional issues in using classic regression models. For one, having a large number of features makes the model much less interpretable. Additionally, when \(p > n\), there are many (in fact infinite) solutions to the OLS problem! In such cases, it is useful (and practical) to assume that a smaller subset of the features exhibit the strongest effects (something called the \emph{bet on sparsity principal} \citep[see][p.~2]{hastie2015statistical}.). For this reason, we sometimes prefer estimation techniques that incorporate \emph{feature selection}\index{feature selection}. One approach to this is called \emph{hard threshholding} feature selection, which includes many of the traditional linear model selection approaches like \emph{forward selection} and \emph{backward elimination}. These procedures, however, can be computationally inefficient, do not scale well, and they simply assume a feature as either in or out of the model (hence the name hard thresholding). In contrast, a more modern approach, called \emph{soft threshholding}, slowly pushes the effects of irrelevant features toward zero, and in some cases, will zero out entire coefficients. As will be demonstrated, this can result in more accurate models that are also easier to interpret.
+
+With wide data (or data that exhibits multicollinearity), one alternative to OLS regression is to use regularized regression (also commonly referred to as \emph{penalized} models\index{penalized models} or \emph{shrinkage} methods\index{shrinkage methods} as in \citet{esl} and \citet{apm}) to constrain the total size of all the coefficient estimates. This constraint helps to reduce the magnitude and fluctuations of the coefficients and will reduce the variance of our model (at the expense of no longer being unbiased---a reasonable compromise).
+
+The objective function of a regularized regression model is similar to OLS; albeit, with a penalty term \(P\).
+
+\begin{equation}
+\label{eq:penalty}
+\text{minimize} \left( SSE + P \right)
+\end{equation}
+
+This penalty parameter constrains the size of the coefficients such that the only way the coefficients can increase is if we experience a comparable decrease in the sum of squared errors (SSE).
+
+This concept generalizes to all GLM models (e.g., logistic and Poisson regression) and even some \emph{survival models}. So far, we have been discussing OLS and the sum of squared errors loss function. However, different models within the GLM family have different loss functions (see Chapter 4 of \citet{esl}). Yet we can think of the penalty parameter all the same---it constrains the size of the coefficients such that the only way the coefficients can increase is if we experience a comparable decrease in the model's loss function.
+
+There are three common penalty parameters we can implement:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Ridge;
+\item
+  LASSO, or lasso;
+\item
+  Elastic net, which is a combination of Ridge and Lasso.
+\end{enumerate}
+
+\hypertarget{ridge}{%
+\subsection{Ridge penalty}\label{ridge}}
+
+Ridge regression\index{ridge penalty} \citep{hoerl1970ridge} controls the estimated coefficients by adding \(\lambda \sum^p_{j=1} \beta_j^2\) to the objective function.
+
+\begin{equation}
+\label{eq:ridge-penalty}
+\text{minimize } \left( SSE + \lambda \sum^p_{j=1} \beta_j^2 \right)
+\end{equation}
+
+The size of this penalty, referred to as \(L^2\) (or Euclidean) norm, can take on a wide range of values, which is controlled by the \emph{tuning parameter} \(\lambda\). When \(\lambda = 0\) there is no effect and our objective function equals the normal OLS regression objective function of simply minimizing SSE. However, as \(\lambda \rightarrow \infty\), the penalty becomes large and forces the coefficients toward zero (but not all the way). This is illustrated in Figure \ref{fig:ridge-coef-example} where exemplar coefficients have been regularized with \(\lambda\) ranging from 0 to over 8,000.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/ridge-coef-example-1} 
+
+}
+
+\caption{Ridge regression coefficients for 15 exemplar predictor variables as $\lambda$ grows from  $0 \rightarrow \infty$. As $\lambda$ grows larger, our coefficient magnitudes are more constrained.}\label{fig:ridge-coef-example}
+\end{figure}
+
+Although these coefficients were scaled and centered prior to the analysis, you will notice that some are quite large when \(\lambda\) is near zero. Furthermore, you'll notice that feature \texttt{x1} has a large negative parameter that fluctuates until \(\lambda \approx 7\) where it then continuously skrinks toward zero. This is indicative of multicollinearity and likely illustrates that constraining our coefficients with \(\lambda > 7\) may reduce the variance, and therefore the error, in our predictions.
+
+In essence, the ridge regression model pushes many of the correlated features toward each other rather than allowing for one to be wildly positive and the other wildly negative. In addition, many of the less-important features also get pushed toward zero. This helps to provide clarity in identifying the important signals in our data (i.e., the labeled features in \ref{fig:ridge-coef-example}).
+
+However, ridge regression does not perform feature selection and will retain \textbf{all} available features in the final model. Therefore, a ridge model is good if you believe there is a need to retain all features in your model yet reduce the noise that less influential variables may create (e.g., in smaller data sets with severe multicollinearity). If greater interpretation is necessary and feel that many of the features are redundant or irrelvant then a lasso or elastic net penalty may be preferable.
+
+\hypertarget{lasso}{%
+\subsection{Lasso penalty}\label{lasso}}
+
+The \emph{least absolute shrinkage and selection operator} (lasso) penalty\index{Lasso penalty} \citep{tibshirani1996regression} is an alternative to the ridge penalty that requires only a small modification. The only difference is that we swap out the \(L^2\) norm for an \(L^1\) norm: \(\lambda \sum^p_{j=1} | \beta_j|\):
+
+\begin{equation}
+\label{eq:lasso-penalty}
+\text{minimize } \left( SSE + \lambda \sum^p_{j=1} | \beta_j | \right)
+\end{equation}
+
+Whereas the ridge penalty pushes variables to \emph{approximately but not equal to zero}, the lasso penalty will actually push coefficients all the way to zero as illustrated in Figure \ref{fig:lasso-coef-example}. Switching to the lasso penalty not only improves the model but it also conducts automated feature selection.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/lasso-coef-example-1} 
+
+}
+
+\caption{Lasso regression coefficients as $\lambda$ grows from  $0 \rightarrow \infty$.}\label{fig:lasso-coef-example}
+\end{figure}
+
+In the figure above we see that when \(\lambda < 0.01\) all 15 variables are included in the model, when \(\lambda \approx 0.5\) 9 variables are retained, and when \(log\left(\lambda\right) = 1\) only 5 variables are retained. Consequently, when a data set has many features, lasso can be used to identify and extract those features with the largest (and most consistent) signal.
+
+\hypertarget{elastic}{%
+\subsection{Elastic nets}\label{elastic}}
+
+A generalization of the ridge and lasso penalties, called the \emph{elastic net}\index{elastic net} \citep{zou2005regularization}, combines the two penalties:
+
+\begin{equation}
+\label{eq:elastic-penalty}
+\text{minimize } \left( SSE + \lambda_1 \sum^p_{j=1} \beta_j^2 + \lambda_2 \sum^p_{j=1} | \beta_j | \right)
+\end{equation}
+
+Although lasso models perform feature selection, when two strongly correlated features are pushed towards zero, one may be pushed fully to zero while the other remains in the model. Furthermore, the process of one being in and one being out is not very systematic. In contrast, the ridge regression penalty is a little more effective in systematically handling correlated features together. Consequently, the advantage of the elastic net penalty is that it enables effective regularization via the ridge penalty with the feature selection characteristics of the lasso penalty.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/elastic-net-coef-example-1} 
+
+}
+
+\caption{Elastic net coefficients as $\lambda$ grows from  $0 \rightarrow \infty$.}\label{fig:elastic-net-coef-example}
+\end{figure}
+
+\hypertarget{implementation}{%
+\section{Implementation}\label{implementation}}
+
+First, we illustrate an implementation of regularized regression using the direct engine \textbf{glmnet}. This will provide you with a strong sense of what is happening with a regularized model. Realize there are other implementations available (e.g., \textbf{h2o}, \textbf{elasticnet}, \textbf{penalized}, some of which you can find example implementations on our online resource). Then, in the tuning section (\ref{regression-glmnet-tune}), we'll demonstrate how to apply a regularized model so we can properly compare it with our previous predictive models.
+
+The \textbf{glmnet} package is extremely efficient and fast, even on very large data sets (mostly due to its use of Fortran to solve the lasso porblem via \emph{coordinate descent}); note, however, that it only accepts the non-formula XY interface (\ref{many-formula-interfaces}) so prior to modeling we need to separate our feature and target sets.
+
+\begin{note}
+The following uses \texttt{model.matrix} to dummy encode our feature set
+(see \texttt{Matrix::sparse.model.matrix} for increased efficiency on
+larger data sets). We also \(\log\) transform the response variable
+which is not required; however, parametric models such as regularized
+regression are sensitive to skewed response values so transforming can
+often improve predictive performance.
+\end{note}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Create training  feature matrices}
+\CommentTok{# we use model.matrix(...)[, -1] to discard the intercept}
+\NormalTok{X <-}\StringTok{ }\KeywordTok{model.matrix}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., ames_train)[, }\DecValTok{-1}\NormalTok{]}
+
+\CommentTok{# transform y with log transformation}
+\NormalTok{Y <-}\StringTok{ }\KeywordTok{log}\NormalTok{(ames_train}\OperatorTok{$}\NormalTok{Sale_Price)}
+\end{Highlighting}
+\end{Shaded}
+
+To apply a regularized model we can use the \texttt{glmnet::glmnet()} function. The \texttt{alpha} parameter tells \textbf{glmnet} to perform a ridge (\texttt{alpha\ =\ 0}), lasso (\texttt{alpha\ =\ 1}), or elastic net (\texttt{0\ \textless{}\ alpha\ \textless{}\ 1}) model. By default, \textbf{glmnet} will do two things that you should be aware of:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Since regularized methods apply a penalty to the coefficients, we need to ensure our coefficients are on a common scale. If not, then predictors with naturally larger values (e.g., total square footage) will be penalized more than predictors with naturally smaller values (e.g., total number of rooms). By default, \textbf{glmnet} automatically standardizes your features. If you standardize your predictors prior to \textbf{glmnet} you can turn this argument off with \texttt{standardize\ =\ FALSE}.
+\item
+  \textbf{glmnet} will fit ridge models across a wide range of \(\lambda\) values, which is illustrated in Figure \ref{fig:ridge1}.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Apply Ridge regression to attrition data}
+\NormalTok{ridge <-}\StringTok{ }\KeywordTok{glmnet}\NormalTok{(}
+  \DataTypeTok{x =}\NormalTok{ X,}
+  \DataTypeTok{y =}\NormalTok{ Y,}
+  \DataTypeTok{alpha =} \DecValTok{0}
+\NormalTok{)}
+
+\KeywordTok{plot}\NormalTok{(ridge, }\DataTypeTok{xvar =} \StringTok{"lambda"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/ridge1-1} 
+
+}
+
+\caption{Coefficients for our ridge regression model as $\lambda$ grows from  $0 \rightarrow \infty$.}\label{fig:ridge1}
+\end{figure}
+
+We can see the exact \(\lambda\) values applied with \texttt{ridge\$lambda}. Although you can specify your own \(\lambda\) values, by default \textbf{glmnet} applies 100 \(\lambda\) values that are data derived.
+
+\begin{tip}
+\textbf{glmnet} can auto-generate the appropriate \(\lambda\) values
+based on the data; the vast majority of the time you will have little
+need to adjust this default.
+\end{tip}
+
+We can also access the coefficients for a particular model using \texttt{coef()}. \textbf{glmnet} stores all the coefficients for each model in order of largest to smallest \(\lambda\). Here we just peak at the two largest coefficients (which correspond to \texttt{Latitude} \& \texttt{Overall\_QualVery\_Excellent}) for the largest (289.0010) and smallest (0.02791035) \(\lambda\) values. You can see how the largest \(\lambda\) value has pushed most of these coefficients to nearly 0.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# lambdas applied to penalty parameter}
+\NormalTok{ridge}\OperatorTok{$}\NormalTok{lambda }\OperatorTok{%>%}\StringTok{ }\KeywordTok{head}\NormalTok{()}
+\CommentTok{## [1] 289.0 263.3 239.9 218.6 199.2 181.5}
+
+\CommentTok{# small lambda results in large coefficients}
+\KeywordTok{coef}\NormalTok{(ridge)[}\KeywordTok{c}\NormalTok{(}\StringTok{"Latitude"}\NormalTok{, }\StringTok{"Overall_QualVery_Excellent"}\NormalTok{), }\DecValTok{100}\NormalTok{]}
+\CommentTok{##                   Latitude Overall_QualVery_Excellent }
+\CommentTok{##                     0.3887                     0.1274}
+
+\CommentTok{# large lambda results in small coefficients}
+\KeywordTok{coef}\NormalTok{(ridge)[}\KeywordTok{c}\NormalTok{(}\StringTok{"Latitude"}\NormalTok{, }\StringTok{"Overall_QualVery_Excellent"}\NormalTok{), }\DecValTok{1}\NormalTok{]  }
+\CommentTok{##                                   Latitude }
+\CommentTok{## 0.0000000000000000000000000000000000067824 }
+\CommentTok{##                 Overall_QualVery_Excellent }
+\CommentTok{## 0.0000000000000000000000000000000000009723}
+\end{Highlighting}
+\end{Shaded}
+
+At this point, we do not understand how much improvement we are experiencing in our loss function across various \(\lambda\) values.
+
+\hypertarget{regression-glmnet-tune}{%
+\section{Tuning}\label{regression-glmnet-tune}}
+
+Recall that \(\lambda\) is a tuning parameter that helps to control our model from over-fitting to the training data. To identify the optimal \(\lambda\) value we can use \emph{k}-fold cross-validation (CV). \texttt{glmnet::cv.glmnet()} can perform \emph{k}-fold CV, and by default, performs 10-fold CV. Below we perform a CV \textbf{glmnet} model with both a ridge and lasso penalty separately:
+
+\begin{tip}
+By default, \texttt{glmnet::cv.glmnet()} uses MSE as the loss function
+but you can also use mean absolute error (MAE) for continuous outcomes
+by changing the \texttt{type.measure} argument; see
+\texttt{?glmnet::cv.glmnet()} for more details.
+\end{tip}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Apply CV Ridge regression to Ames data}
+\NormalTok{ridge <-}\StringTok{ }\KeywordTok{cv.glmnet}\NormalTok{(}
+  \DataTypeTok{x =}\NormalTok{ X,}
+  \DataTypeTok{y =}\NormalTok{ Y,}
+  \DataTypeTok{alpha =} \DecValTok{0}
+\NormalTok{)}
+
+\CommentTok{# Apply CV Lasso regression to Ames data}
+\NormalTok{lasso <-}\StringTok{ }\KeywordTok{cv.glmnet}\NormalTok{(}
+  \DataTypeTok{x =}\NormalTok{ X,}
+  \DataTypeTok{y =}\NormalTok{ Y,}
+  \DataTypeTok{alpha =} \DecValTok{1}
+\NormalTok{)}
+
+\CommentTok{# plot results}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(ridge, }\DataTypeTok{main =} \StringTok{"Ridge penalty}\CharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(lasso, }\DataTypeTok{main =} \StringTok{"Lasso penalty}\CharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/ridge-lasso-cv-models-1} 
+
+}
+
+\caption{10-fold CV MSE for a ridge and lasso model. First dotted vertical line in each plot represents the $\lambda$ with the smallest MSE and the second represents the $\lambda$ with an MSE within one standard error of the minimum MSE.}\label{fig:ridge-lasso-cv-models}
+\end{figure}
+
+Figure \ref{fig:ridge-lasso-cv-models} illustrates the 10-fold CV MSE across all the \(\lambda\) values. In both models we see a slight improvement in the MSE as our penalty \(log(\lambda)\) gets larger , suggesting that a regular OLS model likely overfits the training data. But as we constrain it further (i.e., continue to increase the penalty), our MSE starts to decrease. The numbers across the top of the plot refer to the number of features in the model. Ridge regression does not force any variables to exactly zero so all features will remain in the model but we see the number of variables retained in the lasso model decrease as the penalty increases.
+
+The first and second vertical dashed lines represent the \(\lambda\) value with the minimum MSE and the largest \(\lambda\) value within one standard error of it. The minimum MSE for our ridge model is 0.01899 (produced when \(\lambda =\) 0.09686 whereas the minimium MSE for our lasso model is 0.02090 (produced when \(\lambda =\) 0.00400).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Ridge model}
+\KeywordTok{min}\NormalTok{(ridge}\OperatorTok{$}\NormalTok{cvm)       }\CommentTok{# minimum MSE}
+\CommentTok{## [1] 0.01899}
+\NormalTok{ridge}\OperatorTok{$}\NormalTok{lambda.min     }\CommentTok{# lambda for this min MSE}
+\CommentTok{## [1] 0.09686}
+
+\NormalTok{ridge}\OperatorTok{$}\NormalTok{cvm[ridge}\OperatorTok{$}\NormalTok{lambda }\OperatorTok{==}\StringTok{ }\NormalTok{ridge}\OperatorTok{$}\NormalTok{lambda}\FloatTok{.1}\NormalTok{se]  }\CommentTok{# 1 st.error of min MSE}
+\CommentTok{## [1] 0.02121}
+\NormalTok{ridge}\OperatorTok{$}\NormalTok{lambda}\FloatTok{.1}\NormalTok{se  }\CommentTok{# lambda for this MSE}
+\CommentTok{## [1] 0.471}
+
+\CommentTok{# Lasso model}
+\KeywordTok{min}\NormalTok{(lasso}\OperatorTok{$}\NormalTok{cvm)       }\CommentTok{# minimum MSE}
+\CommentTok{## [1] 0.0209}
+\NormalTok{lasso}\OperatorTok{$}\NormalTok{lambda.min     }\CommentTok{# lambda for this min MSE}
+\CommentTok{## [1] 0.004002}
+
+\NormalTok{lasso}\OperatorTok{$}\NormalTok{cvm[lasso}\OperatorTok{$}\NormalTok{lambda }\OperatorTok{==}\StringTok{ }\NormalTok{lasso}\OperatorTok{$}\NormalTok{lambda}\FloatTok{.1}\NormalTok{se]  }\CommentTok{# 1 st.error of min MSE}
+\CommentTok{## [1] 0.0241}
+\NormalTok{lasso}\OperatorTok{$}\NormalTok{lambda}\FloatTok{.1}\NormalTok{se  }\CommentTok{# lambda for this MSE}
+\CommentTok{## [1] 0.01616}
+\end{Highlighting}
+\end{Shaded}
+
+We can assess this visually. Figure \ref{fig:ridge-lasso-cv-viz-results} plots the estimated coefficients across the range of \(\lambda\) values. The dashed red line represents the \(\lambda\) value with the smallest MSE and the dashed blue line represents largest \(\lambda\) value that falls within one standard error of the minimum MSE. This shows you how much we can constrain the coefficients while still maximizing predictive accuracy.
+
+\begin{tip}
+Above, we saw that both ridge and lasso penalties provide similiar MSEs;
+however, these plots illustrate that ridge is still using all 299
+features whereas the lasso model can get a similar MSE while reducing
+the feature set from 299 down to 131. However, there will be some
+variability with this MSE and we can reasonably assume that we can
+achieve a similar MSE with a slightly more constrained model that uses
+only 63 features. Although this lasso model does not offer significant
+improvement over the ridge model, we get approximately the same accuracy
+by using only 63 features! If describing and interpreting the predictors
+is an important component of your analysis, this may significantly aid
+your endeavor.
+\end{tip}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Ridge model}
+\NormalTok{ridge_min <-}\StringTok{ }\KeywordTok{glmnet}\NormalTok{(}
+  \DataTypeTok{x =}\NormalTok{ X,}
+  \DataTypeTok{y =}\NormalTok{ Y,}
+  \DataTypeTok{alpha =} \DecValTok{0}
+\NormalTok{)}
+
+\CommentTok{# Lasso model}
+\NormalTok{lasso_min <-}\StringTok{ }\KeywordTok{glmnet}\NormalTok{(}
+  \DataTypeTok{x =}\NormalTok{ X,}
+  \DataTypeTok{y =}\NormalTok{ Y,}
+  \DataTypeTok{alpha =} \DecValTok{1}
+\NormalTok{)}
+
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\CommentTok{# plot ridge model}
+\KeywordTok{plot}\NormalTok{(ridge_min, }\DataTypeTok{xvar =} \StringTok{"lambda"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"Ridge penalty}\CharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v =} \KeywordTok{log}\NormalTok{(ridge}\OperatorTok{$}\NormalTok{lambda.min), }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v =} \KeywordTok{log}\NormalTok{(ridge}\OperatorTok{$}\NormalTok{lambda}\FloatTok{.1}\NormalTok{se), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{)}
+
+\CommentTok{# plot lasso model}
+\KeywordTok{plot}\NormalTok{(lasso_min, }\DataTypeTok{xvar =} \StringTok{"lambda"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"Lasso penalty}\CharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v =} \KeywordTok{log}\NormalTok{(lasso}\OperatorTok{$}\NormalTok{lambda.min), }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v =} \KeywordTok{log}\NormalTok{(lasso}\OperatorTok{$}\NormalTok{lambda}\FloatTok{.1}\NormalTok{se), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/ridge-lasso-cv-viz-results-1} 
+
+}
+
+\caption{Coefficients for our ridge and lasso models. First dotted vertical line in each plot represents the $\lambda$ with the smallest MSE and the second represents the $\lambda$ with an MSE within one standard error of the minimum MSE.}\label{fig:ridge-lasso-cv-viz-results}
+\end{figure}
+
+So far we've implemented a pure ridge and pure lasso model. However, we can implement an elastic net the same way as the ridge and lasso models, by adjusting the \texttt{alpha} parameter. Any \texttt{alpha} value between 0--1 will perform an elastic net. When \texttt{alpha\ =\ 0.5} we perform an equal combination of penalties whereas \texttt{alpha} \(< 0.5\) will have a heavier ridge penalty applied and \texttt{alpha} \(> 0.5\) will have a heavier lasso penalty.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/glmnet-elastic-comparison-1} 
+
+}
+
+\caption{Coefficients for various penalty parameters.}\label{fig:glmnet-elastic-comparison}
+\end{figure}
+
+Often, the optimal model contains an \texttt{alpha} somewhere between 0--1, thus we want to tune both the \(\lambda\) and the \texttt{alpha} parameters. As in Chapters \ref{linear-regression} and \ref{logistic-regression}, we can use the \textbf{caret} package to automate the tuning process. This ensures that any feature engineering is appropriately applied within each resample. The following performs a grid search over 10 values of the alpha parameter between 0--1 and ten values of the lambda parameter from the lowest to highest lambda values identified by \textbf{glmnet}.
+
+\begin{warning}
+This grid search took roughly \textbf{71 seconds} to compute.
+\end{warning}
+
+The following snippet of code shows that the model that minimized RMSE used an alpha of 0.1 and \(\lambda\) of 0.04688. The minimum RMSE of 0.1419461 (\(MSE = 0.1419461^2 = 0.0201487\)) is in line with the full ridge model produced earlier. Figure \ref{fig:glmnet-tuning-grid} illustrates how the combination of alpha values (\(x\)-axis) and \(\lambda\) values (line color) influence the RMSE.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# for reproducibility}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+
+\CommentTok{# grid search across }
+\NormalTok{cv_glmnet <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+  \DataTypeTok{x =}\NormalTok{ X,}
+  \DataTypeTok{y =}\NormalTok{ Y,}
+  \DataTypeTok{method =} \StringTok{"glmnet"}\NormalTok{,}
+  \DataTypeTok{preProc =} \KeywordTok{c}\NormalTok{(}\StringTok{"zv"}\NormalTok{, }\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{),}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{),}
+  \DataTypeTok{tuneLength =} \DecValTok{10}
+\NormalTok{)}
+
+\CommentTok{# model with lowest RMSE}
+\NormalTok{cv_glmnet}\OperatorTok{$}\NormalTok{bestTune}
+\CommentTok{##   alpha  lambda}
+\CommentTok{## 8   0.1 0.04688}
+
+\CommentTok{# plot cross-validated RMSE}
+\KeywordTok{ggplot}\NormalTok{(cv_glmnet)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/glmnet-tuning-grid-1} 
+
+}
+
+\caption{The 10-fold cross valdation RMSE across 10 alpha values (x-axis) and 10 lambda values (line color).}\label{fig:glmnet-tuning-grid}
+\end{figure}
+
+So how does this compare to our previous best model for the Ames data set? Keep in mind that for this chapter we \(\log\) transformed the response variable (\texttt{Sale\_Price}). Consequently, to provide a fair comparison to our previously obtained PLS model's RMSE of \$29,970, we need to re-transform our predicted values. The following illustrates that our optimal regularized model achieved an RMSE of \$23,503. Introducing a penalty parameter to constrain the coefficients provided quite an improvement over our previously obtained dimension reduction approach.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# predict sales price on training data}
+\NormalTok{pred <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(cv_glmnet, X)}
+
+\CommentTok{# compute RMSE of transformed predicted}
+\KeywordTok{RMSE}\NormalTok{(}\KeywordTok{exp}\NormalTok{(pred), }\KeywordTok{exp}\NormalTok{(Y))}
+\CommentTok{## [1] 23503}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{lm-features}{%
+\section{Feature interpretation}\label{lm-features}}
+
+Variable importance for regularized models provides a similar interpretation as in linear (or logistic) regression. Importance is determined by maginitude of the standardized coefficients and we can see in Figure \ref{fig:regularize-vip} some of the same features that were considered highly influential in our PLS model, albeit in differing order (i.e. \texttt{Gr\_Liv\_Area}, \texttt{Overall\_Qual}, \texttt{Total\_Bsmt\_SF}, \texttt{First\_Flr\_SF}).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{vip}\NormalTok{(cv_glmnet, }\DataTypeTok{num_features =} \DecValTok{20}\NormalTok{, }\DataTypeTok{bar =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/regularize-vip-1} 
+
+}
+
+\caption{Top 20 most important variables for the optimal regularized regression model.}\label{fig:regularize-vip}
+\end{figure}
+
+Similar to linear and logistic regression, the relationship between the features and response is monotonic linear. However, since we modeled our response with a log transformation, the estimated relationships will still be monotonic but non-linear on the original response scale. Figure \ref{fig:regularized-top4-pdp} illustrates the relationship between the top four most influential variables (i.e., largest aboslute coefficients) and the non-transformed sales price. All relationships are positive in nature, as the values in these features increase (or for \texttt{Overall\_QualExcellent} if it exists) the average predicted sales price increases.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/regularized-top4-pdp-1} 
+
+}
+
+\caption{Partial dependence plots for the first four most important variables.}\label{fig:regularized-top4-pdp}
+\end{figure}
+
+However, we see the \(5^{th}\) most influential variable is \texttt{Overall\_QualPoor}. When a home has an overall quality rating of poor we see that the average predicted sales price decreases versus when it has some other overall quality rating. Consequently, its important to not only look at the variable importance ranking, but also observe the positive or negative nature of the relationship.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/regularized-num5-pdp-1} 
+
+}
+
+\caption{Partial dependence plot for when overall quality of a home is (1) versus is not poor (0).}\label{fig:regularized-num5-pdp}
+\end{figure}
+
+\hypertarget{attrition-data}{%
+\section{Attrition data}\label{attrition-data}}
+
+We saw that regularization significantly improved our predictive accuracy for the Ames data set, but how about for the emplyee attrition example. In Chapter \ref{logistic-regression} we saw a maximum CV accuracy of 86.3\% for our logistic regression model. We see a little improvement in the following with some preprocessing; however, performing a regularized logistic regression model provides us with an additional 0.8\% improvement in accuracy (likely within the margin of error).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df <-}\StringTok{ }\NormalTok{attrition }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate_if}\NormalTok{(is.ordered, factor, }\DataTypeTok{ordered =} \OtherTok{FALSE}\NormalTok{)}
+
+\CommentTok{# Create training (70%) and test (30%) sets for the}
+\CommentTok{# rsample::attrition data. Use set.seed for reproducibility}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{churn_split <-}\StringTok{ }\KeywordTok{initial_split}\NormalTok{(df, }\DataTypeTok{prop =} \FloatTok{.7}\NormalTok{, }\DataTypeTok{strata =} \StringTok{"Attrition"}\NormalTok{)}
+\NormalTok{train <-}\StringTok{ }\KeywordTok{training}\NormalTok{(churn_split)}
+\NormalTok{test  <-}\StringTok{ }\KeywordTok{testing}\NormalTok{(churn_split)}
+
+\CommentTok{# train logistic regression model}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{glm_mod <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  Attrition }\OperatorTok{~}\StringTok{ }\NormalTok{., }
+  \DataTypeTok{data =}\NormalTok{ train, }
+  \DataTypeTok{method =} \StringTok{"glm"}\NormalTok{,}
+  \DataTypeTok{family =} \StringTok{"binomial"}\NormalTok{,}
+  \DataTypeTok{preProc =} \KeywordTok{c}\NormalTok{(}\StringTok{"zv"}\NormalTok{, }\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{),}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{)}
+\NormalTok{  )}
+
+\CommentTok{# train regularized logistic regression model}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{penalized_mod <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  Attrition }\OperatorTok{~}\StringTok{ }\NormalTok{., }
+  \DataTypeTok{data =}\NormalTok{ train, }
+  \DataTypeTok{method =} \StringTok{"glmnet"}\NormalTok{,}
+  \DataTypeTok{family =} \StringTok{"binomial"}\NormalTok{,}
+  \DataTypeTok{preProc =} \KeywordTok{c}\NormalTok{(}\StringTok{"zv"}\NormalTok{, }\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{),}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{),}
+  \DataTypeTok{tuneLength =} \DecValTok{10}
+\NormalTok{  )}
+
+\CommentTok{# extract out of sample performance measures}
+\KeywordTok{summary}\NormalTok{(}\KeywordTok{resamples}\NormalTok{(}\KeywordTok{list}\NormalTok{(}
+  \DataTypeTok{logistic_model =}\NormalTok{ glm_mod, }
+  \DataTypeTok{penalized_model =}\NormalTok{ penalized_mod}
+\NormalTok{  )))}\OperatorTok{$}\NormalTok{statistics}\OperatorTok{$}\NormalTok{Accuracy}
+\CommentTok{##                   Min. 1st Qu. Median   Mean 3rd Qu.}
+\CommentTok{## logistic_model  0.8365  0.8495 0.8792 0.8758  0.8908}
+\CommentTok{## penalized_model 0.8447  0.8759 0.8835 0.8836  0.8915}
+\CommentTok{##                   Max. NA's}
+\CommentTok{## logistic_model  0.9314    0}
+\CommentTok{## penalized_model 0.9412    0}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{final-thoughts-2}{%
+\section{Final thoughts}\label{final-thoughts-2}}
+
+Regularized regression provides many great benefits over traditional GLMs when applied to large data sets with lots of features. It provides a great option for handling the \(n > p\) problem, helps minimize the impact of multicollinearity, and can perform automated feature selection. It also has relatively few hyperparamters which makes them easy to tune, are quite computationally efficient compared to other algorithms discussed in later chapters, and does not require lots of memory.
+
+However, regularized regression does require some feature pre-processing. Notably, all inputs must be numeric; however, some packages (e.g., \textbf{caret} and \textbf{h2o}) automate this process. They cannot automatically handle missing data, which requires you to remove or impute them prior to modeling. Similar to GLMs, they are also not robust to outliers in both the feature and target. Lastly, regularized regression models still assume a monotonic linear relationship (always increasing or decreasing in a linear fashion). It is also up to the analyst whether or not to include specific interaction effects.
 
 \bibliography{book.bib,packages.bib}
 

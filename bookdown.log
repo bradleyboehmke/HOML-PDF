@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019) (preloaded format=xelatex 2019.6.25)  26 JUN 2019 09:19
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019) (preloaded format=xelatex 2019.6.25)  26 JUN 2019 10:42
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2948,7 +2948,117 @@ File: bookdown_files/figure-latex/regularized-top4-pdp-1.pdf Graphic file (type
 File: bookdown_files/figure-latex/regularized-num5-pdp-1.pdf Graphic file (type
  pdf)
 <use bookdown_files/figure-latex/regularized-num5-pdp-1.pdf>
-[139] [140] [141] (./bookdown.bbl [142]
+[139] [140] [141] [142]
+Underfull \vbox (badness 10000) detected at line 4825
+ []
+
+
+Overfull \hbox (336.25pt too wide) detected at line 4825
+[]
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 4825
+ []
+
+
+Overfull \hbox (336.25pt too wide) detected at line 4825
+[]
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 4825
+ []
+
+
+Overfull \hbox (336.25pt too wide) detected at line 4825
+[]
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 4825
+ []
+
+
+Overfull \hbox (336.25pt too wide) detected at line 4825
+[]
+ []
+
+Chapter 7.
+
+Underfull \hbox (badness 10000) has occurred while \output is active
+ [][][][] 
+ []
+
+[143
+
+
+]
+File: bookdown_files/figure-latex/nonlinear-comparisons-1.pdf Graphic file (typ
+e pdf)
+<use bookdown_files/figure-latex/nonlinear-comparisons-1.pdf>
+[144] [145]
+File: bookdown_files/figure-latex/examples-of-multiple-knots-1.pdf Graphic file
+ (type pdf)
+<use bookdown_files/figure-latex/examples-of-multiple-knots-1.pdf>
+[146]
+File: icons/note.png Graphic file (type bmp)
+<icons/note.png>
+[147]
+File: icons/tip.png Graphic file (type bmp)
+<icons/tip.png>
+
+Underfull \hbox (badness 4899) in paragraph at lines 4958--4960
+[]\TU/lmr/m/n/10 You can check out all the coefficients with \TU/lmtt/m/n/10 su
+mmary(mars1) \TU/lmr/m/n/10 or
+ []
+
+[148]
+File: bookdown_files/figure-latex/basic-mod-plot-1.pdf Graphic file (type pdf)
+<use bookdown_files/figure-latex/basic-mod-plot-1.pdf>
+[149]
+File: icons/tip.png Graphic file (type bmp)
+<icons/tip.png>
+[150]
+File: icons/warning.png Graphic file (type bmp)
+<icons/warning.png>
+[151]
+File: bookdown_files/figure-latex/grid-search-1.pdf Graphic file (type pdf)
+<use bookdown_files/figure-latex/grid-search-1.pdf>
+File: icons/note.png Graphic file (type bmp)
+<icons/note.png>
+
+Overfull \hbox (26.34012pt too wide) in paragraph at lines 5106--5121
+[][] 
+ []
+
+[152]
+File: bookdown_files/figure-latex/vip-1.pdf Graphic file (type pdf)
+<use bookdown_files/figure-latex/vip-1.pdf>
+[153]
+Underfull \vbox (badness 10000) detected at line 5183
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 5183
+ []
+
+[154]
+File: bookdown_files/figure-latex/pdp-1.pdf Graphic file (type pdf)
+<use bookdown_files/figure-latex/pdp-1.pdf>
+[155] [156]
+File: bookdown_files/figure-latex/tuned-marts-attrition-1.pdf Graphic file (typ
+e pdf)
+<use bookdown_files/figure-latex/tuned-marts-attrition-1.pdf>
+
+Overfull \hbox (15.2501pt too wide) in paragraph at lines 5261--5272
+[][] 
+ []
+
+
+LaTeX Warning: Reference `DT' on page 157 undefined on input line 5276.
+
+[157] (./bookdown.bbl [158]
 Underfull \vbox (badness 10000) detected at line 1
  []
 
@@ -2994,10 +3104,49 @@ Underfull \hbox (badness 10000) has occurred while \output is active
  [][][][] 
  []
 
-[143
+[159
 
 
-] [144] [145]) [146] (./bookdown.ind
+] [160] [161] [162]) [163]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (336.25pt too wide) has occurred while \output is active
+[]
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (336.25pt too wide) has occurred while \output is active
+[]
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (336.25pt too wide) has occurred while \output is active
+[]
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (336.25pt too wide) has occurred while \output is active
+[]
+ []
+
+
+Underfull \hbox (badness 10000) has occurred while \output is active
+ [][][][] 
+ []
+
+[164
+
+] (./bookdown.ind
 Underfull \hbox (badness 10000) detected at line 1
 []
  []
@@ -3011,33 +3160,32 @@ Underfull \hbox (badness 10000) has occurred while \output is active
  [][][][] 
  []
 
-[147
+[165
 
 
-
-] [148
+] [166
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4829.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 4829.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 5285.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 5285.
 (./bookdown.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 4829.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4829.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 5285.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 5285.
 
 Package rerunfilecheck Info: File `bookdown.out' has not changed.
-(rerunfilecheck)             Checksum: CAD47A4366F8640E27AAC1C99F2C9543.
+(rerunfilecheck)             Checksum: 476498063D93C0A7E7372C7265D8DF63.
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4829.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 5285.
  ) 
 Here is how much of TeX's memory you used:
- 28303 strings out of 494894
- 521009 string characters out of 6173843
- 786167 words of memory out of 5000000
- 31912 multiletter control sequences out of 15000+600000
+ 28365 strings out of 494894
+ 523034 string characters out of 6173843
+ 788966 words of memory out of 5000000
+ 31967 multiletter control sequences out of 15000+600000
  537883 words of font info for 85 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  50i,9n,115p,1615b,621s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on bookdown.pdf (176 pages).
+Output written on bookdown.pdf (194 pages).

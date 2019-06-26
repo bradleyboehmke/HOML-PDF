@@ -26,3 +26,9 @@ ROCR
 Matrix
 foreach
 glmnet
+Formula
+plotrix
+TeachingDemos
+plotmo
+earth
+pdp

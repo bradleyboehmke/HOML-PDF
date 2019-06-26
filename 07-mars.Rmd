@@ -1,0 +1,454 @@
+# Multivariate Adaptive Regression Splines {#mars}
+
+```{r mars-setup, include=FALSE}
+# Set the graphical theme
+ggplot2::theme_set(ggplot2::theme_light())
+
+# Set global knitr chunk options
+knitr::opts_chunk$set(
+  cache = TRUE,
+  warning = FALSE, 
+  message = FALSE, 
+  collapse = TRUE, 
+  fig.align = "center",
+  fig.height = 3.5
+)
+
+# Load required packages
+library(dplyr)
+```
+
+The previous chapters discussed algorithms that are intrinsically linear. Many of these models can be adapted to nonlinear patterns in the data by manually adding nonlinear model terms (e.g., squared terms, interaction effects, and other transofmations of the original features); however, to do so you the analyst must know the specific nature of the nonlinearities and interactions _a priori_.  Alternatively, there are numerous algorithms that are inherently nonlinear. When using these models, the exact form of the nonlinearity does not need to be known explicitly or specified prior to model training. Rather, these algorithms will search for, and discover, nonlinearities and interactions in the data that help maximize predictive accuracy. 
+
+This chapter discusses _multivariate adaptive regression splines_\index{multivariate adaptive regression splines} (MARS) [@friedman1991multivariate], an algorithm that automatically creates a piecewise linear model which provides an intuitive stepping block into nonlinearity after grasping the concept of multiple linear regression. Future chapters will focus on other nonlinear algorithms.
+
+
+## Prerequisites
+
+For this chapter we will use the following packages:
+
+```{r 10-pkgs, message=FALSE}
+# Helper packages
+library(dplyr)     # for data wrangling
+library(ggplot2)   # for awesome plotting
+
+# Modeling packages
+library(earth)     # for fitting MARS models
+library(caret)     # for automating the tuning process
+
+# Model interpretability packages
+library(vip)       # for variable importance
+library(pdp)       # for variable relationships
+```
+
+To illustrate various concepts we'll continue with the `ames_train` and `ames_test` data sets created in Section \@ref(put-process-together):
+
+```{r MARS-ames-train, echo=FALSE}
+library(rsample)
+# stratified sampling with the rsample package
+set.seed(123)
+ames <- AmesHousing::make_ames()
+split  <- initial_split(ames, prop = 0.7, strata = "Sale_Price")
+ames_train  <- training(split)
+ames_test   <- testing(split)
+```
+
+## The basic idea
+
+In the previous chapters, we focused on linear models (where the analyst has to explicitly specify any nonlinear relationships and interaction effects). We illustrated some of the advantages of linear models such as their ease and speed of computation and also the intuitive nature of interpreting their coefficients.  However, linear models make a strong assumption about linearity, and this assumption is often a poor one, which can affect predictive accuracy.
+
+We can extend linear models to capture any non-linear relationship. Typically, this is done by explicitly including polynomial terms (e.g., $X_1^2$) or step functions.  Polynomial regression is a form of regression in which the relationship between $X$ and $Y$ is modeled as an $d$-th degree polynomial of in $X$.  For example, Equation \@ref(eq:poly) represents a polynomial regression function where $Y$ is modeled as a $d$-th degree polynomial in $X$.  Generally speaking, it is unusual to use $d$ greater than 3 or 4 as the larger $d$ becomes, the easier the function fit becomes overly flexible and oddly shapened...especially near the boundaries of the range of $X$ values. Increasing $d$ also tends to increase the presence of multicollinearity.
+
+\begin{equation}
+(\#eq:poly)
+  y_i = \beta_0 + \beta_1 x_i + \beta_2 x^2_i + \beta_3 x^3_i \dots + \beta_d x^d_i + \epsilon_i,
+\end{equation}
+
+An alternative to polynomials is to use step functions. Whereas polynomial functions impose a global non-linear relationship, step functions break the range of $X$ into bins, and fits a simple constant (e.g., the mean response) in each. This amounts to converting a continuous feature into an ordered categorical variable such that our linear regression function is converted to Equation \@ref(eq:steps)
+
+\begin{equation}
+(\#eq:steps)
+  y_i = \beta_0 + \beta_1 C_1(x_i) + \beta_2 C_2(x_i) + \beta_3 C_3(x_i) \dots + \beta_d C_d(x_i) + \epsilon_i,
+\end{equation}
+
+where $C_1(x)$ represents $X$ values ranging from $c_1 \leq X < c_2$, $C_2\left(X\right)$ represents $X$ values ranging from $c_2 \leq X < c_3$, $\dots$, $C_d\left(X\right)$ represents $X$ values ranging from $c_{d-1} \leq X < c_d$.  Figure \@ref(fig:nonlinear-comparisons) contrasts linear, polynomial, and step function fits for non-linear, non-monotonic simulated data.
+
+
+```{r nonlinear-comparisons, echo=FALSE, fig.height=6, fig.width=8, fig.cap="Blue line represents predicted (`y`) values as a function of `x` for alternative approaches to modeling explicit nonlinear regression patterns. (A) Traditional linear regression approach does not capture any nonlinearity unless the predictor or response is transformed (i.e. log transformation). (B) Degree-2 polynomial, (C) Degree-3 polynomial, (D) Step function fitting cutting `x` into six categorical levels."}
+set.seed(123)  # for reproducibility
+x <- seq(from = 0, to = 2 * pi, length = 500)
+y <- sin(x) + rnorm(length(x), sd = 0.3)
+df <- data.frame(x, y) %>%
+  filter(x < 6)
+
+p1 <- ggplot(df, aes(x, y)) +
+  geom_point(size = 1, alpha = .2) +
+  geom_smooth(method = "lm", se = FALSE) +
+  ggtitle("(A) Assumed linear relationship")
+
+p2 <- ggplot(df, aes(x, y)) +
+  geom_point(size = 1, alpha = .2) +
+  stat_smooth( method = "lm", se = FALSE, formula = y ~ poly(x, 2, raw = TRUE)) +
+  ggtitle("(B) Degree-2 polynomial regression")
+
+p3 <- ggplot(df, aes(x, y)) +
+  geom_point(size = 1, alpha = .2) +
+  stat_smooth( method = "lm", se = FALSE, formula = y ~ poly(x, 3, raw = TRUE)) +
+  ggtitle("(C) Degree-3 polynomial regression")
+
+# fit step function model (6 steps)
+step_fit <- lm(y ~ cut(x, 5), data = df)
+step_pred <- predict(step_fit, df)
+
+p4 <- ggplot(cbind(df, step_pred), aes(x, y)) +
+  geom_point(size = 1, alpha = .2) +
+  geom_line(aes(y = step_pred), size = 1, color = "blue") +
+  ggtitle("(D) Step function regression")
+
+gridExtra::grid.arrange(p1, p2, p3, p4, nrow = 2)
+```
+
+Although useful, the typical implementation of polynomial regression and step functions require the user to explicitly identify and incorporate which variables should have what specific degree of interaction or at what points of a variable $X$ should cut points be made for the step functions.  Considering many data sets today can easily contain 50, 100, or more features, this would require an enormous and unncessary time commitment from an analyst to determine these explicit non-linear settings.
+
+### Multivariate regression splines
+
+Multivariate adaptive regression splines (MARS) provide a convenient approach to capture the nonlinearity relationships in the data by assessing cutpoints (_knots_) similar to step functions.  The procedure assesses each data point for each predictor as a knot and creates a linear regression model with the candidate feature(s).  For example, consider our non-linear, non-monotonic data above where $Y = f\left(X\right)$. The MARS procedure will first look for the single point across the range of `X` values where two different linear relationships between `Y` and `X` achieve the smallest error (e.g., smallest SSE).  What results is known as a hinge function $h\left(x-a\right)$, where $a$ is the cutpoint value. For a single knot (Figure \@ref(fig:examples-of-multiple-knots) (A)), our hinge function is $h\left(\text{x}-1.183606\right)$ such that our two linear models for `Y` are
+
+\begin{equation}
+(\#eq:hinge)
+  \text{y} = 
+  \begin{cases}
+    \beta_0 + \beta_1(1.183606 - \text{x}) & \text{x} < 1.183606, \\
+    \beta_0 + \beta_1(\text{x} - 1.183606) & \text{x} > 1.183606
+  \end{cases}
+\end{equation}
+
+Once the first knot has been found, the search continues for a second knot which is found at $x = 4.898114$ (Figure \@ref(fig:examples-of-multiple-knots) (B)).  This results in three linear models for `y`:
+
+\begin{equation}
+(\#eq:hinge2)
+  \text{y} = 
+  \begin{cases}
+    \beta_0 + \beta_1(1.183606 - \text{x}) & \text{x} < 1.183606, \\
+    \beta_0 + \beta_1(\text{x} - 1.183606) & \text{x} > 1.183606 \quad \& \quad \text{x} < 4.898114, \\
+    \beta_0 + \beta_1(4.898114 - \text{x}) & \text{x} > 4.898114
+  \end{cases}
+\end{equation}
+
+```{r examples-of-multiple-knots, echo=FALSE, fig.height=6, fig.width=8, fig.cap="Examples of fitted regression splines of one (A), two (B), three (C), and four (D) knots."}
+# one knot
+mars1 <- mda::mars(df$x, df$y, nk = 3, prune = FALSE)
+p1 <- df %>%
+  mutate(predicted = as.vector(mars1$fitted.values)) %>%
+  ggplot(aes(x, y)) +
+  geom_point(size = 1, alpha = .2) +
+  geom_line(aes(y = predicted), size = 1, color = "blue") +
+  ggtitle("(A) One knot")
+
+# two knots
+mars2 <- mda::mars(df$x, df$y, nk = 5, prune = FALSE)
+p2 <- df %>%
+  mutate(predicted = as.vector(mars2$fitted.values)) %>%
+  ggplot(aes(x, y)) +
+  geom_point(size = 1, alpha = .2) +
+  geom_line(aes(y = predicted), size = 1, color = "blue") +
+  ggtitle("(B) Two knots")
+
+mars3 <- mda::mars(df$x, df$y, nk = 7, prune = FALSE)
+p3 <- df %>%
+  mutate(predicted = as.vector(mars3$fitted.values)) %>%
+  ggplot(aes(x, y)) +
+  geom_point(size = 1, alpha = .2) +
+  geom_line(aes(y = predicted), size = 1, color = "blue") +
+  ggtitle("(C) Three knots")
+
+mars4 <- mda::mars(df$x, df$y, nk = 9, prune = FALSE)
+p4 <- df %>%
+  mutate(predicted = as.vector(mars4$fitted.values)) %>%
+  ggplot(aes(x, y)) +
+  geom_point(size = 1, alpha = .2) +
+  geom_line(aes(y = predicted), size = 1, color = "blue") +
+  ggtitle("(D) Four knots")
+
+
+gridExtra::grid.arrange(p1, p2, p3, p4, nrow = 2)
+```
+
+This procedure continues until many knots are found, producing a (potentially) highly non-linear prediction equation.  Although including many knots may allow us to fit a really good relationship with our training data, it may not generalize very well to new, unseen data. Consequently, once the full set of knots have been identified, we can sequentially remove knots that do not contribute significantly to predictive accuracy.  This process is known as "pruning" and we can use cross-validation, as we have with the previous models, to find the optimal number of knots.
+
+## Fitting a basic MARS model
+
+We can fit a direct engine MARS model with the __earth__ package [@R-earth]. By default, `earth::earth()` will assess all potential knots across all supplied features and then will prune to the optimal number of knots based on an expected change in $R^2$ (for the training data) of less than 0.001.  This calculation is performed by the Generalized cross-validation (GCV)  procedure, which is a computational shortcut for linear models that produces an approximate leave-one-out cross-validation error metric [@golub1979generalized]. 
+
+```{block, type="note"}
+The term "MARS" is trademarked and licensed exclusively to Salford Systems: https://www.salford-systems.com. We can use MARS as an abbreviation; however, it cannot be used for competing software solutions.  This is why the R package uses the name __earth__. 
+```
+
+The following applies a basic MARS model to our __ames__ example. The results show us the final models GCV statistic, generalized $R^2$ (GRSq), and more.  
+
+```{r fit-basic-model}
+# Fit a basic MARS model
+mars1 <- earth(
+  Sale_Price ~ .,  
+  data = ames_train   
+)
+
+# Print model summary
+print(mars1)
+```
+
+It also shows us that 36 of 41 terms were used from 24 of the 307 original predictors. But what does this mean?  If we were to look at all the coefficients, we would see that there are 36 terms in our model (including the intercept).  These terms include hinge functions produced from the original 307 predictors (307 predictors because the model automatically dummy encodes categorical features). Looking at the first 10 terms in our model, we see that  `Gr_Liv_Area` is included with a knot at 2790 (the coefficient for $h\left(2790-\text{Gr\_Liv\_Area}\right)$ is -55.26), `Year_Built` is included with a knot at 2002, etc.
+
+```{block, type="tip"}
+You can check out all the coefficients with `summary(mars1)` or `coef(mars1)`.
+```
+
+```{r basic-mod-coef}
+summary(mars1) %>% .$coefficients %>% head(10)
+```
+
+The plot method for MARS model objects provides useful performance and residual plots.  Figure \@ref(fig:basic-mod-plot) illustrates the model selection plot that graphs the GCV $R^2$ (left-hand $y$-axis and solid black line) based on the number of terms retained in the model ($x$-axis) which are constructed from a certain number of original predictors (right-hand $y$-axis). The vertical dashed lined at 36 tells us the optimal number of non-intercept terms retained where marginal increases in GCV $R^2$ are less than 0.001.
+
+```{r basic-mod-plot, fig.width=5, fig.height=3.5, fig.cap="Model summary capturing GCV $R^2$ (left-hand y-axis and solid black line) based on the number of terms retained (x-axis) which is based on the number of predictors used to make those terms (right-hand side y-axis). For this model, 35 non-intercept terms were retained which are based on 26 predictors.  Any additional terms retained in the model, over and above these 35, results in less than 0.001 improvement in the GCV $R^2$."}
+plot(mars1, which = 1)
+```
+
+In addition to pruning the number of knots, `earth::earth()` allows us to also assess potential interactions between different hinge functions. The following illustrates this by including a `degree = 2` argument. You can see that now our model includes interaction terms between a maximum of two hinge functions (e.g., `h(Year_Built-2002)*h(2362-Gr_Liv_Area)` is an interaction effect for those houses built prior to 2002 and have less than 2,362 square feet of living space above ground).
+
+```{r fit-basic-model-m2}
+# Fit a basic MARS model
+mars2 <- earth(
+  Sale_Price ~ .,  
+  data = ames_train,
+  degree = 2
+)
+
+# check out the first 10 coefficient terms
+summary(mars2) %>% .$coefficients %>% head(10)
+```
+
+## Tuning
+
+There are two important tuning parameters associated with our MARS model: the maximum degree of interactions and the number of terms retained inthe final model. We need to perform a grid search to identify the optimal combination of these hyperparameters that minimize prediction error (the above pruning process was based only on an approximation of CV model performance on the training data rather than an exact _k_-fold CV process). As in previous chapters, we'll perform a CV grid search to identify the optimal hyperpameter mix.  Below, we set up a grid that assesses 30 different combinations of interaction complexity (`degree`) and the number of terms to retain in the final model (`nprune`).
+
+```{block, type="tip"}
+Rarely is there any benefit in assessing greater than 3-rd degree interactions and we suggest starting out with 10 evenly spaced values for `nprune` and then you can always zoom in to a region once you find an approximate optimal solution.
+```
+
+```{r tuning-grid}
+# create a tuning grid
+hyper_grid <- expand.grid(
+  degree = 1:3, 
+  nprune = seq(2, 100, length.out = 10) %>% floor()
+)
+
+head(hyper_grid)
+```
+
+As in the previous chapters, we can use __caret__ to perform a grid search using 10-fold CV.  The model that provides the optimal combination includes third degree interaction effects and retains 45 terms. The cross-validated RMSE for these models are displayed in Figure \@ref(fig:grid-search); the optimal model's cross-validated RMSE was \$22,888.
+
+```{block, type="warning"}
+This grid search took roughly five minutes to complete.
+```
+
+```{r grid-search, fig.cap="Cross-validated RMSE for the 30 different hyperparameter combinations in our grid search. The optimal model retains 45 terms and includes up to 3$^{rd}$ degree interactions.", fig.height=3}
+# for reproducibiity
+set.seed(123)
+
+# cross validated model
+cv_mars <- train(
+  x = subset(ames_train, select = -Sale_Price),
+  y = ames_train$Sale_Price,
+  method = "earth",
+  metric = "RMSE",
+  trControl = trainControl(method = "cv", number = 10),
+  tuneGrid = hyper_grid
+)
+
+# best model
+cv_mars$bestTune
+
+# plot results
+ggplot(cv_mars)
+```
+
+The above grid search helps to focus where we can further refine our model tuning. As a next step, we could perform a grid search that focuses in on a refined grid space for `nprune` (e.g., comparing 35--45 terms retained). However, for brevity we'll leave this as an exercise for the reader.
+
+So how does this compare to our previously built models for the Ames housing data?  The following table compares the cross-validated RMSE for our tuned MARS model to an ordinary multiple regression model along with tuned principal component regression (PCR), partial least squares (PLS), and regularized regression (elastic net) models.  By incorporating non-linear relationships and interaction effects, the MARS model provides a substantial improvement over the previous linear models that we have explored.
+
+```{block, type = 'note'}
+Notice that our elastic net model is higher than in the last chapter. This table compares these 5 modeling approaches without performing any logarithmic transformation on the target variable. However, even considering the best tuned regularized regression results from last chapter (RMSE = 23503), our optimal MARS model performs better.
+```
+
+
+```{r cv-model-comparison, echo=FALSE, fig.cap="Cross-validated RMSE results for tuned MARS and regression models."}
+set.seed(123)
+cv_model1 <- train(
+  Sale_Price ~ ., 
+  data = ames_train, 
+  method = "lm",
+  metric = "RMSE",
+  trControl = trainControl(method = "cv", number = 10)
+)
+
+set.seed(123)
+cv_model2 <- train(
+  Sale_Price ~ ., 
+  data = ames_train, 
+  method = "pcr",
+  trControl = trainControl(method = "cv", number = 10),
+  metric = "RMSE",
+  preProcess = c("zv", "center", "scale"),
+  tuneLength = 20
+)
+
+set.seed(123)
+cv_model3 <- train(
+  Sale_Price ~ ., 
+  data = ames_train, 
+  method = "pls",
+  trControl = trainControl(method = "cv", number = 10),
+  metric = "RMSE",
+  preProcess = c("zv", "center", "scale"),
+  tuneLength = 20
+)
+
+set.seed(123)
+cv_model4 <- train(
+  Sale_Price ~ ., 
+  data = ames_train,
+  method = "glmnet",
+  preProc = c("zv", "center", "scale"),
+  trControl = trainControl(method = "cv", number = 10),
+  metric = "RMSE",
+  tuneLength = 10
+)
+
+# extract out of sample performance measures
+summary(resamples(list(
+  Multiple_regression = cv_model1, 
+  PCR = cv_model2, 
+  PLS = cv_model3,
+  Elastic_net = cv_model4,
+  MARS = cv_mars
+  )))$statistics$RMSE %>%
+  kableExtra::kable()
+```
+
+
+## Feature interpretation {#mars-features}
+
+MARS models via `earth::earth()` include a backwards elimination feature selection routine that looks at reductions in the GCV estimate of error as each predictor is added to the model. This total reduction is used as the variable importance measure (`value = "gcv"`). Since MARS will automatically include and exclude terms during the pruning process, it essentially performs automated feature selection. If a predictor was never used in any of the MARS basis functions in the final model (after pruning), it has an importance value of zero. This is illustrated in Figure \@ref(fig:vip) where 27 features have $>0$ importance values while the rest of the features have an importance value of zero since they were not included in the final model.  Alternatively, you can also monitor the change in the residual sums of squares (RSS) as terms are added (`value = "rss"`); however, you will see very little difference between these methods.
+
+```{r vip, fig.height=5.5, fig.width=9, fig.cap="Variable importance based on impact to GCV (left) and RSS (right) values as predictors are added to the model. Both variable importance measures will usually give you very similar results."}
+# variable importance plots
+p1 <- vip(cv_mars, num_features = 40, bar = FALSE, value = "gcv") + 
+  ggtitle("GCV")
+
+p2 <- vip(cv_mars, num_features = 40, bar = FALSE, value = "rss") + 
+  ggtitle("RSS")
+
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+```
+
+Its important to realize that variable importance will only measure the impact of the prediction error as features are included; however, it does not measure the impact for particular hinge functions created for a given feature.  For example, in Figure \@ref(fig:vip) we see that `Gr_Liv_Area` and `Year_Built` are the two most influential variables; however, variable importance does not tell us how our model is treating the non-linear patterns for each feature.  Also, if we look at the interaction terms our model retained, we see interactions between different hinge functions for `Gr_Liv_Area` and `Year_Built`.
+
+```{r}
+# extract coefficients, convert to tidy data frame, and
+# filter for interaction terms
+cv_mars$finalModel %>%
+  coef() %>%  
+  broom::tidy() %>%  
+  filter(stringr::str_detect(names, "\\*")) 
+```
+
+To better understand the relationship between these features and `Sale_Price`, we can create partial dependence plots (PDPs) for each feature individually and also together. The individual PDPs illustrate the knots for each feature that our model found provides the best fit.  For `Gr_Liv_Area`, as homes exceed 2,790 square feet, each additional square foot demands a higher marginal increase in sale price than homes with less than 2,790 square feet.  Similarly, for homes built after 2002, there is a greater marginal effect on sales price based on the age of the home than for homes built prior to 2002.  The interaction plot (far right figure) illustrates the stronger effect these two features have when combined.
+
+```{r pdp, fig.width=10, fig.cap="Partial dependence plots to understand the relationship between sale price and the living space and year built features.  The PDPs tell us that as living space increases and for newer homes, predicted sale price increases dramatically."}
+# Construct partial dependence plots
+p1 <- partial(cv_mars, pred.var = "Gr_Liv_Area") %>% autoplot()
+p2 <- partial(cv_mars, pred.var = "Year_Built") %>% autoplot()
+p3 <- partial(cv_mars, pred.var = c("Gr_Liv_Area", "Year_Built")) %>% 
+  plotPartial(levelplot = FALSE, zlab = "yhat", drape = TRUE, 
+              colorkey = TRUE, screen = list(z = -20, x = -60))
+
+# Display plots side by side
+gridExtra::grid.arrange(p1, p2, p3, ncol = 3)
+```
+
+## Attrition data
+
+The MARS method and algorithm can be extended to handle classification problems and GLMs in general.^[See @esl and @stone1997polynomial for technical details regarding various alternative encodings for binary and mulinomial classification approaches.] We saw significant improvement to our predictive accuracy on the Ames data with a MARS model, but how about the emplyee attrition example?  In Chapter \@ref(logistic-regression) we saw a slight improvement in our cross-validated accuracy rate using regularized regression.  Here, we tune a MARS model using the same search grid as we did above.  We see our best models include no interaction effects and the optimal model retained 12 terms.
+
+```{r tuned-marts-attrition, fig.cap="Cross-validated accuracy rate for the 30 different hyperparameter combinations in our grid search. The optimal model retains 12 terms and includes no interaction effects.", fig.height=3}
+# get attrition data
+df <- attrition %>% mutate_if(is.ordered, factor, ordered = FALSE)
+
+# Create training (70%) and test (30%) sets for the 
+# rsample::attrition data.
+set.seed(123)
+churn_split <- initial_split(df, prop = .7, strata = "Attrition")
+churn_train <- training(churn_split)
+churn_test  <- testing(churn_split)
+
+
+# for reproducibiity
+set.seed(123)
+
+# cross validated model
+tuned_mars <- train(
+  x = subset(churn_train, select = -Attrition),
+  y = churn_train$Attrition,
+  method = "earth",
+  trControl = trainControl(method = "cv", number = 10),
+  tuneGrid = hyper_grid
+)
+
+# best model
+tuned_mars$bestTune
+
+# plot results
+ggplot(tuned_mars)
+```
+
+However, comparing our MARS model to the previous linear models (logistic regression and regularized regression), we do not see any improvement in our overall accuracy rate.
+
+```{r attrition-modeling-mars, echo=FALSE}
+# train logistic regression model
+set.seed(123)
+glm_mod <- train(
+  Attrition ~ ., 
+  data = churn_train, 
+  method = "glm",
+  family = "binomial",
+  preProc = c("zv", "center", "scale"),
+  trControl = trainControl(method = "cv", number = 10)
+  )
+
+# train regularized logistic regression model
+set.seed(123)
+penalized_mod <- train(
+  Attrition ~ ., 
+  data = churn_train, 
+  method = "glmnet",
+  family = "binomial",
+  preProc = c("zv", "center", "scale"),
+  trControl = trainControl(method = "cv", number = 10),
+  tuneLength = 10
+  )
+
+# extract out of sample performance measures
+summary(resamples(list(
+  Logistic_model = glm_mod, 
+  Elastic_net = penalized_mod,
+  MARS_model = tuned_mars
+  )))$statistics$Accuracy %>%
+  kableExtra::kable()
+```
+
+
+## Final thoughts
+
+There are several advantages to MARS.  First, MARS naturally handles mixed types of predictors (quantitative and qualitative). MARS considers all possible binary partitions of the categories for a qualitative predictor into two groups.^[This is very similar to CART-like decision trees which you'll be exposed to in Chapter \@ref(DT).] Each group then generates a pair of piecewise indicator functions for the two categories. MARS also requires minimal feature engineering (e.g., feature scaling) and performs automated feature selection. For example, since MARS scans each predictor to identify a split that improves predictive accuracy, non-informative features will not be chosen. Furthermore, highly correlated predictors do not impede predictive accuracy as much as they do with OLS models. 
+
+However, one disadvantage to MARS models is that they're typically slower to train.  Since the algorithm scans each value of each predictor for potential cutpoints, computational performance can suffer as both $n$ and $p$ increase.  Also, although correlated predictors do not necessarily impede model performance, they can make model interpretation difficult. When two features are nearly perfectly correlated, the algorithm will essentially select the first one it happens to come across when scanning the features.  Then, since it randomly selected one, the correlated feature will likely not be included as it adds no additional explanatory power.  

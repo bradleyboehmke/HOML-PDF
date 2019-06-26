@@ -433,7 +433,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    dplyr         * 0.8.1      2019-05-14 [1]}
 \CommentTok{#>    dslabs          0.5.2      2018-12-19 [1]}
 \CommentTok{#>    e1071           1.7-1      2019-03-19 [1]}
-\CommentTok{#>    earth           5.1.1      2019-04-12 [1]}
+\CommentTok{#>    earth         * 5.1.1      2019-04-12 [1]}
 \CommentTok{#>    ellipse         0.4.1      2018-01-05 [1]}
 \CommentTok{#>    ellipsis        0.1.0      2019-02-19 [1]}
 \CommentTok{#>    emo             0.0.0.9000 2019-05-03 [1]}
@@ -447,7 +447,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    foreach       * 1.4.4      2017-12-12 [1]}
 \CommentTok{#>    foreign         0.8-71     2018-07-20 [1]}
 \CommentTok{#>    forge           0.2.0      2019-02-26 [1]}
-\CommentTok{#>    Formula         1.2-3      2018-05-03 [1]}
+\CommentTok{#>    Formula       * 1.2-3      2018-05-03 [1]}
 \CommentTok{#>    gbm             2.1.5      2019-01-14 [1]}
 \CommentTok{#>    gdata           2.18.0     2017-06-06 [1]}
 \CommentTok{#>    generics        0.0.2      2018-11-29 [1]}
@@ -508,12 +508,12 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    partykit        1.2-3      2019-01-31 [1]}
 \CommentTok{#>    pbkrtest        0.4-7      2017-03-15 [1]}
 \CommentTok{#>    pBrackets       1.0        2014-10-17 [1]}
-\CommentTok{#>    pdp             0.7.0      2018-08-27 [1]}
+\CommentTok{#>    pdp           * 0.7.0      2018-08-27 [1]}
 \CommentTok{#>    pillar          1.4.1      2019-05-28 [1]}
 \CommentTok{#>    pkgconfig       2.0.2      2018-08-16 [1]}
 \CommentTok{#>    plogr           0.2.0      2018-03-25 [1]}
-\CommentTok{#>    plotmo          3.5.4      2019-04-06 [1]}
-\CommentTok{#>    plotrix         3.7-5      2019-04-07 [1]}
+\CommentTok{#>    plotmo        * 3.5.4      2019-04-06 [1]}
+\CommentTok{#>    plotrix       * 3.7-5      2019-04-07 [1]}
 \CommentTok{#>    pls           * 2.7-1      2019-03-23 [1]}
 \CommentTok{#>    plyr            1.8.4      2016-06-08 [1]}
 \CommentTok{#>    polynom         1.4-0      2019-03-22 [1]}
@@ -555,7 +555,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    stringi         1.4.3      2019-03-12 [1]}
 \CommentTok{#>    stringr       * 1.4.0      2019-02-10 [1]}
 \CommentTok{#>    survival        2.44-1.1   2019-04-01 [1]}
-\CommentTok{#>    TeachingDemos   2.10       2016-02-12 [1]}
+\CommentTok{#>    TeachingDemos * 2.10       2016-02-12 [1]}
 \CommentTok{#>    tensorflow      1.13.1     2019-04-05 [1]}
 \CommentTok{#>    tfestimators    1.9.1      2018-11-07 [1]}
 \CommentTok{#>    tfruns          1.4        2018-08-25 [1]}
@@ -4820,6 +4820,462 @@ We saw that regularization significantly improved our predictive accuracy for th
 Regularized regression provides many great benefits over traditional GLMs when applied to large data sets with lots of features. It provides a great option for handling the \(n > p\) problem, helps minimize the impact of multicollinearity, and can perform automated feature selection. It also has relatively few hyperparamters which makes them easy to tune, are quite computationally efficient compared to other algorithms discussed in later chapters, and does not require lots of memory.
 
 However, regularized regression does require some feature pre-processing. Notably, all inputs must be numeric; however, some packages (e.g., \textbf{caret} and \textbf{h2o}) automate this process. They cannot automatically handle missing data, which requires you to remove or impute them prior to modeling. Similar to GLMs, they are also not robust to outliers in both the feature and target. Lastly, regularized regression models still assume a monotonic linear relationship (always increasing or decreasing in a linear fashion). It is also up to the analyst whether or not to include specific interaction effects.
+
+\hypertarget{mars}{%
+\chapter{Multivariate Adaptive Regression Splines}\label{mars}}
+
+The previous chapters discussed algorithms that are intrinsically linear. Many of these models can be adapted to nonlinear patterns in the data by manually adding nonlinear model terms (e.g., squared terms, interaction effects, and other transofmations of the original features); however, to do so you the analyst must know the specific nature of the nonlinearities and interactions \emph{a priori}. Alternatively, there are numerous algorithms that are inherently nonlinear. When using these models, the exact form of the nonlinearity does not need to be known explicitly or specified prior to model training. Rather, these algorithms will search for, and discover, nonlinearities and interactions in the data that help maximize predictive accuracy.
+
+This chapter discusses \emph{multivariate adaptive regression splines}\index{multivariate adaptive regression splines} (MARS) \citep{friedman1991multivariate}, an algorithm that automatically creates a piecewise linear model which provides an intuitive stepping block into nonlinearity after grasping the concept of multiple linear regression. Future chapters will focus on other nonlinear algorithms.
+
+\hypertarget{prerequisites-5}{%
+\section{Prerequisites}\label{prerequisites-5}}
+
+For this chapter we will use the following packages:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Helper packages}
+\KeywordTok{library}\NormalTok{(dplyr)     }\CommentTok{# for data wrangling}
+\KeywordTok{library}\NormalTok{(ggplot2)   }\CommentTok{# for awesome plotting}
+
+\CommentTok{# Modeling packages}
+\KeywordTok{library}\NormalTok{(earth)     }\CommentTok{# for fitting MARS models}
+\KeywordTok{library}\NormalTok{(caret)     }\CommentTok{# for automating the tuning process}
+
+\CommentTok{# Model interpretability packages}
+\KeywordTok{library}\NormalTok{(vip)       }\CommentTok{# for variable importance}
+\KeywordTok{library}\NormalTok{(pdp)       }\CommentTok{# for variable relationships}
+\end{Highlighting}
+\end{Shaded}
+
+To illustrate various concepts we'll continue with the \texttt{ames\_train} and \texttt{ames\_test} data sets created in Section \ref{put-process-together}:
+
+\hypertarget{the-basic-idea}{%
+\section{The basic idea}\label{the-basic-idea}}
+
+In the previous chapters, we focused on linear models (where the analyst has to explicitly specify any nonlinear relationships and interaction effects). We illustrated some of the advantages of linear models such as their ease and speed of computation and also the intuitive nature of interpreting their coefficients. However, linear models make a strong assumption about linearity, and this assumption is often a poor one, which can affect predictive accuracy.
+
+We can extend linear models to capture any non-linear relationship. Typically, this is done by explicitly including polynomial terms (e.g., \(X_1^2\)) or step functions. Polynomial regression is a form of regression in which the relationship between \(X\) and \(Y\) is modeled as an \(d\)-th degree polynomial of in \(X\). For example, Equation \eqref{eq:poly} represents a polynomial regression function where \(Y\) is modeled as a \(d\)-th degree polynomial in \(X\). Generally speaking, it is unusual to use \(d\) greater than 3 or 4 as the larger \(d\) becomes, the easier the function fit becomes overly flexible and oddly shapened\ldots{}especially near the boundaries of the range of \(X\) values. Increasing \(d\) also tends to increase the presence of multicollinearity.
+
+\begin{equation}
+\label{eq:poly}
+  y_i = \beta_0 + \beta_1 x_i + \beta_2 x^2_i + \beta_3 x^3_i \dots + \beta_d x^d_i + \epsilon_i,
+\end{equation}
+
+An alternative to polynomials is to use step functions. Whereas polynomial functions impose a global non-linear relationship, step functions break the range of \(X\) into bins, and fits a simple constant (e.g., the mean response) in each. This amounts to converting a continuous feature into an ordered categorical variable such that our linear regression function is converted to Equation \eqref{eq:steps}
+
+\begin{equation}
+\label{eq:steps}
+  y_i = \beta_0 + \beta_1 C_1(x_i) + \beta_2 C_2(x_i) + \beta_3 C_3(x_i) \dots + \beta_d C_d(x_i) + \epsilon_i,
+\end{equation}
+
+where \(C_1(x)\) represents \(X\) values ranging from \(c_1 \leq X < c_2\), \(C_2\left(X\right)\) represents \(X\) values ranging from \(c_2 \leq X < c_3\), \(\dots\), \(C_d\left(X\right)\) represents \(X\) values ranging from \(c_{d-1} \leq X < c_d\). Figure \ref{fig:nonlinear-comparisons} contrasts linear, polynomial, and step function fits for non-linear, non-monotonic simulated data.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/nonlinear-comparisons-1} 
+
+}
+
+\caption{Blue line represents predicted (`y`) values as a function of `x` for alternative approaches to modeling explicit nonlinear regression patterns. (A) Traditional linear regression approach does not capture any nonlinearity unless the predictor or response is transformed (i.e. log transformation). (B) Degree-2 polynomial, (C) Degree-3 polynomial, (D) Step function fitting cutting `x` into six categorical levels.}\label{fig:nonlinear-comparisons}
+\end{figure}
+
+Although useful, the typical implementation of polynomial regression and step functions require the user to explicitly identify and incorporate which variables should have what specific degree of interaction or at what points of a variable \(X\) should cut points be made for the step functions. Considering many data sets today can easily contain 50, 100, or more features, this would require an enormous and unncessary time commitment from an analyst to determine these explicit non-linear settings.
+
+\hypertarget{multivariate-regression-splines}{%
+\subsection{Multivariate regression splines}\label{multivariate-regression-splines}}
+
+Multivariate adaptive regression splines (MARS) provide a convenient approach to capture the nonlinearity relationships in the data by assessing cutpoints (\emph{knots}) similar to step functions. The procedure assesses each data point for each predictor as a knot and creates a linear regression model with the candidate feature(s). For example, consider our non-linear, non-monotonic data above where \(Y = f\left(X\right)\). The MARS procedure will first look for the single point across the range of \texttt{X} values where two different linear relationships between \texttt{Y} and \texttt{X} achieve the smallest error (e.g., smallest SSE). What results is known as a hinge function \(h\left(x-a\right)\), where \(a\) is the cutpoint value. For a single knot (Figure \ref{fig:examples-of-multiple-knots} (A)), our hinge function is \(h\left(\text{x}-1.183606\right)\) such that our two linear models for \texttt{Y} are
+
+\begin{equation}
+\label{eq:hinge}
+  \text{y} = 
+  \begin{cases}
+    \beta_0 + \beta_1(1.183606 - \text{x}) & \text{x} < 1.183606, \\
+    \beta_0 + \beta_1(\text{x} - 1.183606) & \text{x} > 1.183606
+  \end{cases}
+\end{equation}
+
+Once the first knot has been found, the search continues for a second knot which is found at \(x = 4.898114\) (Figure \ref{fig:examples-of-multiple-knots} (B)). This results in three linear models for \texttt{y}:
+
+\begin{equation}
+\label{eq:hinge2}
+  \text{y} = 
+  \begin{cases}
+    \beta_0 + \beta_1(1.183606 - \text{x}) & \text{x} < 1.183606, \\
+    \beta_0 + \beta_1(\text{x} - 1.183606) & \text{x} > 1.183606 \quad \& \quad \text{x} < 4.898114, \\
+    \beta_0 + \beta_1(4.898114 - \text{x}) & \text{x} > 4.898114
+  \end{cases}
+\end{equation}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/examples-of-multiple-knots-1} 
+
+}
+
+\caption{Examples of fitted regression splines of one (A), two (B), three (C), and four (D) knots.}\label{fig:examples-of-multiple-knots}
+\end{figure}
+
+This procedure continues until many knots are found, producing a (potentially) highly non-linear prediction equation. Although including many knots may allow us to fit a really good relationship with our training data, it may not generalize very well to new, unseen data. Consequently, once the full set of knots have been identified, we can sequentially remove knots that do not contribute significantly to predictive accuracy. This process is known as ``pruning'' and we can use cross-validation, as we have with the previous models, to find the optimal number of knots.
+
+\hypertarget{fitting-a-basic-mars-model}{%
+\section{Fitting a basic MARS model}\label{fitting-a-basic-mars-model}}
+
+We can fit a direct engine MARS model with the \textbf{earth} package \citep{R-earth}. By default, \texttt{earth::earth()} will assess all potential knots across all supplied features and then will prune to the optimal number of knots based on an expected change in \(R^2\) (for the training data) of less than 0.001. This calculation is performed by the Generalized cross-validation (GCV) procedure, which is a computational shortcut for linear models that produces an approximate leave-one-out cross-validation error metric \citep{golub1979generalized}.
+
+\begin{note}
+The term ``MARS'' is trademarked and licensed exclusively to Salford
+Systems: \url{https://www.salford-systems.com}. We can use MARS as an
+abbreviation; however, it cannot be used for competing software
+solutions. This is why the R package uses the name \textbf{earth}.
+\end{note}
+
+The following applies a basic MARS model to our \textbf{ames} example. The results show us the final models GCV statistic, generalized \(R^2\) (GRSq), and more.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Fit a basic MARS model}
+\NormalTok{mars1 <-}\StringTok{ }\KeywordTok{earth}\NormalTok{(}
+\NormalTok{  Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{.,  }
+  \DataTypeTok{data =}\NormalTok{ ames_train   }
+\NormalTok{)}
+
+\CommentTok{# Print model summary}
+\KeywordTok{print}\NormalTok{(mars1)}
+\CommentTok{## Selected 36 of 41 terms, and 24 of 307 predictors}
+\CommentTok{## Termination condition: RSq changed by less than 0.001 at 41 terms}
+\CommentTok{## Importance: First_Flr_SF, Second_Flr_SF, ...}
+\CommentTok{## Number of terms at each degree of interaction: 1 35 (additive model)}
+\CommentTok{## GCV 511235214    RSS 978736420657    GRSq 0.9206    RSq 0.9259}
+\end{Highlighting}
+\end{Shaded}
+
+It also shows us that 36 of 41 terms were used from 24 of the 307 original predictors. But what does this mean? If we were to look at all the coefficients, we would see that there are 36 terms in our model (including the intercept). These terms include hinge functions produced from the original 307 predictors (307 predictors because the model automatically dummy encodes categorical features). Looking at the first 10 terms in our model, we see that \texttt{Gr\_Liv\_Area} is included with a knot at 2790 (the coefficient for \(h\left(2790-\text{Gr\_Liv\_Area}\right)\) is -55.26), \texttt{Year\_Built} is included with a knot at 2002, etc.
+
+\begin{tip}
+You can check out all the coefficients with \texttt{summary(mars1)} or
+\texttt{coef(mars1)}.
+\end{tip}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(mars1) }\OperatorTok{%>%}\StringTok{ }\NormalTok{.}\OperatorTok{$}\NormalTok{coefficients }\OperatorTok{%>%}\StringTok{ }\KeywordTok{head}\NormalTok{(}\DecValTok{10}\NormalTok{)}
+\CommentTok{##                       Sale_Price}
+\CommentTok{## (Intercept)            289316.22}
+\CommentTok{## h(Gr_Liv_Area-2790)       -55.26}
+\CommentTok{## h(Year_Built-2002)       3040.56}
+\CommentTok{## h(2002-Year_Built)       -410.86}
+\CommentTok{## h(2220-Total_Bsmt_SF)     -30.71}
+\CommentTok{## h(Bsmt_Unf_SF-543)        -25.38}
+\CommentTok{## h(543-Bsmt_Unf_SF)         13.83}
+\CommentTok{## h(Total_Bsmt_SF-1550)      39.17}
+\CommentTok{## h(Garage_Cars-2)        12480.67}
+\CommentTok{## h(2-Garage_Cars)        -4834.41}
+\end{Highlighting}
+\end{Shaded}
+
+The plot method for MARS model objects provides useful performance and residual plots. Figure \ref{fig:basic-mod-plot} illustrates the model selection plot that graphs the GCV \(R^2\) (left-hand \(y\)-axis and solid black line) based on the number of terms retained in the model (\(x\)-axis) which are constructed from a certain number of original predictors (right-hand \(y\)-axis). The vertical dashed lined at 36 tells us the optimal number of non-intercept terms retained where marginal increases in GCV \(R^2\) are less than 0.001.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(mars1, }\DataTypeTok{which =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/basic-mod-plot-1} 
+
+}
+
+\caption{Model summary capturing GCV $R^2$ (left-hand y-axis and solid black line) based on the number of terms retained (x-axis) which is based on the number of predictors used to make those terms (right-hand side y-axis). For this model, 35 non-intercept terms were retained which are based on 26 predictors.  Any additional terms retained in the model, over and above these 35, results in less than 0.001 improvement in the GCV $R^2$.}\label{fig:basic-mod-plot}
+\end{figure}
+
+In addition to pruning the number of knots, \texttt{earth::earth()} allows us to also assess potential interactions between different hinge functions. The following illustrates this by including a \texttt{degree\ =\ 2} argument. You can see that now our model includes interaction terms between a maximum of two hinge functions (e.g., \texttt{h(Year\_Built-2002)*h(2362-Gr\_Liv\_Area)} is an interaction effect for those houses built prior to 2002 and have less than 2,362 square feet of living space above ground).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Fit a basic MARS model}
+\NormalTok{mars2 <-}\StringTok{ }\KeywordTok{earth}\NormalTok{(}
+\NormalTok{  Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{.,  }
+  \DataTypeTok{data =}\NormalTok{ ames_train,}
+  \DataTypeTok{degree =} \DecValTok{2}
+\NormalTok{)}
+
+\CommentTok{# check out the first 10 coefficient terms}
+\KeywordTok{summary}\NormalTok{(mars2) }\OperatorTok{%>%}\StringTok{ }\NormalTok{.}\OperatorTok{$}\NormalTok{coefficients }\OperatorTok{%>%}\StringTok{ }\KeywordTok{head}\NormalTok{(}\DecValTok{10}\NormalTok{)}
+\CommentTok{##                                        Sale_Price}
+\CommentTok{## (Intercept)                            230780.519}
+\CommentTok{## h(Gr_Liv_Area-2790)                        94.786}
+\CommentTok{## h(2790-Gr_Liv_Area)                       -50.976}
+\CommentTok{## h(Year_Built-2002)                       9111.804}
+\CommentTok{## h(2002-Year_Built)                       -689.248}
+\CommentTok{## h(Year_Built-2002)*h(2362-Gr_Liv_Area)     -7.717}
+\CommentTok{## h(Total_Bsmt_SF-1136)                      63.634}
+\CommentTok{## h(1136-Total_Bsmt_SF)                     -32.704}
+\CommentTok{## h(Bsmt_Unf_SF-504)                        -25.087}
+\CommentTok{## h(504-Bsmt_Unf_SF)                         12.957}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{tuning}{%
+\section{Tuning}\label{tuning}}
+
+There are two important tuning parameters associated with our MARS model: the maximum degree of interactions and the number of terms retained inthe final model. We need to perform a grid search to identify the optimal combination of these hyperparameters that minimize prediction error (the above pruning process was based only on an approximation of CV model performance on the training data rather than an exact \emph{k}-fold CV process). As in previous chapters, we'll perform a CV grid search to identify the optimal hyperpameter mix. Below, we set up a grid that assesses 30 different combinations of interaction complexity (\texttt{degree}) and the number of terms to retain in the final model (\texttt{nprune}).
+
+\begin{tip}
+Rarely is there any benefit in assessing greater than 3-rd degree
+interactions and we suggest starting out with 10 evenly spaced values
+for \texttt{nprune} and then you can always zoom in to a region once you
+find an approximate optimal solution.
+\end{tip}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# create a tuning grid}
+\NormalTok{hyper_grid <-}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}
+  \DataTypeTok{degree =} \DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{, }
+  \DataTypeTok{nprune =} \KeywordTok{seq}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DataTypeTok{length.out =} \DecValTok{10}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{floor}\NormalTok{()}
+\NormalTok{)}
+
+\KeywordTok{head}\NormalTok{(hyper_grid)}
+\CommentTok{##   degree nprune}
+\CommentTok{## 1      1      2}
+\CommentTok{## 2      2      2}
+\CommentTok{## 3      3      2}
+\CommentTok{## 4      1     12}
+\CommentTok{## 5      2     12}
+\CommentTok{## 6      3     12}
+\end{Highlighting}
+\end{Shaded}
+
+As in the previous chapters, we can use \textbf{caret} to perform a grid search using 10-fold CV. The model that provides the optimal combination includes third degree interaction effects and retains 45 terms. The cross-validated RMSE for these models are displayed in Figure \ref{fig:grid-search}; the optimal model's cross-validated RMSE was \$22,888.
+
+\begin{warning}
+This grid search took roughly five minutes to complete.
+\end{warning}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# for reproducibiity}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+
+\CommentTok{# cross validated model}
+\NormalTok{cv_mars <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+  \DataTypeTok{x =} \KeywordTok{subset}\NormalTok{(ames_train, }\DataTypeTok{select =} \OperatorTok{-}\NormalTok{Sale_Price),}
+  \DataTypeTok{y =}\NormalTok{ ames_train}\OperatorTok{$}\NormalTok{Sale_Price,}
+  \DataTypeTok{method =} \StringTok{"earth"}\NormalTok{,}
+  \DataTypeTok{metric =} \StringTok{"RMSE"}\NormalTok{,}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{),}
+  \DataTypeTok{tuneGrid =}\NormalTok{ hyper_grid}
+\NormalTok{)}
+
+\CommentTok{# best model}
+\NormalTok{cv_mars}\OperatorTok{$}\NormalTok{bestTune}
+\CommentTok{##    nprune degree}
+\CommentTok{## 25     45      3}
+
+\CommentTok{# plot results}
+\KeywordTok{ggplot}\NormalTok{(cv_mars)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/grid-search-1} 
+
+}
+
+\caption{Cross-validated RMSE for the 30 different hyperparameter combinations in our grid search. The optimal model retains 45 terms and includes up to 3$^{rd}$ degree interactions.}\label{fig:grid-search}
+\end{figure}
+
+The above grid search helps to focus where we can further refine our model tuning. As a next step, we could perform a grid search that focuses in on a refined grid space for \texttt{nprune} (e.g., comparing 35--45 terms retained). However, for brevity we'll leave this as an exercise for the reader.
+
+So how does this compare to our previously built models for the Ames housing data? The following table compares the cross-validated RMSE for our tuned MARS model to an ordinary multiple regression model along with tuned principal component regression (PCR), partial least squares (PLS), and regularized regression (elastic net) models. By incorporating non-linear relationships and interaction effects, the MARS model provides a substantial improvement over the previous linear models that we have explored.
+
+\begin{note}
+Notice that our elastic net model is higher than in the last chapter.
+This table compares these 5 modeling approaches without performing any
+logarithmic transformation on the target variable. However, even
+considering the best tuned regularized regression results from last
+chapter (RMSE = 23503), our optimal MARS model performs better.
+\end{note}
+
+\begin{tabular}{l|r|r|r|r|r|r|r}
+\hline
+  & Min. & 1st Qu. & Median & Mean & 3rd Qu. & Max. & NA's\\
+\hline
+Multiple\_regression & 20945 & 25674 & 33769 & 37304 & 42967 & 80339 & 0\\
+\hline
+PCR & 26925 & 29987 & 33891 & 33659 & 37180 & 40713 & 0\\
+\hline
+PLS & 21147 & 25951 & 28903 & 29970 & 35261 & 41414 & 0\\
+\hline
+Elastic\_net & 19938 & 24062 & 25261 & 29785 & 33829 & 53333 & 0\\
+\hline
+MARS & 18967 & 21792 & 22833 & 22888 & 23786 & 27190 & 0\\
+\hline
+\end{tabular}
+
+\hypertarget{mars-features}{%
+\section{Feature interpretation}\label{mars-features}}
+
+MARS models via \texttt{earth::earth()} include a backwards elimination feature selection routine that looks at reductions in the GCV estimate of error as each predictor is added to the model. This total reduction is used as the variable importance measure (\texttt{value\ =\ "gcv"}). Since MARS will automatically include and exclude terms during the pruning process, it essentially performs automated feature selection. If a predictor was never used in any of the MARS basis functions in the final model (after pruning), it has an importance value of zero. This is illustrated in Figure \ref{fig:vip} where 27 features have \(>0\) importance values while the rest of the features have an importance value of zero since they were not included in the final model. Alternatively, you can also monitor the change in the residual sums of squares (RSS) as terms are added (\texttt{value\ =\ "rss"}); however, you will see very little difference between these methods.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# variable importance plots}
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{vip}\NormalTok{(cv_mars, }\DataTypeTok{num_features =} \DecValTok{40}\NormalTok{, }\DataTypeTok{bar =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{value =} \StringTok{"gcv"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"GCV"}\NormalTok{)}
+
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{vip}\NormalTok{(cv_mars, }\DataTypeTok{num_features =} \DecValTok{40}\NormalTok{, }\DataTypeTok{bar =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{value =} \StringTok{"rss"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"RSS"}\NormalTok{)}
+
+\NormalTok{gridExtra}\OperatorTok{::}\KeywordTok{grid.arrange}\NormalTok{(p1, p2, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/vip-1} 
+
+}
+
+\caption{Variable importance based on impact to GCV (left) and RSS (right) values as predictors are added to the model. Both variable importance measures will usually give you very similar results.}\label{fig:vip}
+\end{figure}
+
+Its important to realize that variable importance will only measure the impact of the prediction error as features are included; however, it does not measure the impact for particular hinge functions created for a given feature. For example, in Figure \ref{fig:vip} we see that \texttt{Gr\_Liv\_Area} and \texttt{Year\_Built} are the two most influential variables; however, variable importance does not tell us how our model is treating the non-linear patterns for each feature. Also, if we look at the interaction terms our model retained, we see interactions between different hinge functions for \texttt{Gr\_Liv\_Area} and \texttt{Year\_Built}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# extract coefficients, convert to tidy data frame, and}
+\CommentTok{# filter for interaction terms}
+\NormalTok{cv_mars}\OperatorTok{$}\NormalTok{finalModel }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{coef}\NormalTok{() }\OperatorTok{%>%}\StringTok{  }
+\StringTok{  }\NormalTok{broom}\OperatorTok{::}\KeywordTok{tidy}\NormalTok{() }\OperatorTok{%>%}\StringTok{  }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(stringr}\OperatorTok{::}\KeywordTok{str_detect}\NormalTok{(names, }\StringTok{"}\CharTok{\textbackslash{}\textbackslash{}}\StringTok{*"}\NormalTok{)) }
+\CommentTok{## # A tibble: 20 x 2}
+\CommentTok{##    names                                              x}
+\CommentTok{##    <chr>                                          <dbl>}
+\CommentTok{##  1 h(Year_Built-2002) * h(2362-Gr_Liv_Area)    -6.98e+0}
+\CommentTok{##  2 h(Year_Remod_Add-2007) * h(Total_Bsmt_S~     8.93e+0}
+\CommentTok{##  3 h(2007-Year_Remod_Add) * h(Total_Bsmt_S~    -1.22e+0}
+\CommentTok{##  4 NeighborhoodEdwards * h(Year_Built-2002~    -6.71e+1}
+\CommentTok{##  5 h(Lot_Area-3874) * h(3-Garage_Cars)         -1.17e+0}
+\CommentTok{##  6 Bsmt_ExposureGd * h(Total_Bsmt_SF-1136)      3.12e+1}
+\CommentTok{##  7 NeighborhoodCrawford * h(2002-Year_Buil~     4.25e+2}
+\CommentTok{##  8 h(2002-Year_Built) * h(Year_Remod_Add-1~     7.90e+0}
+\CommentTok{##  9 h(2002-Year_Built) * h(1974-Year_Remod_~     5.42e+0}
+\CommentTok{## 10 h(Kitchen_AbvGr-1) * FunctionalTyp          -1.55e+4}
+\CommentTok{## 11 Overall_QualVery_Excellent * Functional~     9.68e+4}
+\CommentTok{## 12 Overall_QualGood * FunctionalTyp             1.32e+4}
+\CommentTok{## 13 h(Lot_Area-3874) * h(Latitude-42.0014)       7.65e+0}
+\CommentTok{## 14 h(Lot_Area-3874) * h(42.0014-Latitude)      -1.23e+2}
+\CommentTok{## 15 h(Total_Bsmt_SF-1136) * h(115-Screen_Po~    -3.04e-1}
+\CommentTok{## 16 h(Lot_Area-3874) * h(Gr_Liv_Area-2411) ~    -2.99e-3}
+\CommentTok{## 17 h(Lot_Area-3874) * h(2411-Gr_Liv_Area) ~     5.29e-4}
+\CommentTok{## 18 Overall_CondGood * h(2002-Year_Built)        3.33e+2}
+\CommentTok{## 19 Overall_CondVery_Good * h(2002-Year_Bui~     3.68e+2}
+\CommentTok{## 20 Overall_CondAbove_Average * h(2790-Gr_L~     6.20e+0}
+\end{Highlighting}
+\end{Shaded}
+
+To better understand the relationship between these features and \texttt{Sale\_Price}, we can create partial dependence plots (PDPs) for each feature individually and also together. The individual PDPs illustrate the knots for each feature that our model found provides the best fit. For \texttt{Gr\_Liv\_Area}, as homes exceed 2,790 square feet, each additional square foot demands a higher marginal increase in sale price than homes with less than 2,790 square feet. Similarly, for homes built after 2002, there is a greater marginal effect on sales price based on the age of the home than for homes built prior to 2002. The interaction plot (far right figure) illustrates the stronger effect these two features have when combined.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Construct partial dependence plots}
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{partial}\NormalTok{(cv_mars, }\DataTypeTok{pred.var =} \StringTok{"Gr_Liv_Area"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{autoplot}\NormalTok{()}
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{partial}\NormalTok{(cv_mars, }\DataTypeTok{pred.var =} \StringTok{"Year_Built"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{autoplot}\NormalTok{()}
+\NormalTok{p3 <-}\StringTok{ }\KeywordTok{partial}\NormalTok{(cv_mars, }\DataTypeTok{pred.var =} \KeywordTok{c}\NormalTok{(}\StringTok{"Gr_Liv_Area"}\NormalTok{, }\StringTok{"Year_Built"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{plotPartial}\NormalTok{(}\DataTypeTok{levelplot =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{zlab =} \StringTok{"yhat"}\NormalTok{, }\DataTypeTok{drape =} \OtherTok{TRUE}\NormalTok{, }
+              \DataTypeTok{colorkey =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{screen =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{z =} \DecValTok{-20}\NormalTok{, }\DataTypeTok{x =} \DecValTok{-60}\NormalTok{))}
+
+\CommentTok{# Display plots side by side}
+\NormalTok{gridExtra}\OperatorTok{::}\KeywordTok{grid.arrange}\NormalTok{(p1, p2, p3, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/pdp-1} 
+
+}
+
+\caption{Partial dependence plots to understand the relationship between sale price and the living space and year built features.  The PDPs tell us that as living space increases and for newer homes, predicted sale price increases dramatically.}\label{fig:pdp}
+\end{figure}
+
+\hypertarget{attrition-data-1}{%
+\section{Attrition data}\label{attrition-data-1}}
+
+The MARS method and algorithm can be extended to handle classification problems and GLMs in general.\footnote{See \citet{esl} and \citet{stone1997polynomial} for technical details regarding various alternative encodings for binary and mulinomial classification approaches.} We saw significant improvement to our predictive accuracy on the Ames data with a MARS model, but how about the emplyee attrition example? In Chapter \ref{logistic-regression} we saw a slight improvement in our cross-validated accuracy rate using regularized regression. Here, we tune a MARS model using the same search grid as we did above. We see our best models include no interaction effects and the optimal model retained 12 terms.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# get attrition data}
+\NormalTok{df <-}\StringTok{ }\NormalTok{attrition }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate_if}\NormalTok{(is.ordered, factor, }\DataTypeTok{ordered =} \OtherTok{FALSE}\NormalTok{)}
+
+\CommentTok{# Create training (70%) and test (30%) sets for the }
+\CommentTok{# rsample::attrition data.}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{churn_split <-}\StringTok{ }\KeywordTok{initial_split}\NormalTok{(df, }\DataTypeTok{prop =} \FloatTok{.7}\NormalTok{, }\DataTypeTok{strata =} \StringTok{"Attrition"}\NormalTok{)}
+\NormalTok{churn_train <-}\StringTok{ }\KeywordTok{training}\NormalTok{(churn_split)}
+\NormalTok{churn_test  <-}\StringTok{ }\KeywordTok{testing}\NormalTok{(churn_split)}
+
+
+\CommentTok{# for reproducibiity}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+
+\CommentTok{# cross validated model}
+\NormalTok{tuned_mars <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+  \DataTypeTok{x =} \KeywordTok{subset}\NormalTok{(churn_train, }\DataTypeTok{select =} \OperatorTok{-}\NormalTok{Attrition),}
+  \DataTypeTok{y =}\NormalTok{ churn_train}\OperatorTok{$}\NormalTok{Attrition,}
+  \DataTypeTok{method =} \StringTok{"earth"}\NormalTok{,}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{),}
+  \DataTypeTok{tuneGrid =}\NormalTok{ hyper_grid}
+\NormalTok{)}
+
+\CommentTok{# best model}
+\NormalTok{tuned_mars}\OperatorTok{$}\NormalTok{bestTune}
+\CommentTok{##   nprune degree}
+\CommentTok{## 2     12      1}
+
+\CommentTok{# plot results}
+\KeywordTok{ggplot}\NormalTok{(tuned_mars)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/tuned-marts-attrition-1} 
+
+}
+
+\caption{Cross-validated accuracy rate for the 30 different hyperparameter combinations in our grid search. The optimal model retains 12 terms and includes no interaction effects.}\label{fig:tuned-marts-attrition}
+\end{figure}
+
+However, comparing our MARS model to the previous linear models (logistic regression and regularized regression), we do not see any improvement in our overall accuracy rate.
+
+\begin{tabular}{l|r|r|r|r|r|r|r}
+\hline
+  & Min. & 1st Qu. & Median & Mean & 3rd Qu. & Max. & NA's\\
+\hline
+Logistic\_model & 0.8365 & 0.8495 & 0.8792 & 0.8758 & 0.8908 & 0.9314 & 0\\
+\hline
+Elastic\_net & 0.8447 & 0.8759 & 0.8835 & 0.8836 & 0.8915 & 0.9412 & 0\\
+\hline
+MARS\_model & 0.8155 & 0.8578 & 0.8781 & 0.8708 & 0.8908 & 0.9029 & 0\\
+\hline
+\end{tabular}
+
+\hypertarget{final-thoughts-3}{%
+\section{Final thoughts}\label{final-thoughts-3}}
+
+There are several advantages to MARS. First, MARS naturally handles mixed types of predictors (quantitative and qualitative). MARS considers all possible binary partitions of the categories for a qualitative predictor into two groups.\footnote{This is very similar to CART-like decision trees which you'll be exposed to in Chapter \ref{DT}.} Each group then generates a pair of piecewise indicator functions for the two categories. MARS also requires minimal feature engineering (e.g., feature scaling) and performs automated feature selection. For example, since MARS scans each predictor to identify a split that improves predictive accuracy, non-informative features will not be chosen. Furthermore, highly correlated predictors do not impede predictive accuracy as much as they do with OLS models.
+
+However, one disadvantage to MARS models is that they're typically slower to train. Since the algorithm scans each value of each predictor for potential cutpoints, computational performance can suffer as both \(n\) and \(p\) increase. Also, although correlated predictors do not necessarily impede model performance, they can make model interpretation difficult. When two features are nearly perfectly correlated, the algorithm will essentially select the first one it happens to come across when scanning the features. Then, since it randomly selected one, the correlated feature will likely not be included as it adds no additional explanatory power.
 
 \bibliography{book.bib,packages.bib}
 

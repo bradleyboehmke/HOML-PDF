@@ -5277,6 +5277,533 @@ There are several advantages to MARS. First, MARS naturally handles mixed types 
 
 However, one disadvantage to MARS models is that they're typically slower to train. Since the algorithm scans each value of each predictor for potential cutpoints, computational performance can suffer as both \(n\) and \(p\) increase. Also, although correlated predictors do not necessarily impede model performance, they can make model interpretation difficult. When two features are nearly perfectly correlated, the algorithm will essentially select the first one it happens to come across when scanning the features. Then, since it randomly selected one, the correlated feature will likely not be included as it adds no additional explanatory power.
 
+\hypertarget{knn}{%
+\chapter{\texorpdfstring{\emph{K}-Nearest Neighbors}{K-Nearest Neighbors}}\label{knn}}
+
+\emph{K}-nearest neighbor\index{k-nearest neighbor} (KNN) is a very simple algorithm in which each observation is predicted based on its ``similarity'' to other observations. Unlike most methods in this book, KNN is a \emph{memory-based} algorithm and cannot be summarized by a closed-form model. This means the training samples are required at run-time and predictions are made directly from the sample relationships. Consequently, KNNs are also known as \emph{lazy learners} \citep{cunningham2007k} and can be computationally inefficient. However, KNNs have been successful in a large number of business problems (see, for example, \citet{jiang2012improved} and \citet{mccord2011spam}) and are useful for pre-precessing purposes as well (as was discussed in Section \ref{impute}).
+
+\hypertarget{prerequisites-6}{%
+\section{Prerequisites}\label{prerequisites-6}}
+
+For this chapter we'll use the following packages:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Helper packages}
+\KeywordTok{library}\NormalTok{(dplyr)      }\CommentTok{# for data wrangling}
+\KeywordTok{library}\NormalTok{(ggplot2)    }\CommentTok{# for awesome graphics}
+\KeywordTok{library}\NormalTok{(rsample)    }\CommentTok{# for creating validation splits}
+\KeywordTok{library}\NormalTok{(recipes)    }\CommentTok{# for feature engineering}
+
+\CommentTok{# Modeling packages}
+\KeywordTok{library}\NormalTok{(caret)       }\CommentTok{# for fitting KNN models}
+\end{Highlighting}
+\end{Shaded}
+
+To illustrate various concepts we'll continue working with the \texttt{ames\_train} and \texttt{ames\_test} data sets created in Section \ref{put-process-together}; however, we'll also illustrate the performance of KNNs on the employee attrition and MNIST data sets.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# create training (70%) set for the rsample::attrition data.}
+\NormalTok{attrit <-}\StringTok{ }\NormalTok{attrition }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate_if}\NormalTok{(is.ordered, factor, }\DataTypeTok{ordered =} \OtherTok{FALSE}\NormalTok{)}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{churn_split <-}\StringTok{ }\KeywordTok{initial_split}\NormalTok{(attrit, }\DataTypeTok{prop =} \FloatTok{.7}\NormalTok{, }\DataTypeTok{strata =} \StringTok{"Attrition"}\NormalTok{)}
+\NormalTok{churn_train <-}\StringTok{ }\KeywordTok{training}\NormalTok{(churn_split)}
+
+\CommentTok{# import MNIST training data}
+\NormalTok{mnist <-}\StringTok{ }\NormalTok{dslabs}\OperatorTok{::}\KeywordTok{read_mnist}\NormalTok{()}
+\KeywordTok{names}\NormalTok{(mnist)}
+\CommentTok{## [1] "train" "test"}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{measuring-similarity}{%
+\section{Measuring similarity}\label{measuring-similarity}}
+
+The KNN algorithm identifies \emph{k} observations that are ``similar'' or nearest to the new record being predicted and then uses the average response value (regression) or the most common class (classification) of those \emph{k} observations as the predicted output.
+
+For illustration, consider our Ames housing data. In real estate, realtors determine what price they will list (or market) a home for based on ``comps'' (comparable homes). To identify comps, they look for homes that have very similar attributes to the one being sold. This can include similar features (e.g., square footage, number of rooms, and style of the home), location (e.g., neighborhood and school district), and many other attributes. The realtor will look at the typical sale price of these comps and will usually list the new home at a very similar price to the prices these comps sold for.
+
+As an example, Figure \ref{fig:map-homes} maps 10 homes (blue) that are most similar to the home of interest (red). These homes are all relatively close to the target home and likely have similar characteristics (e.g., home style, size, and school district). Consequently, the realtor would likely list the target home around the average price that these comps sold for. In essence, this is what the KNN algorithm will do.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/map-homes-1} 
+
+}
+
+\caption{The 10 nearest neighbors (blue) whose home attributes most closely resemble the house of interest (red).}\label{fig:map-homes}
+\end{figure}
+
+\hypertarget{knn-distance}{%
+\subsection{Distance measures}\label{knn-distance}}
+
+How do we determine the similarity between observations (or homes as in Figure \ref{fig:map-homes})? We use distance (or dissimilarity) metrics to compute the pairwise differences between observations. The most common distance measures are the Euclidean \eqref{eq:euclidean} and Manhattan \eqref{eq:manhattan} distance metrics; both of which measure the distance between observation \(x_a\) and \(x_b\) for all \(j\) features.
+
+\begin{equation}
+\label{eq:euclidean}
+ \sqrt{\sum^P_{j=1}(x_{aj} - x_{bj})^2}
+\end{equation}
+
+\begin{equation}
+\label{eq:manhattan}
+ \sum^P_{j=1} | x_{aj} - x_{bj} | 
+\end{equation}
+
+Euclidean distance is the most common and measures the straight-line distance between two samples (i.e., how the crow flies). Manhattan measures the point-to-point travel time (i.e., city block) and is commonly used for binary predictors (e.g., one-hot encoded 0/1 indicator variables). A simplified example is presented below and illustrated in Figure \ref{fig:difference-btwn-distance-measures} where the distance measures are computed for the first two homes in \texttt{ames\_train} and for only two features (\texttt{Gr\_Liv\_Area} \& \texttt{Year\_Built}).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{two_houses <-}\StringTok{ }\NormalTok{ames_train }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(Gr_Liv_Area, Year_Built) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{sample_n}\NormalTok{(}\DecValTok{2}\NormalTok{)}
+
+\NormalTok{two_houses}
+\CommentTok{## # A tibble: 2 x 2}
+\CommentTok{##   Gr_Liv_Area Year_Built}
+\CommentTok{##         <int>      <int>}
+\CommentTok{## 1         896       1961}
+\CommentTok{## 2        1511       2002}
+
+\CommentTok{# Euclidean}
+\KeywordTok{dist}\NormalTok{(two_houses, }\DataTypeTok{method =} \StringTok{"euclidean"}\NormalTok{)}
+\CommentTok{##       1}
+\CommentTok{## 2 616.4}
+
+\CommentTok{# Manhattan}
+\KeywordTok{dist}\NormalTok{(two_houses, }\DataTypeTok{method =} \StringTok{"manhattan"}\NormalTok{)}
+\CommentTok{##     1}
+\CommentTok{## 2 656}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/difference-btwn-distance-measures-1} 
+
+}
+
+\caption{Euclidean (A) versus Manhattan (B) distance.}\label{fig:difference-btwn-distance-measures}
+\end{figure}
+
+There are other metrics to measure the distance between observations. For example, the Minkowski distance is a generalization of the Euclidean and Manhattan distances and is defined as
+
+\begin{equation}
+\label{eq:minkowski}
+ \bigg( \sum^P_{j=1} | x_{aj} - x_{bj} | ^q \bigg)^{\frac{1}{q}}
+\end{equation}
+
+where \(q > 0\) \citep{han2011data}. When \(q = 2\) the Minkowski distance equals the Euclidean distance and when \(q = 1\) it is equal to the Manhattan distance. The Mahalanobis distance is also an attractive measure to use since it accounts for the correlation between two variables \citep{de2000mahalanobis}.
+
+\hypertarget{knn-preprocess}{%
+\subsection{Pre-processing}\label{knn-preprocess}}
+
+Due to the squaring in \eqref{eq:euclidean}, the Euclidean distance is more sensitive to outliers. Furthermore, most distance measures are sensitive to the scale of the features. Data with features that have different scales will bias the distance measures as those predictors with the largest values will contribute most to the distance between two samples. For example, consider the three home below: \texttt{home1} is a four bedroom built in 2008, \texttt{home2} is a two bedroom built in the same year, and \texttt{home3} is a three bedroom built a decade earlier.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{home1}
+\CommentTok{## # A tibble: 1 x 4}
+\CommentTok{##   home  Bedroom_AbvGr Year_Built    id}
+\CommentTok{##   <chr>         <int>      <int> <int>}
+\CommentTok{## 1 home1             4       2008   423}
+\NormalTok{home2}
+\CommentTok{## # A tibble: 1 x 4}
+\CommentTok{##   home  Bedroom_AbvGr Year_Built    id}
+\CommentTok{##   <chr>         <int>      <int> <int>}
+\CommentTok{## 1 home2             2       2008   424}
+\NormalTok{home3}
+\CommentTok{## # A tibble: 1 x 4}
+\CommentTok{##   home  Bedroom_AbvGr Year_Built    id}
+\CommentTok{##   <chr>         <int>      <int> <int>}
+\CommentTok{## 1 home3             3       1998     6}
+\end{Highlighting}
+\end{Shaded}
+
+The Euclidean distance between \texttt{home1} and \texttt{home3} is larger due to the larger difference in \texttt{Year\_Built} with \texttt{home2}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{features <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Bedroom_AbvGr"}\NormalTok{, }\StringTok{"Year_Built"}\NormalTok{)}
+
+\CommentTok{# distance between home 1 and 2}
+\KeywordTok{dist}\NormalTok{(}\KeywordTok{rbind}\NormalTok{(home1[,features], home2[,features]))}
+\CommentTok{##   1}
+\CommentTok{## 2 2}
+
+\CommentTok{# distance between home 1 and 3}
+\KeywordTok{dist}\NormalTok{(}\KeywordTok{rbind}\NormalTok{(home1[,features], home3[,features]))}
+\CommentTok{##       1}
+\CommentTok{## 2 10.05}
+\end{Highlighting}
+\end{Shaded}
+
+However, \texttt{Year\_Built} has a much larger range (1875--2010) than \texttt{Bedroom\_AbvGr} (0--8). And if you ask most people, especially families with kids, the difference between 2 \& 4 bedrooms is much more significant than a 10 year difference in the age of a home. If we standardize these features, we see that the difference between \texttt{home1} and \texttt{home2}'s standardized value for \texttt{Bedroom\_AbvGr} is larger than the difference between \texttt{home1} and \texttt{home3}'s \texttt{Year\_Built}. And if we compute the Euclidean distance between these standarized home features, we see that now \texttt{home1} and \texttt{home3} are more similar than \texttt{home1} and \texttt{home2}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{home1_std}
+\CommentTok{## # A tibble: 1 x 4}
+\CommentTok{##   home  Bedroom_AbvGr Year_Built    id}
+\CommentTok{##   <chr>         <dbl>      <dbl> <int>}
+\CommentTok{## 1 home1          1.38       1.21   423}
+\NormalTok{home2_std}
+\CommentTok{## # A tibble: 1 x 4}
+\CommentTok{##   home  Bedroom_AbvGr Year_Built    id}
+\CommentTok{##   <chr>         <dbl>      <dbl> <int>}
+\CommentTok{## 1 home2         -1.03       1.21   424}
+\NormalTok{home3_std}
+\CommentTok{## # A tibble: 1 x 4}
+\CommentTok{##   home  Bedroom_AbvGr Year_Built    id}
+\CommentTok{##   <chr>         <dbl>      <dbl> <int>}
+\CommentTok{## 1 home3         0.176      0.881     6}
+
+\CommentTok{# distance between home 1 and 2}
+\KeywordTok{dist}\NormalTok{(}\KeywordTok{rbind}\NormalTok{(home1_std[,features], home2_std[,features]))}
+\CommentTok{##       1}
+\CommentTok{## 2 2.416}
+
+\CommentTok{# distance between home 1 and 3}
+\KeywordTok{dist}\NormalTok{(}\KeywordTok{rbind}\NormalTok{(home1_std[,features], home3_std[,features]))}
+\CommentTok{##       1}
+\CommentTok{## 2 1.253}
+\end{Highlighting}
+\end{Shaded}
+
+In addition to standardizing numeric features, all categorical features must be one-hot encoded or encoded using another method (e.g., ordinal encoding) so that all categorical features are represented numerically. Furthermore, the KNN method is very sensitive to noisy predictors since they cause similar samples to have larger magnitudes and variability in distance values. Consequently, removing irrelevant, noisy features often leads to significant improvement.
+
+\hypertarget{choosing-k}{%
+\section{\texorpdfstring{Choosing \emph{k}}{Choosing k}}\label{choosing-k}}
+
+The performance of KNNs is very sensitive to the choice of \emph{k}. This was illustrated in section \ref{tune-overfit} where low values of \emph{k} typically overfit and large values often underfit. At the extremes, when \(k = 1\), we base our prediction on a single observation that has the closest distance measure. In contrast, when \(k = n\), we are simply using the average (regression) or most common class (classification) across all training samples as our predicted value.
+
+There is no general rule about the best \emph{k} as it depends greatly on the nature of the data. For high signal data with very few noisy (irrelevant) features, smaller values of \emph{k} tend to work best. As more irrelevant features are involved, larger values of \emph{k} are required to smooth out the noise. To illustrate, we saw in section \ref{engineering-process-example} that we optimized the RMSE for the \texttt{ames\_train} data with \(k = 12\). The \texttt{ames\_train} data has 2054 observations, so such a small \emph{k} likely suggests a strong signal exists. In contrast, the \texttt{churn\_train} data has 1030 observations and Figure \ref{fig:range-k-values} illustrates that our loss function is not optimized until \(k = 271\). Moreover, the max ROC value is 0.8078 and the overall proportion of attriting employees to non-attriting is 0.839. This suggest there is likely not a very strong signal in the Attrition data.
+
+\begin{tip}
+When using KNN for classification, it is best to assess odd numbers for
+\emph{k} to avoid ties in the event their is equal proportion of
+response levels (i.e.~when \emph{k = 2} one of the neighbors could have
+class ``0'' while the other neighbor has class ``1'').
+\end{tip}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# create blueprint}
+\NormalTok{blueprint <-}\StringTok{ }\KeywordTok{recipe}\NormalTok{(Attrition }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ churn_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_nzv}\NormalTok{(}\KeywordTok{all_nominal}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_integer}\NormalTok{(}\KeywordTok{contains}\NormalTok{(}\StringTok{"Satisfaction"}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_integer}\NormalTok{(WorkLifeBalance) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_integer}\NormalTok{(JobInvolvement) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_dummy}\NormalTok{(}\KeywordTok{all_nominal}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{(), }\DataTypeTok{one_hot =} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_center}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_scale}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{())}
+
+\CommentTok{# create a resampling method}
+\NormalTok{cv <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}
+  \DataTypeTok{method =} \StringTok{"repeatedcv"}\NormalTok{, }
+  \DataTypeTok{number =} \DecValTok{10}\NormalTok{, }
+  \DataTypeTok{repeats =} \DecValTok{5}\NormalTok{,}
+  \DataTypeTok{classProbs =} \OtherTok{TRUE}\NormalTok{,                 }
+  \DataTypeTok{summaryFunction =}\NormalTok{ twoClassSummary}
+\NormalTok{  )}
+
+\CommentTok{# create a hyperparameter grid search}
+\NormalTok{hyper_grid <-}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{k =} \KeywordTok{floor}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\KeywordTok{nrow}\NormalTok{(churn_train)}\OperatorTok{/}\DecValTok{3}\NormalTok{, }
+                                        \DataTypeTok{length.out =} \DecValTok{20}\NormalTok{)))}
+
+\CommentTok{# fit knn model and perform grid search}
+\NormalTok{knn_grid <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  blueprint, }
+  \DataTypeTok{data =}\NormalTok{ churn_train, }
+  \DataTypeTok{method =} \StringTok{"knn"}\NormalTok{, }
+  \DataTypeTok{trControl =}\NormalTok{ cv, }
+  \DataTypeTok{tuneGrid =}\NormalTok{ hyper_grid,}
+  \DataTypeTok{metric =} \StringTok{"ROC"}
+\NormalTok{  )}
+
+\KeywordTok{ggplot}\NormalTok{(knn_grid)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/range-k-values-1} 
+
+}
+
+\caption{Cross validated search grid results for Attrition training data where 20 values between 1 and 343 are assessed for k. When k = 1, the predicted value is based on a single observation that is closest to the target sample and when k = 343, the predicted value is based on the response with the largest proportion for 1/3 of the training sample.}\label{fig:range-k-values}
+\end{figure}
+
+\hypertarget{knn-mnist}{%
+\section{MNIST example}\label{knn-mnist}}
+
+The MNIST data set is significantly larger than the Ames housing and attrition data sets. Because we want this example to run locally and in a reasonable amount of time (\textless{} 1 hour), we will train our initial models on a random sample of 10,000 rows from the training set.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{index <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(mnist}\OperatorTok{$}\NormalTok{train}\OperatorTok{$}\NormalTok{images), }\DataTypeTok{size =} \DecValTok{10000}\NormalTok{)}
+\NormalTok{mnist_x <-}\StringTok{ }\NormalTok{mnist}\OperatorTok{$}\NormalTok{train}\OperatorTok{$}\NormalTok{images[index, ]}
+\NormalTok{mnist_y <-}\StringTok{ }\KeywordTok{factor}\NormalTok{(mnist}\OperatorTok{$}\NormalTok{train}\OperatorTok{$}\NormalTok{labels[index])}
+\end{Highlighting}
+\end{Shaded}
+
+Recall that the MNIST data contains 784 features representing the darkness (0--255) of pixels in images of handwritten numbers (0--9). As stated in Section \ref{knn-preprocess}, KNN models can be severly impacted by irrelevant features. One culprit of this is zero, or near-zero variance features (see Section \ref{feature-filtering}). Figure \ref{fig:mnist-plot-variance} illustrates that there are nearly 125 features that have zero variance and many more that have very little variation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mnist_x }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{as.data.frame}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{map_df}\NormalTok{(sd) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{gather}\NormalTok{(feature, sd) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(sd)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{binwidth =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/mnist-plot-variance-1} 
+
+}
+
+\caption{Distribution of variability across the MNIST features.  We see a significant number of zero variance features that should be removed.}\label{fig:mnist-plot-variance}
+\end{figure}
+
+Figure \ref{fig:mnist-plot-nzv-feature-image} shows which features are driving this concern. Images (A)--(C) illustrate typical handwritten numbers from the test set. Image (D) illustrates which features in our images have variability. The white in the center shows that the features that represent the center pixels have regular variability whereas the black exterior highlights that the features representing the edge pixels in our images have zero or near-zero variability. These features have low variability in pixel values because they are rarely drawn on.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/mnist-plot-nzv-feature-image-1} 
+
+}
+
+\caption{Example images (A)-(C) from our data set and (D) highlights near-zero variance features around the edges of our images.}\label{fig:mnist-plot-nzv-feature-image}
+\end{figure}
+
+By identifying and removing these zero (or near-zero) variance features, we end up keeping 249 of the original 784 predictors. This can cause dramatic improvements to both the accuracy and speed of our algorithm. Furthermore, by removing these upfront we can remove some of the overhead experienced by \texttt{caret::train()}. Furthermore, we need to add column names to the feature matrices as these are required by \textbf{caret}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# rename features}
+\KeywordTok{colnames}\NormalTok{(mnist_x) <-}\StringTok{ }\KeywordTok{paste0}\NormalTok{(}\StringTok{"V"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(mnist_x))}
+
+\CommentTok{# remove near zero variance features manually}
+\NormalTok{nzv <-}\StringTok{ }\KeywordTok{nearZeroVar}\NormalTok{(mnist_x)}
+\NormalTok{index <-}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(mnist_x), nzv)}
+\NormalTok{mnist_x <-}\StringTok{ }\NormalTok{mnist_x[, index]}
+\end{Highlighting}
+\end{Shaded}
+
+Next we perform our search grid. Since we are working with a larger data set, using resampling (e.g., \emph{k}-fold cross validation) becomes costly. Moreover, as we have more data, our estimated error rate produced by a simple train vs.~validation set becomes less biased and variable. Consequently, the following CV procedure (\texttt{cv}) uses 70\% of our data to train and the remaining 30\% for validation. We can adjust the \texttt{number} of times we do this which becomes similar to the bootstrap procedure discussed in \ref{resampling}.
+
+\begin{warning}
+Our hyperparameter grid search assesses 13 \emph{k} values between 1-25
+and takes approximately 3 minutes.
+\end{warning}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# create a simple train-validate resampling method}
+\NormalTok{cv <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}
+  \DataTypeTok{method =} \StringTok{"LGOCV"}\NormalTok{, }
+  \DataTypeTok{p =} \FloatTok{0.7}\NormalTok{,}
+  \DataTypeTok{number =} \DecValTok{1}\NormalTok{,}
+  \DataTypeTok{savePredictions =} \OtherTok{TRUE}
+\NormalTok{  )}
+
+\CommentTok{# create a hyperparameter grid search}
+\NormalTok{hyper_grid <-}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{k =} \KeywordTok{seq}\NormalTok{(}\DecValTok{3}\NormalTok{, }\DecValTok{25}\NormalTok{, }\DataTypeTok{by =} \DecValTok{2}\NormalTok{))}
+
+\CommentTok{# execute grid search}
+\NormalTok{knn_mnist <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  mnist_x,}
+\NormalTok{  mnist_y,}
+  \DataTypeTok{method =} \StringTok{"knn"}\NormalTok{,}
+  \DataTypeTok{tuneGrid =}\NormalTok{ hyper_grid,}
+  \DataTypeTok{preProc =} \KeywordTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{),}
+  \DataTypeTok{trControl =}\NormalTok{ cv}
+\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(knn_mnist)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/mnist-initial-model-1} 
+
+}
+
+\caption{KNN search grid results for the MNIST data}\label{fig:mnist-initial-model}
+\end{figure}
+
+Figure \ref{fig:mnist-initial-model} illustrates the grid search results and our best model used 3 nearest neighbors and provided an accuracy of 93.8\%. Looking at the results for each class, we can see that 8s were the hardest to detect followed by 2s, 3s, and 4s (based on sensitivity). The most common incorrectly predicted digit is 1 (specificity).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# create confusion matrix and just look at sensitivity, specificity, & accuracy}
+\NormalTok{cm <-}\StringTok{ }\KeywordTok{confusionMatrix}\NormalTok{(knn_mnist}\OperatorTok{$}\NormalTok{pred}\OperatorTok{$}\NormalTok{pred, knn_mnist}\OperatorTok{$}\NormalTok{pred}\OperatorTok{$}\NormalTok{obs)}
+\NormalTok{cm}\OperatorTok{$}\NormalTok{byClass[, }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{2}\NormalTok{, }\DecValTok{11}\NormalTok{)]}
+\CommentTok{##          Sensitivity Specificity Balanced Accuracy}
+\CommentTok{## Class: 0      0.9642      0.9962            0.9802}
+\CommentTok{## Class: 1      0.9917      0.9841            0.9879}
+\CommentTok{## Class: 2      0.9156      0.9955            0.9555}
+\CommentTok{## Class: 3      0.9164      0.9920            0.9542}
+\CommentTok{## Class: 4      0.8699      0.9961            0.9330}
+\CommentTok{## Class: 5      0.9151      0.9915            0.9533}
+\CommentTok{## Class: 6      0.9795      0.9889            0.9842}
+\CommentTok{## Class: 7      0.9327      0.9897            0.9612}
+\CommentTok{## Class: 8      0.8224      0.9979            0.9102}
+\CommentTok{## Class: 9      0.9330      0.9853            0.9591}
+\end{Highlighting}
+\end{Shaded}
+
+Feature importance for KNNs are computed by finding the features with the smallest distance measure \eqref{eq:euclidean}. Since the response variable in the MNIST data is multiclass, the variable importance scores below sort the features by maximum importance across the classes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# top 20 most important features}
+\NormalTok{vi <-}\StringTok{ }\KeywordTok{varImp}\NormalTok{(knn_mnist)}
+\NormalTok{vi}
+\CommentTok{## ROC curve variable importance}
+\CommentTok{## }
+\CommentTok{##   variables are sorted by maximum importance across the classes}
+\CommentTok{##   only 20 most important variables shown (out of 249)}
+\CommentTok{## }
+\CommentTok{##         X0    X1    X2    X3    X4    X5    X6    X7}
+\CommentTok{## V435 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0}
+\CommentTok{## V407  99.4  99.4  99.4  99.4  99.4  99.4  99.4  99.4}
+\CommentTok{## V463  97.9  97.9  97.9  97.9  97.9  97.9  97.9  97.9}
+\CommentTok{## V379  97.4  97.4  97.4  97.4  97.4  97.4  97.4  97.4}
+\CommentTok{## V434  95.9  95.9  95.9  95.9  95.9  95.9  96.7  95.9}
+\CommentTok{## V380  96.1  96.1  96.1  96.1  96.1  96.1  96.1  96.1}
+\CommentTok{## V462  95.6  95.6  95.6  95.6  95.6  95.6  95.6  95.6}
+\CommentTok{## V408  95.4  95.4  95.4  95.4  95.4  95.4  95.4  95.4}
+\CommentTok{## V352  93.5  93.5  93.5  93.5  93.5  93.5  93.5  93.5}
+\CommentTok{## V490  93.1  93.1  93.1  93.1  93.1  93.1  93.1  93.1}
+\CommentTok{## V406  92.9  92.9  92.9  92.9  92.9  92.9  92.9  92.9}
+\CommentTok{## V437  70.8  60.4  92.8  52.0  71.1  83.4  75.5  91.1}
+\CommentTok{## V351  92.4  92.4  92.4  92.4  92.4  92.4  92.4  92.4}
+\CommentTok{## V409  70.5  76.1  88.1  54.5  79.9  77.7  84.9  91.9}
+\CommentTok{## V436  90.0  90.0  90.9  90.0  90.0  90.0  91.4  90.0}
+\CommentTok{## V464  76.7  76.5  90.2  76.5  76.5  76.6  77.7  82.0}
+\CommentTok{## V491  89.5  89.5  89.5  89.5  89.5  89.5  89.5  89.5}
+\CommentTok{## V598  68.0  68.0  88.4  68.0  68.0  84.9  68.0  88.2}
+\CommentTok{## V465  63.1  36.6  87.7  38.2  50.7  80.6  59.9  84.3}
+\CommentTok{## V433  63.7  55.7  76.7  55.7  57.4  55.7  87.6  68.4}
+\CommentTok{##         X8   X9}
+\CommentTok{## V435 100.0 80.6}
+\CommentTok{## V407  99.4 75.2}
+\CommentTok{## V463  97.9 83.3}
+\CommentTok{## V379  97.4 86.6}
+\CommentTok{## V434  95.9 76.2}
+\CommentTok{## V380  96.1 88.0}
+\CommentTok{## V462  95.6 83.4}
+\CommentTok{## V408  95.4 75.0}
+\CommentTok{## V352  93.5 87.1}
+\CommentTok{## V490  93.1 81.9}
+\CommentTok{## V406  92.9 74.6}
+\CommentTok{## V437  52.0 70.8}
+\CommentTok{## V351  92.4 82.1}
+\CommentTok{## V409  52.7 76.1}
+\CommentTok{## V436  90.0 78.8}
+\CommentTok{## V464  76.5 76.7}
+\CommentTok{## V491  89.5 77.4}
+\CommentTok{## V598  68.0 38.8}
+\CommentTok{## V465  57.1 63.1}
+\CommentTok{## V433  55.7 63.7}
+\end{Highlighting}
+\end{Shaded}
+
+We can plot these results to get an understanding of what pixel features are driving our results. The image shows that the most influential features lie around the edges of numbers (outer white circle) and along the very center. This makes intuitive sense as many key differences between numbers lie in these areas. For example, the main difference between a 3 and an 8 is whether the left side of the number is enclosed.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# get median value for feature importance}
+\NormalTok{imp <-}\StringTok{ }\NormalTok{vi}\OperatorTok{$}\NormalTok{importance }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\DataTypeTok{var =} \StringTok{"feature"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{gather}\NormalTok{(response, imp, }\OperatorTok{-}\NormalTok{feature) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(feature) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{imp =} \KeywordTok{median}\NormalTok{(imp))}
+
+\CommentTok{# create tibble for all edge pixels}
+\NormalTok{edges <-}\StringTok{ }\KeywordTok{tibble}\NormalTok{(}
+  \DataTypeTok{feature =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"V"}\NormalTok{, nzv),}
+  \DataTypeTok{imp =} \DecValTok{0}
+\NormalTok{)}
+
+\CommentTok{# combine and plot}
+\NormalTok{imp <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(imp, edges) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{ID  =} \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{str_extract}\NormalTok{(feature, }\StringTok{"}\CharTok{\textbackslash{}\textbackslash{}}\StringTok{d+"}\NormalTok{))) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(ID)}
+\KeywordTok{image}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(imp}\OperatorTok{$}\NormalTok{imp, }\DecValTok{28}\NormalTok{, }\DecValTok{28}\NormalTok{), }\DataTypeTok{col =} \KeywordTok{gray}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\FloatTok{0.05}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/plot-mnist-vi-1} 
+
+}
+
+\caption{Image heat map showing which features, on average, are most influential across all response classes for our KNN model.}\label{fig:plot-mnist-vi}
+\end{figure}
+
+We can look at a few of our correct (left) and incorrect (right) predictions in Figure \ref{fig:correct-vs-incorrect}. When looking at the incorrect predictions, we can rationalize some of the errors (e.g., the actual 4 where we predicted a 1 has a strong vertical stroke compared to the rest of the number's features, the actual 2 where we predicted a 0 is blurry and not well defined.)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# get a few accurate predictions}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{9}\NormalTok{)}
+\NormalTok{good <-}\StringTok{ }\NormalTok{knn_mnist}\OperatorTok{$}\NormalTok{pred }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(pred }\OperatorTok{==}\StringTok{ }\NormalTok{obs) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{sample_n}\NormalTok{(}\DecValTok{4}\NormalTok{)}
+
+\CommentTok{# get a few inaccurate predictions}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{9}\NormalTok{)}
+\NormalTok{bad <-}\StringTok{ }\NormalTok{knn_mnist}\OperatorTok{$}\NormalTok{pred }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(pred }\OperatorTok{!=}\StringTok{ }\NormalTok{obs) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{sample_n}\NormalTok{(}\DecValTok{4}\NormalTok{)}
+
+\NormalTok{combine <-}\StringTok{ }\KeywordTok{bind_rows}\NormalTok{(good, bad)}
+
+\CommentTok{# get original feature set with all pixel features}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{index <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(mnist}\OperatorTok{$}\NormalTok{train}\OperatorTok{$}\NormalTok{images), }\DecValTok{10000}\NormalTok{)}
+\NormalTok{X <-}\StringTok{ }\NormalTok{mnist}\OperatorTok{$}\NormalTok{train}\OperatorTok{$}\NormalTok{images[index,]}
+
+\CommentTok{# plot }
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{2}\NormalTok{), }\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+\KeywordTok{layout}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(}\KeywordTok{seq_len}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(combine)), }\DecValTok{4}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{FALSE}\NormalTok{))}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \KeywordTok{seq_len}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(combine))) \{}
+  \KeywordTok{image}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(X[combine}\OperatorTok{$}\NormalTok{rowIndex[i],], }\DecValTok{28}\NormalTok{, }\DecValTok{28}\NormalTok{)[, }\DecValTok{28}\OperatorTok{:}\DecValTok{1}\NormalTok{], }
+        \DataTypeTok{col =} \KeywordTok{gray}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\FloatTok{0.05}\NormalTok{)),}
+        \DataTypeTok{main =} \KeywordTok{paste}\NormalTok{(}\StringTok{"Actual:"}\NormalTok{, combine}\OperatorTok{$}\NormalTok{obs[i], }\StringTok{"  "}\NormalTok{, }
+                     \StringTok{"Predicted:"}\NormalTok{, combine}\OperatorTok{$}\NormalTok{pred[i]),}
+        \DataTypeTok{xaxt=}\StringTok{"n"}\NormalTok{, }\DataTypeTok{yaxt=}\StringTok{"n"}\NormalTok{) }
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/correct-vs-incorrect-1} 
+
+}
+
+\caption{Actual images from the MNIST data set along with our KNN model's predictions.  Left column illustrates a few accurate predictions and the right column illustrates a few inaccurate predictions.}\label{fig:correct-vs-incorrect}
+\end{figure}
+
+\hypertarget{final-thoughts-4}{%
+\section{Final thoughts}\label{final-thoughts-4}}
+
+KNNs are a very simplistic, and intuitive, algorithm that can provide average to decent predictive power, especially when the response is dependent on the local structure of the features. However, a major drawback of KNNs are their computation time, which increases by \(n \times p\) for each observation. Furthermore, since KNNs are a lazy learner, they require the model be run at prediction time which limits their use for real-time modeling. Some work has been done to minimize this effect; for example the \textbf{FNN} package \citep{R-fnn} provides a collection of fast \emph{k}-nearest neighbor search algorithms and applications such as cover-tree \citep{beygelzimer2006cover} and kd-tree \citep{robinson1981kdb}.
+
+Although KNNs rarely provide the best predictive performance, they have many benefits; for example, in feature engineering and in data cleaning and preprocessing. We discussed KNN for imputation in Section \ref{impute}. \citet{bruce2017practical} discuss another approach that uses KNNs to add a \emph{local knowledge} feature. This includes running a KNN to estimate the predicted output or class and using this predicted value as a new feature for downstream modeling. However, this approach also invites more opportunities for target leakage.
+
+Other alternatives to traditional KNNs such as using invariant metrics, tangent distance metrics, and adaptive nearest neighbor methods are also discussed in \citet{esl} and are worth exploring.
+
 \bibliography{book.bib,packages.bib}
 
 \backmatter

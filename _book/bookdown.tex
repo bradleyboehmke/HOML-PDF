@@ -1,0 +1,781 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+%
+\documentclass[]{krantz}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+            pdftitle={Hands-on Machine Learning with R},
+            pdfauthor={Brad Boehmke \& Brandon Greenwell},
+            colorlinks=true,
+            linkcolor=Maroon,
+            filecolor=Maroon,
+            citecolor=Blue,
+            urlcolor=Blue,
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.33,0.33,0.33}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.61,0.61,0.61}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.06,0.06,0.06}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.5,0.5,0.5}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0,0,0}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.27,0.27,0.27}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.27,0.27,0.27}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.06,0.06,0.06}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.14,0.14,0.14}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.06,0.06,0.06}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0,0,0}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.27,0.27,0.27}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.43,0.43,0.43}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0,0,0}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.5,0.5,0.5}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.5,0.5,0.5}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0,0,0}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.5,0.5,0.5}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs}
+% Fix footnotes in tables (requires footnote package)
+\IfFileExists{footnote.sty}{\usepackage{footnote}\makesavenoteenv{longtable}}{}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage[bf,singlelinecheck=off]{caption}
+
+\usepackage{framed,color}
+\definecolor{shadecolor}{RGB}{248,248,248}
+
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\topfraction}{0.8}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\floatpagefraction}{0.75}
+
+\renewenvironment{quote}{\begin{VF}}{\end{VF}}
+\let\oldhref\href
+\renewcommand{\href}[2]{#2\footnote{\url{#1}}}
+
+\makeatletter
+\newenvironment{kframe}{%
+\medskip{}
+\setlength{\fboxsep}{.8em}
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\newenvironment{block}[1]
+  {
+  \begin{itemize}
+  \renewcommand{\labelitemi}{
+    \raisebox{-.7\height}[0pt][0pt]{
+      {\setkeys{Gin}{width=3em,keepaspectratio}\includegraphics{icons/#1}}
+    }
+  }
+  \setlength{\fboxsep}{1em}
+  \begin{kframe}
+  \item
+  }
+  {
+  \end{kframe}
+  \end{itemize}
+  }
+\newenvironment{note}
+  {\begin{block}{note}}
+  {\end{block}}
+\newenvironment{caution}
+  {\begin{block}{caution}}
+  {\end{block}}
+\newenvironment{important}
+  {\begin{block}{important}}
+  {\end{block}}
+\newenvironment{tip}
+  {\begin{block}{tip}}
+  {\end{block}}
+\newenvironment{warning}
+  {\begin{block}{warning}}
+  {\end{block}}
+
+\renewenvironment{Shaded}{\begin{kframe}}{\end{kframe}}
+
+\usepackage{makeidx}
+\makeindex
+
+\urlstyle{tt}
+
+\usepackage{amsthm}
+\makeatletter
+\def\thm@space@setup{%
+  \thm@preskip=8pt plus 2pt minus 4pt
+  \thm@postskip=\thm@preskip
+}
+\makeatother
+
+\frontmatter
+\usepackage[]{natbib}
+\bibliographystyle{apalike}
+
+\title{Hands-on Machine Learning with R}
+\author{Brad Boehmke \& Brandon Greenwell}
+\date{2019-06-25}
+
+\begin{document}
+\maketitle
+
+% you may need to leave a few empty pages before the dedication page
+
+%\cleardoublepage\newpage\thispagestyle{empty}\null
+%\cleardoublepage\newpage\thispagestyle{empty}\null
+%\cleardoublepage\newpage
+\thispagestyle{empty}
+
+\begin{center}
+To my son,
+
+without whom I should have finished this book two years earlier
+%\includegraphics{images/dedication.pdf}
+\end{center}
+
+\setlength{\abovedisplayskip}{-5pt}
+\setlength{\abovedisplayshortskip}{-5pt}
+
+{
+\hypersetup{linkcolor=}
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\listoftables
+\listoffigures
+\hypertarget{preface}{%
+\chapter*{Preface}\label{preface}}
+
+
+\begin{note}
+\textbf{Note to readers}: this text is a work in progress. It will
+eventually be published by Chapman \& Hall/CRC. Prior to the formal
+copyediting process, we wanted to open it up to public review to get
+feedback on the content. Any feedback would be greatly appreciated and
+can be given at
+\url{https://github.com/koalaverse/hands-on-machine-learning-with-r/issues}.
+Public reviewers that help improve this book will be recognized in the
+Acknowledge Section.
+\end{note}
+
+Welcome to \emph{Hands-on Machine Learning with R}. This book provides hands-on modules for many of the most common machine learning methods to include:
+
+\begin{itemize}
+\tightlist
+\item
+  Generalized low rank models
+\item
+  Clustering algorithms
+\item
+  Autoencoders
+\item
+  Regularized models
+\item
+  Random forests
+\item
+  Gradient boosting machines
+\item
+  Deep neural networks
+\item
+  Stacking / super learners
+\item
+  and more!
+\end{itemize}
+
+You will learn how to build and tune these various models with R packages that have been tested and approved due to their ability to scale well. However, our motivation in almost every case is to describe the techniques in a way that helps develop intuition for its strengths and weaknesses. For the most part, we minimize mathematical complexity when possible but also provide resources to get deeper into the details if desired.
+
+\hypertarget{who-should-read-this}{%
+\section*{Who should read this}\label{who-should-read-this}}
+
+
+We intend this work to be a practitioner's guide to the machine learning process and a place where one can come to learn about the approach and to gain intuition about the many commonly used, modern, and powerful methods accepted in the machine learning community. If you are familiar with the analytic methodologies, this book may still serve as a reference for how to work with the various R packages for implementation. While an abundance of videos, blog posts, and tutorials exist online, we have long been frustrated by the lack of consistency, completeness, and bias towards singular packages for implementation. This is what inspired this book.
+
+This book is not meant to be an introduction to R or to programming in general; as we assume the reader has familiarity with the R language to include defining functions, managing R objects, controlling the flow of a program, and other basic tasks. If not, we would refer you to \href{http://r4ds.had.co.nz/index.html}{R for Data Science} \citep{wickham2016r} to learn the fundamentals of data science with R such as importing, cleaning, transforming, visualizing, and exploring your data. For those looking to advance their R programming skills and knowledge of the languge, we would refer you to \href{http://adv-r.had.co.nz/}{Advanced R} \citep{wickham2014advanced}. Nor is this book designed to be a deep dive into the theory and math underpinning machine learning algorithms. Several books already exist that do great justice in this arena (i.e. \href{https://web.stanford.edu/~hastie/ElemStatLearn/}{Elements of Statistical Learning} \citep{esl}, \href{https://web.stanford.edu/~hastie/CASI/}{Computer Age Statistical Inference} \citep{efron2016computer}, \href{http://www.deeplearningbook.org/}{Deep Learning} \citep{goodfellow2016deep}).
+
+Instead, this book is meant to help R users learn to use the machine learning stack within R, which includes using various R packages such as \textbf{glmnet}, \textbf{h2o}, \textbf{ranger}, \textbf{xgboost}, \textbf{lime}, and others to effectively model and gain insight from your data. The book favors a hands-on approach, growing an intuitive understanding of machine learning through concrete examples and just a little bit of theory. While you can read this book without opening R, we highly recommend you experiment with the code examples provided throughout.
+
+\hypertarget{why-r}{%
+\section*{Why R}\label{why-r}}
+
+
+R has emerged over the last couple decades as a first-class tool for scientific computing tasks, and has been a consistent leader in implementing statistical methodologies for analyzing data. The usefulness of R for data science stems from the large, active, and growing ecosystem of third-party packages: \textbf{tidyverse} for common data analysis activities; \textbf{h2o}, \textbf{ranger}, \textbf{xgboost}, and others for fast and scalable machine learning; \textbf{iml}, \textbf{pdp}, \textbf{vip}, and others for machine learning interpretability; and many more tools will be mentioned throughout the pages that follow.
+
+\hypertarget{conventions-used-in-this-book}{%
+\section*{Conventions used in this book}\label{conventions-used-in-this-book}}
+
+
+The following typographical conventions are used in this book:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\emph{strong italic}}: indicates new terms,
+\item
+  \textbf{bold}: indicates package \& file names,
+\item
+  \texttt{inline\ code}: monospaced highlighted text indicates functions or other commands that could be typed literally by the user,
+\item
+  code chunk: indicates commands or other text that could be typed literally by the user
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DecValTok{1} \OperatorTok{+}\StringTok{ }\DecValTok{2}
+\CommentTok{## [1] 3}
+\end{Highlighting}
+\end{Shaded}
+
+In addition to the general text used throughout, you will notice the following code chunks with images, which signify:
+
+\begin{tip}
+Signifies a tip or suggestion
+\end{tip}
+
+\begin{note}
+Signifies a general note
+\end{note}
+
+\begin{warning}
+Signifies a warning or caution
+\end{warning}
+
+\hypertarget{additional-resources}{%
+\section*{Additional resources}\label{additional-resources}}
+
+
+There are many great resources available to learn about machine learning. Throughout the chapters we try to include many of the resources that we have found extremely useful for digging deeper into the methodology and applying with code. However, due to print restrictions, the hard copy version of this book limits the concepts and methods discussed. Online supplementary material exists at \url{https://github.com/koalaverse/hands-on-machine-learning-with-r}. The additional material will accumulate over time and include extended chapter material (i.e., random forest package benchmarking) along with brand new content we couldn't fit in (i.e., random hyperparameter search). In addition, you can download the data used throughout the book, find teaching resources (i.e., slides and exercises), and more.
+
+\hypertarget{feedback}{%
+\section*{Feedback}\label{feedback}}
+
+
+Reader comments are greatly appreciated. To report errors or bugs please post an issue at \url{https://github.com/koalaverse/hands-on-machine-learning-with-r/issues}.
+
+\hypertarget{acknowledgments}{%
+\section*{Acknowledgments}\label{acknowledgments}}
+
+
+TBD
+
+\hypertarget{software-information}{%
+\section*{Software information}\label{software-information}}
+
+
+An online version of this book is available at \url{http://bit.ly/HOML_with_R}. The source of the book along with additional content is available at \url{https://github.com/koalaverse/hands-on-machine-learning-with-r}. The book is powered by \url{https://bookdown.org} which makes it easy to turn R markdown files into HTML, PDF, and EPUB.
+
+This book was built with the following packages and R version. All code was executed on 2017 MacBook Pro with a 2.9 GHz Intel Core i7 processor, 16 GB of memory, 2133 MHz speed, and double data rate synchronous dynamic random access memory (DDR3).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# packages used}
+\NormalTok{pkgs <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}
+  \StringTok{"AmesHousing"}\NormalTok{,}
+  \StringTok{"bookdown"}\NormalTok{,}
+  \StringTok{"caret"}\NormalTok{,}
+  \StringTok{"cluster"}\NormalTok{,}
+  \StringTok{"DALEX"}\NormalTok{,}
+  \StringTok{"data.table"}\NormalTok{,}
+  \StringTok{"dplyr"}\NormalTok{,}
+  \StringTok{"dslabs"}\NormalTok{,}
+  \StringTok{"e1071"}\NormalTok{,}
+  \StringTok{"earth"}\NormalTok{,}
+  \StringTok{"emo"}\NormalTok{,}
+  \StringTok{"extracat"}\NormalTok{,}
+  \StringTok{"factoextra"}\NormalTok{,}
+  \StringTok{"ggplot2"}\NormalTok{,}
+  \StringTok{"gbm"}\NormalTok{,}
+  \StringTok{"glmnet"}\NormalTok{,}
+  \StringTok{"h2o"}\NormalTok{,}
+  \StringTok{"iml"}\NormalTok{,}
+  \StringTok{"ipred"}\NormalTok{,}
+  \StringTok{"keras"}\NormalTok{,}
+  \StringTok{"kernlab"}\NormalTok{,}
+  \StringTok{"MASS"}\NormalTok{,}
+  \StringTok{"mclust"}\NormalTok{,}
+  \StringTok{"mlbench"}\NormalTok{,}
+  \StringTok{"pBrackets"}\NormalTok{,}
+  \StringTok{"pdp"}\NormalTok{,}
+  \StringTok{"pls"}\NormalTok{,}
+  \StringTok{"pROC"}\NormalTok{,}
+  \StringTok{"purrr"}\NormalTok{,}
+  \StringTok{"ranger"}\NormalTok{,}
+  \StringTok{"recipes"}\NormalTok{,}
+  \StringTok{"reshape2"}\NormalTok{,}
+  \StringTok{"ROCR"}\NormalTok{,}
+  \StringTok{"rpart"}\NormalTok{,}
+  \StringTok{"rpart.plot"}\NormalTok{,}
+  \StringTok{"rsample"}\NormalTok{,}
+  \StringTok{"tfruns"}\NormalTok{,}
+  \StringTok{"tfestimators"}\NormalTok{,}
+  \StringTok{"vip"}\NormalTok{,}
+  \StringTok{"xgboost"}
+\NormalTok{)}
+
+\CommentTok{# package & session info}
+\NormalTok{sessioninfo}\OperatorTok{::}\KeywordTok{session_info}\NormalTok{(pkgs)}
+\CommentTok{#> - Session info --------------------------------------}
+\CommentTok{#>  setting  value                       }
+\CommentTok{#>  version  R version 3.6.0 (2019-04-26)}
+\CommentTok{#>  os       macOS Sierra 10.12.6        }
+\CommentTok{#>  system   x86_64, darwin15.6.0        }
+\CommentTok{#>  ui       RStudio                     }
+\CommentTok{#>  language (EN)                        }
+\CommentTok{#>  collate  en_US.UTF-8                 }
+\CommentTok{#>  ctype    en_US.UTF-8                 }
+\CommentTok{#>  tz       America/New_York            }
+\CommentTok{#>  date     2019-06-25                  }
+\CommentTok{#> }
+\CommentTok{#> - Packages ------------------------------------------}
+\CommentTok{#>  ! package       * version    date       lib}
+\CommentTok{#>    abind           1.4-5      2016-07-21 [1]}
+\CommentTok{#>    AmesHousing     0.0.3      2017-12-17 [1]}
+\CommentTok{#>    assertthat      0.2.1      2019-03-21 [1]}
+\CommentTok{#>    backports       1.1.4      2019-04-10 [1]}
+\CommentTok{#>    base64enc       0.1-3      2015-07-28 [1]}
+\CommentTok{#>    BH              1.69.0-1   2019-01-07 [1]}
+\CommentTok{#>    bitops          1.0-6      2013-08-17 [1]}
+\CommentTok{#>    bookdown        0.11       2019-05-28 [1]}
+\CommentTok{#>    boot            1.3-22     2019-04-02 [1]}
+\CommentTok{#>    car             3.0-3      2019-05-27 [1]}
+\CommentTok{#>    carData         3.0-2      2018-09-30 [1]}
+\CommentTok{#>    caret           6.0-84     2019-04-27 [1]}
+\CommentTok{#>    caTools         1.17.1.2   2019-03-06 [1]}
+\CommentTok{#>    cellranger      1.1.0      2016-07-27 [1]}
+\CommentTok{#>    checkmate       1.9.3      2019-05-03 [1]}
+\CommentTok{#>    class           7.3-15     2019-01-01 [1]}
+\CommentTok{#>    cli             1.1.0      2019-03-19 [1]}
+\CommentTok{#>    clipr           0.6.0      2019-04-15 [1]}
+\CommentTok{#>    cluster         2.0.8      2019-04-05 [1]}
+\CommentTok{#>    codetools       0.2-16     2018-12-24 [1]}
+\CommentTok{#>    colorspace      1.4-1      2019-03-18 [1]}
+\CommentTok{#>    config          0.3        2018-03-27 [1]}
+\CommentTok{#>    cowplot         0.9.4      2019-01-08 [1]}
+\CommentTok{#>    crayon          1.3.4      2017-09-16 [1]}
+\CommentTok{#>    curl            3.3        2019-01-10 [1]}
+\CommentTok{#>    DALEX           0.3.0      2019-03-25 [1]}
+\CommentTok{#>    data.table      1.12.2     2019-04-07 [1]}
+\CommentTok{#>    dendextend      1.12.0     2019-05-11 [1]}
+\CommentTok{#>    digest          0.6.19     2019-05-20 [1]}
+\CommentTok{#>    dplyr           0.8.1      2019-05-14 [1]}
+\CommentTok{#>    dslabs          0.5.2      2018-12-19 [1]}
+\CommentTok{#>    e1071           1.7-1      2019-03-19 [1]}
+\CommentTok{#>    earth           5.1.1      2019-04-12 [1]}
+\CommentTok{#>    ellipse         0.4.1      2018-01-05 [1]}
+\CommentTok{#>    ellipsis        0.1.0      2019-02-19 [1]}
+\CommentTok{#>    emo             0.0.0.9000 2019-05-03 [1]}
+\CommentTok{#>    evaluate        0.14       2019-05-28 [1]}
+\CommentTok{#>  R extracat        <NA>       <NA>       [?]}
+\CommentTok{#>    factoextra      1.0.5      2017-08-22 [1]}
+\CommentTok{#>    FactoMineR      1.41       2018-05-04 [1]}
+\CommentTok{#>    fansi           0.4.0      2018-10-05 [1]}
+\CommentTok{#>    flashClust      1.01-2     2012-08-21 [1]}
+\CommentTok{#>    forcats         0.4.0      2019-02-17 [1]}
+\CommentTok{#>    foreach         1.4.4      2017-12-12 [1]}
+\CommentTok{#>    foreign         0.8-71     2018-07-20 [1]}
+\CommentTok{#>    forge           0.2.0      2019-02-26 [1]}
+\CommentTok{#>    Formula         1.2-3      2018-05-03 [1]}
+\CommentTok{#>    gbm             2.1.5      2019-01-14 [1]}
+\CommentTok{#>    gdata           2.18.0     2017-06-06 [1]}
+\CommentTok{#>    generics        0.0.2      2018-11-29 [1]}
+\CommentTok{#>    ggplot2         3.1.1      2019-04-07 [1]}
+\CommentTok{#>    ggpubr          0.2        2018-11-15 [1]}
+\CommentTok{#>    ggrepel         0.8.1      2019-05-07 [1]}
+\CommentTok{#>    ggsci           2.9        2018-05-14 [1]}
+\CommentTok{#>    ggsignif        0.5.0      2019-02-20 [1]}
+\CommentTok{#>    glmnet          2.0-16     2018-04-02 [1]}
+\CommentTok{#>    glue            1.3.1.9000 2019-05-03 [1]}
+\CommentTok{#>    gower           0.2.0      2019-03-07 [1]}
+\CommentTok{#>    gplots          3.0.1.1    2019-01-27 [1]}
+\CommentTok{#>    gridExtra       2.3        2017-09-09 [1]}
+\CommentTok{#>    gtable          0.3.0      2019-03-25 [1]}
+\CommentTok{#>    gtools          3.8.1      2018-06-26 [1]}
+\CommentTok{#>    h2o             3.22.1.1   2019-01-10 [1]}
+\CommentTok{#>    haven           2.1.0      2019-02-19 [1]}
+\CommentTok{#>    highr           0.8        2019-03-20 [1]}
+\CommentTok{#>    hms             0.4.2      2018-03-10 [1]}
+\CommentTok{#>    htmltools       0.3.6      2017-04-28 [1]}
+\CommentTok{#>    iml             0.9.0      2019-02-05 [1]}
+\CommentTok{#>    inum            1.0-1      2019-04-25 [1]}
+\CommentTok{#>    ipred           0.9-9      2019-04-28 [1]}
+\CommentTok{#>    iterators       1.0.10     2018-07-13 [1]}
+\CommentTok{#>    jsonlite        1.6        2018-12-07 [1]}
+\CommentTok{#>    keras           2.2.4.1    2019-04-05 [1]}
+\CommentTok{#>    kernlab         0.9-27     2018-08-10 [1]}
+\CommentTok{#>    KernSmooth      2.23-15    2015-06-29 [1]}
+\CommentTok{#>    knitr           1.23       2019-05-18 [1]}
+\CommentTok{#>    labeling        0.3        2014-08-23 [1]}
+\CommentTok{#>    lattice         0.20-38    2018-11-04 [1]}
+\CommentTok{#>    lava            1.6.5      2019-02-12 [1]}
+\CommentTok{#>    lazyeval        0.2.2      2019-03-15 [1]}
+\CommentTok{#>    leaps           3.0        2017-01-10 [1]}
+\CommentTok{#>    libcoin         1.0-4      2019-02-28 [1]}
+\CommentTok{#>    lme4            1.1-21     2019-03-05 [1]}
+\CommentTok{#>    lubridate       1.7.4      2018-04-11 [1]}
+\CommentTok{#>    magrittr        1.5        2014-11-22 [1]}
+\CommentTok{#>    maptools        0.9-5      2019-02-18 [1]}
+\CommentTok{#>    markdown        1.0        2019-06-07 [1]}
+\CommentTok{#>    MASS            7.3-51.4   2019-03-31 [1]}
+\CommentTok{#>    Matrix          1.2-17     2019-03-22 [1]}
+\CommentTok{#>    MatrixModels    0.4-1      2015-08-22 [1]}
+\CommentTok{#>    mclust          5.4.3      2019-03-14 [1]}
+\CommentTok{#>    Metrics         0.1.4      2018-07-09 [1]}
+\CommentTok{#>    mgcv            1.8-28     2019-03-21 [1]}
+\CommentTok{#>    mime            0.7        2019-06-11 [1]}
+\CommentTok{#>    minqa           1.2.4      2014-10-09 [1]}
+\CommentTok{#>    mlbench         2.1-1      2012-07-10 [1]}
+\CommentTok{#>    ModelMetrics    1.2.2      2018-11-03 [1]}
+\CommentTok{#>    munsell         0.5.0      2018-06-12 [1]}
+\CommentTok{#>    mvtnorm         1.0-10     2019-03-05 [1]}
+\CommentTok{#>    nlme            3.1-139    2019-04-09 [1]}
+\CommentTok{#>    nloptr          1.2.1      2018-10-03 [1]}
+\CommentTok{#>    nnet            7.3-12     2016-02-02 [1]}
+\CommentTok{#>    numDeriv        2016.8-1   2016-08-27 [1]}
+\CommentTok{#>    openxlsx        4.1.0.1    2019-05-28 [1]}
+\CommentTok{#>    partykit        1.2-3      2019-01-31 [1]}
+\CommentTok{#>    pbkrtest        0.4-7      2017-03-15 [1]}
+\CommentTok{#>    pBrackets       1.0        2014-10-17 [1]}
+\CommentTok{#>    pdp             0.7.0      2018-08-27 [1]}
+\CommentTok{#>    pillar          1.4.1      2019-05-28 [1]}
+\CommentTok{#>    pkgconfig       2.0.2      2018-08-16 [1]}
+\CommentTok{#>    plogr           0.2.0      2018-03-25 [1]}
+\CommentTok{#>    plotmo          3.5.4      2019-04-06 [1]}
+\CommentTok{#>    plotrix         3.7-5      2019-04-07 [1]}
+\CommentTok{#>    pls             2.7-1      2019-03-23 [1]}
+\CommentTok{#>    plyr            1.8.4      2016-06-08 [1]}
+\CommentTok{#>    polynom         1.4-0      2019-03-22 [1]}
+\CommentTok{#>    prediction      0.3.6.2    2019-01-31 [1]}
+\CommentTok{#>    prettyunits     1.0.2      2015-07-13 [1]}
+\CommentTok{#>    pROC            1.14.0     2019-03-12 [1]}
+\CommentTok{#>    processx        3.3.0      2019-03-10 [1]}
+\CommentTok{#>    prodlim         2018.04.18 2018-04-18 [1]}
+\CommentTok{#>    progress        1.2.2      2019-05-16 [1]}
+\CommentTok{#>    ps              1.3.0      2018-12-21 [1]}
+\CommentTok{#>    purrr           0.3.2      2019-03-15 [1]}
+\CommentTok{#>    quantreg        5.38       2018-12-18 [1]}
+\CommentTok{#>    R6              2.4.0      2019-02-14 [1]}
+\CommentTok{#>    ranger          0.11.2     2019-03-07 [1]}
+\CommentTok{#>    RColorBrewer    1.1-2      2014-12-07 [1]}
+\CommentTok{#>    Rcpp            1.0.1      2019-03-17 [1]}
+\CommentTok{#>    RcppEigen       0.3.3.5.0  2018-11-24 [1]}
+\CommentTok{#>    RcppRoll        0.3.0      2018-06-05 [1]}
+\CommentTok{#>    RCurl           1.95-4.12  2019-03-04 [1]}
+\CommentTok{#>    readr           1.3.1      2018-12-21 [1]}
+\CommentTok{#>    readxl          1.3.1      2019-03-13 [1]}
+\CommentTok{#>    recipes         0.1.5      2019-03-21 [1]}
+\CommentTok{#>    rematch         1.0.1      2016-04-21 [1]}
+\CommentTok{#>    reshape2        1.4.3      2017-12-11 [1]}
+\CommentTok{#>    reticulate      1.12       2019-04-12 [1]}
+\CommentTok{#>    rio             0.5.16     2018-11-26 [1]}
+\CommentTok{#>    rlang           0.3.4      2019-04-07 [1]}
+\CommentTok{#>    rmarkdown       1.13       2019-05-22 [1]}
+\CommentTok{#>    ROCR            1.0-7      2015-03-26 [1]}
+\CommentTok{#>    rpart           4.1-15     2019-04-12 [1]}
+\CommentTok{#>    rpart.plot      3.0.7      2019-04-12 [1]}
+\CommentTok{#>    rsample         0.0.4      2019-01-07 [1]}
+\CommentTok{#>    rstudioapi      0.10       2019-03-19 [1]}
+\CommentTok{#>    scales          1.0.0      2018-08-09 [1]}
+\CommentTok{#>    scatterplot3d   0.3-41     2018-03-14 [1]}
+\CommentTok{#>    sp              1.3-1      2018-06-05 [1]}
+\CommentTok{#>    SparseM         1.77       2017-04-23 [1]}
+\CommentTok{#>    SQUAREM         2017.10-1  2017-10-07 [1]}
+\CommentTok{#>    stringi         1.4.3      2019-03-12 [1]}
+\CommentTok{#>    stringr         1.4.0      2019-02-10 [1]}
+\CommentTok{#>    survival        2.44-1.1   2019-04-01 [1]}
+\CommentTok{#>    TeachingDemos   2.10       2016-02-12 [1]}
+\CommentTok{#>    tensorflow      1.13.1     2019-04-05 [1]}
+\CommentTok{#>    tfestimators    1.9.1      2018-11-07 [1]}
+\CommentTok{#>    tfruns          1.4        2018-08-25 [1]}
+\CommentTok{#>    tibble          2.1.2      2019-05-29 [1]}
+\CommentTok{#>    tidyr           0.8.3      2019-03-01 [1]}
+\CommentTok{#>    tidyselect      0.2.5      2018-10-11 [1]}
+\CommentTok{#>    timeDate        3043.102   2018-02-21 [1]}
+\CommentTok{#>    tinytex         0.13       2019-05-14 [1]}
+\CommentTok{#>    utf8            1.1.4      2018-05-24 [1]}
+\CommentTok{#>    vctrs           0.1.0      2018-11-29 [1]}
+\CommentTok{#>    vip             0.1.2.9000 2019-06-04 [1]}
+\CommentTok{#>    viridis         0.5.1      2018-03-29 [1]}
+\CommentTok{#>    viridisLite     0.3.0      2018-02-01 [1]}
+\CommentTok{#>    whisker         0.3-2      2013-04-28 [1]}
+\CommentTok{#>    withr           2.1.2      2018-03-15 [1]}
+\CommentTok{#>    xfun            0.7        2019-05-14 [1]}
+\CommentTok{#>    xgboost         0.82.1     2019-03-11 [1]}
+\CommentTok{#>    yaImpute        1.0-31     2019-01-09 [1]}
+\CommentTok{#>    yaml            2.2.0      2018-07-25 [1]}
+\CommentTok{#>    zeallot         0.1.0      2018-01-28 [1]}
+\CommentTok{#>    zip             2.0.2      2019-05-13 [1]}
+\CommentTok{#>  source                         }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  Github (hadley/emo@02a5206)    }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  <NA>                           }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  Github (tidyverse/glue@ea0edcb)}
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  Github (koalaverse/vip@9d537bb)}
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#>  CRAN (R 3.6.0)                 }
+\CommentTok{#> }
+\CommentTok{#> [1] /Library/Frameworks/R.framework/Versions/3.6/Resources/library}
+\CommentTok{#> }
+\CommentTok{#>  R -- Package was removed from disk.}
+\end{Highlighting}
+\end{Shaded}
+
+\bibliography{book.bib,packages.bib}
+
+\backmatter
+\printindex
+
+\end{document}

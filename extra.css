@@ -1,0 +1,17 @@
+.note, .tip, .warning {
+  padding: 1em 1em 1em 4em;
+  margin-bottom: 10px;
+  background: #FEF9E7 5px center/3em no-repeat;
+} 
+
+.note {
+  background-image: url("icons/note.png");
+}
+
+.tip {
+  background-image: url("icons/tip.png");
+}
+
+.warning {
+  background-image: url("icons/warning.png");
+}

@@ -206,13 +206,15 @@ To fit a model to our data, the model terms must be specified. Historically, the
 model_fn(Sale_Price ~ Neighborhood + Year_Sold, data = ames)
 
 # Variables + interactions
-model_fn(Sale_Price ~ Neighborhood + Year_Sold + Neighborhood:Year_Sold, data = ames)
+model_fn(Sale_Price ~ Neighborhood + Year_Sold + 
+           Neighborhood:Year_Sold, data = ames)
 
 # Shorthand for all predictors
 model_fn(Sale_Price ~ ., data = ames)
 
 # Inline functions / transformations
-model_fn(log10(Sale_Price) ~ ns(Longitude, df = 3) + ns(Latitude, df = 3), data = ames)
+model_fn(log10(Sale_Price) ~ ns(Longitude, df = 3) + 
+           ns(Latitude, df = 3), data = ames)
 ```
 
 This is very convenient but it has some disadvantages. For example:
@@ -681,7 +683,7 @@ knn_fit <- train(
 
 Looking at our results we see that the best model coincided with $k=$ `r pull(knn_fit$bestTune)`, which resulted in an RMSE of `r knn_fit$results %>% filter(k == as.numeric(knn_fit$bestTune)) %>% pull(RMSE)  %>% round(2) %>% prettyNum(big.mark = "")`.  This implies that, on average, our model mispredicts the expected sale price of a home by `r knn_fit$results %>% filter(k == as.numeric(knn_fit$bestTune)) %>% pull(RMSE)  %>% round(0) %>% prettyNum(big.mark = ",") %>% paste0("$", .)`. Figure \@ref(fig:example-process-assess) illustrates the cross-validated error rate across the spectrum of hyperparameter values that we specified.
 
-```{r example-process-assess, fig.height=3, fig.cap="Results from a grid search for a k-nearest neighbor model on the Ames housing data assessing values for _k_ ranging from 2-25."}
+```{r example-process-assess, fig.height=3, fig.cap="Results from a grid search for a k-nearest neighbor model on the Ames housing data assessing values for k ranging from 2-25."}
 # print model results
 knn_fit
 

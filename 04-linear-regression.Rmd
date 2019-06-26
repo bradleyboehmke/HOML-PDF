@@ -1,0 +1,587 @@
+# (PART) Supervised Learning {-} 
+
+# Linear Regression {#linear-regression}
+
+```{r ch4-setup, include=FALSE}
+# Set global R options
+options(scipen = 999)
+
+# Set the graphical theme
+ggplot2::theme_set(ggplot2::theme_light())
+
+# Set global knitr chunk options
+knitr::opts_chunk$set(
+  cache = TRUE,
+  warning = FALSE, 
+  message = FALSE, 
+  collapse = TRUE, 
+  fig.align = "center",
+  fig.height = 3.5
+)
+
+ames <- AmesHousing::make_ames()
+```
+
+_Linear regression_\index{linear regression}, a staple of classical statistical modeling, is one of the simplest algorithms for doing supervised learning. Though it may seem somewhat dull compared to some of the more modern statistical learning approaches described in later chapters, linear regression is still a useful and widely applied statistical learning method. Moreover, it serves as a good starting point for more advanced approaches; as we will see in later chapters, many of the more sophisticated statistical learning approaches can be seen as generalizations to or extensions of ordinary linear regression. Consequently, it is important to have a good understanding of linear regression before studying more complex learning methods. This chapter introduces linear regression with an emphasis on prediction, rather than inference. An excellent and comprehensive overview of linear regression is provided in @kutner-2005-applied. See @faraway-2016-linear for a discussion of linear regression in R (the book's website also provides Python scripts).
+
+
+## Prerequisites
+
+This chapter leverages the following packages:
+
+```{r 04-pkgs, message=FALSE}
+# Helper packages
+library(dplyr)    # for data manipulation
+library(ggplot2)  # for awesome graphics
+
+# Modeling packages
+library(caret)    # for logistic regression modeling
+
+# Model interpretability packages
+library(vip)      # variable importance
+```
+
+We'll also continue working with the `ames_train` data set created in Section \@ref(put-process-together).
+
+```{r 04-ames-train, echo=FALSE}
+library(rsample)
+# stratified sampling with the rsample package
+set.seed(123)
+split  <- initial_split(ames, prop = 0.7, strata = "Sale_Price")
+ames_train  <- training(split)
+ames_test   <- testing(split)
+```
+
+## Simple linear regression
+
+Pearson's correlation coefficient is often used to quantify the strength of the linear association between two continuous variables. In this section, we seek to fully characterize that linear relationship. _Simple linear regression_ (SLR) assumes that the statistical relationship between two continuous variables (say $X$ and $Y$) is (at least approximately) linear:
+
+\begin{equation}
+(\#eq:lm)
+  Y_i = \beta_0 + \beta_1 X_i + \epsilon_i, \quad \text{for } i = 1, 2, \dots, n,
+\end{equation}
+
+where $Y_i$ represents the _i_-th response value, $X_i$ represents the _i_-th feature value, $\beta_0$ and $\beta_1$ are fixed, but unknown constants (commonly referred to as coefficients or parameters) that represent the intercept and slope of the regression line, respectively, and $\epsilon_i$ represents noise or random error. In this Chapter, we'll assume that the errors are normally distirbuted with mean zero and constant variance $\sigma^2$, denoted $\stackrel{iid}{\sim} \left(0, \sigma^2\right)$. Since the random errors are centered around zero (i.e., $E\left(\epsilon\right) = 0$), linear regression is really a problem of estimating a _conditional mean_:
+
+\begin{equation}
+  E\left(Y_i | X_i\right) = \beta_0 + \beta_1 X_i.
+\end{equation}
+
+For brevity, we often drop the conditional piece and write $E\left(Y | X\right) = E\left(Y\right)$. Consequently, the interpretation of the coefficients are in terms of the average, or mean response. For example, the intercept $\beta_0$ represents the average response value when $X = 0$ (it is often not meaningful or of interest and is is sometimes referred to as a _bias term_). The slope $\beta_1$ represents the increase in the average response per one-unit increase in $X$ (i.e., it is a _rate of change_).
+
+### Estimation
+
+Ideally, we want estimates of $\beta_0$ and $\beta_1$ that give us the "best fitting" line. But what is meant by "best fitting"? The most common approach is to use the method of _least squares_\index{least squares} (LS) estimation; this form of linear regression is often referred to as ordinary least squares (OLS) regression. There are multiple ways to measure "best fitting", but the LS criterion finds the "best fitting" line by minimizing the _residual sum of squares_\index{residual sum of squares} (RSS):
+
+\begin{equation}
+(\#eq:least-squares-simple)
+  RSS\left(\beta_0, \beta_1\right) = \sum_{i=1}^n\left[Y_i - \left(\beta_0 + \beta_1 X_i\right)\right]^2 = \sum_{i=1}^n\left(Y_i - \beta_0 - \beta_1 X_i\right)^2.
+\end{equation}
+
+The LS estimates of $\beta_0$ and $\beta_1$ are denoted as $\widehat{\beta}_0$ and $\widehat{\beta}_1$, respectively. Once obtained, we can generate predicted values, say at $X = X_{new}$, using the estimated regression equation:
+
+\begin{equation}
+  \widehat{Y}_{new} = \widehat{\beta}_0 + \widehat{\beta}_1 X_{new},
+\end{equation}
+
+where $\widehat{Y}_{new} = \widehat{E\left(Y_{new} | X = X_{new}\right)}$ is the estimated mean response at $X = X_{new}$.
+
+With the Ames housing data, suppose we wanted to model a linear relationship between the total above ground living space of a home (`Gr_Liv_Area`) and sale price (`Sale_Price`). To perform an OLS regression model in R we can use the `lm()` function: 
+
+```{r 04-model1}
+model1 <- lm(Sale_Price ~ Gr_Liv_Area, data = ames_train)
+```
+
+The fitted model (`model1`) is displayed in the left plot in Figure \@ref(fig:04-visualize-model1) where the points represent the values of `Sale_Price` in the training data. In the right plot of Figure  \@ref(fig:04-visualize-model1), the vertical lines represent the individual errors, called _residuals_\index{residuals}, associated with each observation. The OLS criterion \@ref(eq:least-squares-simple) identifies the "best fitting" line that minimizes the sum of squares of these residuals.
+
+```{r 04-visualize-model1, eval=TRUE, fig.width=10, fig.height=3.5, echo=FALSE, fig.cap="The least squares fit from regressing sale price on living space for the the Ames housing data. Left: Fitted regresison line. Right: Fitted regression line with vertical grey bars representing the residuals."}
+# Fitted regression line (full training data)
+p1 <- model1 %>%
+  broom::augment() %>%
+  ggplot(aes(Gr_Liv_Area, Sale_Price)) + 
+  geom_point(size = 1, alpha = 0.3) +
+  geom_smooth(se = FALSE, method = "lm") +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("Fitted regression line")
+
+# Fitted regression line (restricted range)
+p2 <- model1 %>%
+  broom::augment() %>%
+  ggplot(aes(Gr_Liv_Area, Sale_Price)) + 
+  geom_segment(aes(x = Gr_Liv_Area, y = Sale_Price,
+                   xend = Gr_Liv_Area, yend = .fitted), 
+               alpha = 0.3) +
+  geom_point(size = 1, alpha = 0.3) +
+  geom_smooth(se = FALSE, method = "lm") +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("Fitted regression line (with residuals)")
+
+# Side-by-side plots
+grid.arrange(p1, p2, nrow = 1)
+```
+
+The `coef()` function extracts the estimated coefficients from the model. We can also use `summary()` to get a more detailed report of the model results. 
+
+```{r 04-model1-summary}
+summary(model1)
+```
+
+The estimated coefficients from our model are $\widehat{\beta}_0 =$ `r round(coef(model1)[1L], digits = 2)` and $\widehat{\beta}_1 =$ `r round(coef(model1)[2L], digits = 2)`. To interpret, we estimate that the mean selling price increases by `r round(coef(model1)[2L], digits = 2)` for each additional one square foot of above ground living space. This simple description of the relationship between the sale price and square footage using a single number (i.e., the slope) is what makes linear regression such an intuitive and popular modeling tool.
+
+One drawback of the LS procedure in linear regression is that it only provides estimates of the coefficents; it does not provide an estimate of the error variance $\sigma^2$! LS also makes no assumptions about the random errors. These assumptions are important for inference and in estimating the error variance which we're assuming is a constant value $\sigma^2$. One way to estimate $\sigma^2$ (which is required for characterizing the variability of our fitted model), is to use the method of _maximum likelihood_\index{maximum likelihood} (ML) estimation (see @kutner-2005-applied sec 1.7 for details). The ML procedure requires that we assume a particular distribution for the random errors. Most often, we assume the errors to be normally distributed. In practice, under the usual assumptions stated above, an unbiased estimate of the error variance is given as the sum of the squared residuals divided by $n - p$ (where $p$ is the number of regression coefficients or parameters in the model):
+
+\begin{equation}
+  \widehat{\sigma}^2 = \frac{1}{n - p}\sum_{i = 1} ^ n r_i ^ 2,
+\end{equation}
+
+where $r_i = \left(Y_i - \widehat{Y}_i\right)$ is referred to as the _i_-th residual (i.e., the difference between the _i_-th observed and predicted response value). The quantity $\widehat{\sigma}^2$ is also referred to as the _mean square error_\index{mean square error} (MSE) and it's square root is denoted RMSE (see Section \@ref(model-eval) for discussion on these metrics). In R, the RMSE of a linear model can be extracted using the `sigma()` function:
+
+```{block, type = "note"}
+Typically, these error metrics are computed on a separate validation set or using cross-validation as discussed in Section 2.4; however, they can also be computed on the same training data the model was trained on as illustrated here.
+```
+
+```{r model1-sigma}
+sigma(model1)    # RMSE
+sigma(model1)^2  # MSE
+```
+
+Note that the RMSE is also reported as the `Residual standard error` in the output from `summary()`.
+
+### Inference
+
+How accurate are the LS of $\beta_0$ and $\beta_1$? Point estimates by themselves are not very useful. It is often desirable to associate some measure of an estimates variability. The variability of an estimate is often measured by its _standard error_\index{standard error} (SE)---the square root of its variance. If we assume that the errors in the linear regression model are $\stackrel{iid}{\sim} \left(0, \sigma^2\right)$, then simple expressions for the SEs of the estimated coefficients exist and are displayed in the column labeled `Std. Error` in the output from `summary()`. From this, we can also derive simple $t$-tests to understand if the individual coefficients are statistically significant from zero. The _t_-statistics for such a test are nothing more than the estimated coefficients divided by their corresponding estimated standard errors (i.e., in the output from `summary()`, `t value` = `Estimate` / `Std. Error`). The reported _t_-statistics measure the number of standard deviations each coefficient is away from 0. Thus, large _t_-statistics (greater than two in absolute value, say) roughly indicate statistical significance at the $\alpha = 0.05$ level. The _p_-values for these tests are also reported by `summary()` in the column labeled `Pr(>|t|)`. 
+
+Under the same assumptions, we can also derive confidence intervals for the coefficients. The formula for the traditional $100\left(1 - \alpha\right)$% confidence interval for $\beta_j$ is
+
+\begin{equation}
+  \widehat{\beta}_j \pm t_{1 - \alpha / 2, n - p} \widehat{SE}\left(\widehat{\beta}_j\right),
+  (\#eq:conf-int)
+\end{equation}
+
+In R, we can construct such (one-at-a-time) confidence intervals for each coefficient using `confint()`. For example, a 95% confidence intervals for the coefficients in our SLR example can be computed using
+
+```{r}
+confint(model1, level = 0.95)
+```
+
+To interpret, we estimate with 95% confidence that the mean selling price increases between `r round(confint(model1)[2L, 1L], digits = 2)` and `r round(confint(model1)[2L, 2L], digits = 2)` for each additional one square foot of above ground living space. We can also conclude that the slope $\beta_1$ is significantly different from zero (or any other pre-specified value not included in the interval) at the $\alpha = 0.05$ level. This is also supported by the output from `summary()`.
+
+```{block2, type="note"}
+Most statistical software, including R, will include estimated standard errors, _t_-statistics, etc. as part of its regression output. However, it is important to remember that such quantities depend on three major assumptions of the linear regresion model:
+
+1. Independent observations
+2. The random errors have mean zero, and constant variance
+3. The random errors are normally distributed
+
+If any or all of these assumptions are violated, then remdial measures need to be taken. For instance, _weighted least squares_ (and other procedures) can be used when the constant variance assumption is violated. Transformations (of both the response and features) can also help to correct departures from these assumptions. The residuals are extremely useful in helping to identify how parametric models depart from such assumptions.
+```
+
+## Multiple linear regression {#multi-lm}
+
+In practice, we often have more than one predictor. For example, with the Ames housing data, we may wish to understand if above ground square footage (`Gr_Liv_Area`) and the year the house was built (`Year_Built`) are (linearly) related to sale price (`Sale_Price`). We can extend the SLR model so that it can directly accommodate multiple predictors; this is referred to as the _multiple linear regression_ (MLR) model. With two predictors, the MLR model becomes: 
+
+\begin{equation}
+  Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \epsilon,
+\end{equation}
+
+where $X_1$ and $X_2$ are features of interest. In our Ames housing example, $X_1$ represents `Gr_Liv_Area` and $X_2$ represents `Year_Built`. 
+
+In R, multiple linear regression models can be fit by separating all the features of interest with a `+`:
+
+```{r model2}
+(model2 <- lm(Sale_Price ~ Gr_Liv_Area + Year_Built, data = ames_train))
+```
+
+Alternatively, we can use `update()` to update the model formula used in `model1`. The new formula can use a `.` as short hand for keep everything on either the left or right hand side of the formula, and a `+` or `-` can be used to add or remove terms from the original model, respectively. In the case of adding `Year_Built` to to `model1`, we could've used:
+
+```{r model2-using-update}
+(model2 <- update(model1, . ~ . + Year_Built))
+```
+
+The LS estimates of the regression coefficients are $\widehat{\beta}_1 =$ `r round(coef(model2)[2L], digits = 3)` and $\widehat{\beta}_2 =$ `r round(coef(model2)[3L], digits = 3)` (the estimated intercept is `r round(coef(model2)[1L], digits = 3)`. In other words, every one square foot increase to above ground square footage is associated with an additional `r scales::dollar(coef(model2)[2L])` in __mean selling price__ when holding the year the house was built constant. Likewise, for every year newer a home is there is approximately an increase of `r scales::dollar(coef(model2)[3L])` in selling price when holding the above ground square footage constant.
+
+A contour plot of the fitted regression surface is displayed in the left side of Figure \@ref(fig:04-mlr-fit) below. Note how the fitted regression surface is flat (i.e., it does not twist or bend). This is true for all linear models that include only _main effects_ (i.e., terms involving only a single predictor). One way to model curvature is to include _interaction effects_. An interaction occurs when the effect of one predictor on the response depends on the values of other predictors. In linear regression, interactions can be captured via products of features (i.e., $X1 \times X_2$). A model with two main effects can also include a two-way interaction. For example, to include an interaction between $X_1 =$ `Gr_Liv_Area` and $X_2 =$ `Year_Built`, we introduce an additional product term:
+
+\begin{equation}
+  Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 X_2 + \epsilon.
+\end{equation}
+
+Note that in R, we use the `:` operator to include an interaction (technically, we could use `*` as well, but `x1 * x2` is shorthand for `x1 + x2 + x1:x2` so is slightly redundant):
+
+```{r model2-w-interaction}
+lm(Sale_Price ~ Gr_Liv_Area + Year_Built + Gr_Liv_Area : Year_Built, 
+   data = ames_train)
+```
+
+A contour plot of the fitted regression surface with interaction is displayed in the right side of Figure \@ref(fig:04-mlr-fit). Note the curvature in the contour lines. 
+
+```{block, type="note"}
+Interaction effects are quite prevelant in predictive modeling. Since linear models are an example of parametric modeling, it is up to the analyst to decide if and when to include interaction effects. In later chapters, we'll discuss algorithms that can automatically detect and incorporate interaction effects (albeit in different ways). It is also important to understand a concept called the _hierarchy principle_---which demands that all lower-order terms corresponding to an interaction be retained in the model---when concidering interaction effects in linear regression models.
+```
+
+```{r 04-mlr-fit, echo=FALSE, fig.width=10, fig.height=4.5, fig.cap="In a three-dimensional setting, with two predictors and one response, the least squares regression line becomes a plane. The 'best-fit' plane minimizes the sum of squared errors between the actual sales price (individual dots) and the predicted sales price (plane)."}
+# Fitted models
+fit1 <- lm(Sale_Price ~ Gr_Liv_Area + Year_Built, data = ames_train)
+fit2 <- lm(Sale_Price ~ Gr_Liv_Area * Year_Built, data = ames_train)
+
+# Regression plane data
+plot_grid <- expand.grid(
+  Gr_Liv_Area = seq(from = min(ames_train$Gr_Liv_Area), to = max(ames_train$Gr_Liv_Area), 
+                    length = 100), 
+  Year_Built = seq(from = min(ames_train$Year_Built), to = max(ames_train$Year_Built), 
+                   length = 100)
+)
+plot_grid$y1 <- predict(fit1, newdata = plot_grid)
+plot_grid$y2 <- predict(fit2, newdata = plot_grid)
+
+# Level plots
+p1 <- ggplot(plot_grid, aes(x = Gr_Liv_Area, y = Year_Built, 
+                            z = y1, fill = y1)) +
+  geom_tile() +
+  geom_contour(color = "white") +
+  viridis::scale_fill_viridis(name = "Predicted\nvalue", option = "inferno") +
+  theme_bw() +
+  ggtitle("Main effects only")
+p2 <- ggplot(plot_grid, aes(x = Gr_Liv_Area, y = Year_Built, 
+                            z = y2, fill = y1)) +
+  geom_tile() +
+  geom_contour(color = "white") +
+  viridis::scale_fill_viridis(name = "Predicted\nvalue", option = "inferno") +
+  theme_bw() +
+  ggtitle("Main effects with two-way interaction")
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
+In general, we can include as many predictors as we want, as long as we have more rows than parameters! The general multiple linear regression model with _p_ distinct predictors is
+
+\begin{equation}
+  Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon,
+\end{equation}
+
+where $X_i$ for $i = 1, 2, \dots, p$ are the predictors of interest. Note some of these may represent interactions (e.g., $X_3 = X_1 \times X_2$) between or transformations^[Transformations of the features serve a number of purposes (e.g., modeling nonlinear relationships or alleviating departures from common regression assumptions). See @kutner-2005-applied for details.] (e.g., $X_4 = \sqrt{X_1}$) of the original features. Unfortunately, visualizing beyond three dimensions is not practical as our best-fit plane becomes a hyperplane. However, the motivation remains the same where the best-fit hyperplane is identified by minimizing the RSS. The code below creates a third model where we use all features in our data set as main effects (i.e., no interaction terms) to predict `Sale_Price`.
+
+```{r model3}
+# include all possible main effects
+model3 <- lm(Sale_Price ~ ., data = ames_train) 
+
+# print estimated coefficients in a tidy data frame
+broom::tidy(model3)  
+```
+
+## Assessing model accuracy
+
+We've fit three main effects models to the Ames housing data: a single predictor, two predictors, and all possible predictors. But the question remains, which model is "best"? To answer this question we have to define what we mean by "best". In our case, we'll use the RMSE metric and cross-validation (Section \@ref(resampling)) to determine the "best" model. We can use the `caret::train()` function to train a linear model (i.e., `method = "lm"`) using cross-validation (or a variety of other validation methods). In practice, a number of factors should be considered in determining a "best" model (e.g., time constraints, model production cost, predictive accuracy, etc.). The benefit of __caret__ is that it provides built-in cross-validation capabilities, whereas the `lm()` function does not^[Although general cross-validation is not avilable in `lm()` alone, a simple metric called the _PRESS_ statistic, for **PRE**dictive **S**um of **S**quare, (equivalent to a _leave-one-out_ cross-validated RMSE) can be computed by summing the PRESS residuals which are available using `rstandard(<lm-model-name>, type = "predictive")`. See `?rstandard` for details.]. The following code chunk uses `caret::train()` to refit `model1` using 10-fold cross-validation:
+
+```{r model1-accuracy}
+# Use caret package to train model using 10-fold cross-validation
+set.seed(123)  # for reproducibility
+(cv_model1 <- train(
+  form = Sale_Price ~ Gr_Liv_Area, 
+  data = ames_train, 
+  method = "lm",
+  trControl = trainControl(method = "cv", number = 10)
+))
+```
+
+The resulting cross-validated RMSE is `r scales::dollar(cv_model1$results$RMSE)` (this is the average RMSE across the 10 CV folds). How should we interpret this? When applied to unseen data, the predictions this model makes are, on average, about `r scales::dollar(cv_model1$results$RMSE)` off from the actual sale price. 
+
+We can perform cross-validation on the other two models in a similar fashion, which we do in the code chunk below. 
+
+```{r mult-models}
+# model 2 CV
+set.seed(123)
+cv_model2 <- train(
+  Sale_Price ~ Gr_Liv_Area + Year_Built, 
+  data = ames_train, 
+  method = "lm",
+  trControl = trainControl(method = "cv", number = 10)
+)
+
+# model 3 CV
+set.seed(123)
+cv_model3 <- train(
+  Sale_Price ~ ., 
+  data = ames_train, 
+  method = "lm",
+  trControl = trainControl(method = "cv", number = 10)
+)
+
+# Extract out of sample performance measures
+summary(resamples(list(
+  model1 = cv_model1, 
+  model2 = cv_model2, 
+  model3 = cv_model3
+)))
+```
+
+Extracting the results for each model, we see that by adding more information via more predictors, we are able to improve the out-of-sample cross validation performance metrics. Specifically, our cross-validated RMSE reduces from `r scales::dollar(cv_model2$results$RMSE)` (the model with two predictors) down to `r scales::dollar(cv_model3$results$RMSE)` (for our full model). In this case, the model with all possible main effects performs the "best" (compared with the other two).
+
+
+## Model concerns {#lm-residuals}
+
+As previously stated, linear regression has been a popular modeling tool due to the ease of interpreting the coefficients. However, linear regression makes several strong assumptions that are often violated as we include more predictors in our model. Violation of these assumptions can lead to flawed interpretation of the coefficients and prediction results. 
+
+__1. Linear relationship:__ Linear regression assumes a linear relationship between the predictor and the response variable. However, as discussed in Chapter \@ref(engineering), non-linear relationships can be made linear (or near-linear) by applying transformations to the response and/or predictors. For example, Figure \@ref(fig:04-linear-relationship) illustrates the relationship between sale price and the year a home was built. The left plot illustrates the non-linear relationship that exists. However, we can achieve a near-linear relationship by log transforming sale price; although some non-linearity still exists for older homes.
+
+
+```{r 04-linear-relationship, fig.align='center', fig.width=8, fig.height=3.5, fig.cap="Linear regression assumes a linear relationship between the predictor(s) and the response variable; however, non-linear relationships can often be altered to be near-linear by appying a transformation to the variable(s)."}
+p1 <- ggplot(ames_train, aes(Year_Built, Sale_Price)) + 
+  geom_point(size = 1, alpha = .4) +
+  geom_smooth(se = FALSE) +
+  scale_y_continuous("Sale price", labels = scales::dollar) +
+  xlab("Year built") +
+  ggtitle("Non-transformed variables with a \nnon-linear relationship.")
+
+p2 <- ggplot(ames_train, aes(Year_Built, Sale_Price)) + 
+  geom_point(size = 1, alpha = .4) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_y_log10("Sale price", labels = scales::dollar, 
+                breaks = seq(0, 400000, by = 100000)) +
+  xlab("Year built") +
+  ggtitle("Transforming variables can provide a \nnear-linear relationship.")
+
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
+__2. Constant variance among residuals:__\index{constant variance} Linear regression assumes the variance among error terms ($\epsilon_1, \epsilon_2, \dots, \epsilon_p$) are constant (this assumption is referred to as homoscedasticity). If the error variance is not constant, the _p_-values and confidence intervals for the coefficients will be invalid. Similar to the linear relationship assumption, non-constant variance can often be resolved with variable transformations or by including additional predictors. For example, Figure \@ref(fig:04-homoskedasticity) shows the residuals vs. predicted values for `model1` and `model3`. `model1` displays a classic violation of constant variance as indicated by the cone-shaped pattern. However, `model3` appears to have near-constant variance.
+
+```{block, type="tip"}
+The `broom::augment` function is an easy way to add model results to each observation (i.e. predicted values, residuals).
+```
+
+```{r 04-homoskedasticity, fig.align='center', fig.width=8, fig.height=3.5, fig.cap="Linear regression assumes constant variance among the residuals. `model1` (left) shows definitive signs of heteroskedasticity whereas `model3` (right) appears to have constant variance."}
+
+df1 <- broom::augment(cv_model1$finalModel, data = ames_train)
+
+p1 <- ggplot(df1, aes(.fitted, .resid)) + 
+  geom_point(size = 1, alpha = .4) +
+  xlab("Predicted values") +
+  ylab("Residuals") +
+  ggtitle("Model 1", subtitle = "Sale_Price ~ Gr_Liv_Area")
+
+df2 <- broom::augment(cv_model3$finalModel, data = ames_train)
+
+p2 <- ggplot(df2, aes(.fitted, .resid)) + 
+  geom_point(size = 1, alpha = .4)  +
+  xlab("Predicted values") +
+  ylab("Residuals") +
+  ggtitle("Model 3", subtitle = "Sale_Price ~ .")
+
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
+__3. No autocorrelation:__\index{autocorrelation} Linear regression assumes the errors are independent and uncorrelated. If in fact, there is correlation among the errors, then the estimated standard errors of the coefficients will be biased leading to prediction intervals being narrower than they should be. For example, the left plot in Figure \@ref(fig:04-autocorrelation) displays the residuals ($y$-axis) vs. the observation ID ($x$-axis) for `model1`. A clear pattern exists suggesting that information about $\epsilon_1$ provides information about $\epsilon_2$.
+
+This pattern is a result of the data being ordered by neighborhood, which we have not accounted for in this model. Consequently, the residuals for homes in the same neighborhood are correlated (homes within a neighborhood are typically the same size and can often contain similar features). Since the `Neighborhood` predictor is included in `model3` (right plot), the correlation in the errors is reduced.
+
+```{r 04-autocorrelation, fig.align='center', fig.width=8, fig.height=3.5, fig.cap="Linear regression assumes uncorrelated errors. The residuals in `model1` (left) have a distinct pattern suggesting that information about $\\epsilon_1$ provides information about $\\epsilon_2$. Whereas `model3` has no signs of autocorrelation."}
+
+df1 <- mutate(df1, id = row_number())
+df2 <- mutate(df2, id = row_number())
+
+p1 <- ggplot(df1, aes(id, .resid)) + 
+  geom_point(size = 1, alpha = .4) +
+  xlab("Row ID") +
+  ylab("Residuals") +
+  ggtitle("Model 1",
+    subtitle = "Correlated residuals.")
+
+p2 <- ggplot(df2, aes(id, .resid)) + 
+  geom_point(size = 1, alpha = .4) +
+  xlab("Row ID") +
+  ylab("Residuals") +
+  ggtitle("Model 3",
+    subtitle = "Uncorrelated residuals.")
+
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
+
+__4. More observations than predictors:__ Although not an issue with the Ames housing data, when the number of features exceeds the number of observations ($p > n$), the OLS estimates are not obtainable. To resolve this issue an analyst can remove variables one-at-a-time until $p < n$. Although pre-processing tools can be used to guide this manual approach [@apm, 43-47], it can be cumbersome and prone to errors. In Chapter \@ref(regularized-regression) we'll introduce regularized regression which provides an alternative to OLS that can be used when $p > n$.
+
+__5. No or little multicollinearity:__\index{multicollinearity}  _Collinearity_\index{collinearity} refers to the situation in which two or more predictor variables are closely related to one another. The presence of collinearity can pose problems in the OLS, since it can be difficult to separate out the individual effects of collinear variables on the response. In fact, collinearity can cause predictor variables to appear as statistically insignificant when in fact they are significant. This obviously leads to an inaccurate interpretation of coefficients and makes it difficult to identify influential predictors. 
+
+In `ames`, for example, `Garage_Area` and `Garage_Cars` are two variables that have a correlation of `r round(cor(ames_train$Garage_Area, ames_train$Garage_Cars), 2)` and both variables are strongly related to our response variable (`Sale_Price`). Looking at our full model where both of these variables are included, we see that `Garage_Cars` is found to be statistically significant but `Garage_Area` is not:
+
+```{r, collinearity-1}
+# fit with two strongly correlated variables
+summary(cv_model3) %>%
+  broom::tidy() %>%
+  filter(term %in% c("Garage_Area", "Garage_Cars"))
+```
+
+However, if we refit the full model without `Garage_Cars`, the coefficient estimate for `Garage_Area` increases two fold and becomes statistically significant.
+
+```{r collinearity-2}
+# model without Garage_Area
+set.seed(123)
+mod_wo_Garage_Cars <- train(
+  Sale_Price ~ ., 
+  data = select(ames_train, -Garage_Cars), 
+  method = "lm",
+  trControl = trainControl(method = "cv", number = 10)
+)
+
+summary(mod_wo_Garage_Cars) %>%
+  broom::tidy() %>%
+  filter(term == "Garage_Area")
+```
+
+This reflects the instability in the linear regression model caused by between-predictor relationships; this instability also gets propagated directly to the model predictions. Considering 16 of our 34 numeric predictors have a medium to strong correlation (Section \@ref(pca)), the biased coefficients of these predictors are likely restricting the predictive accuracy of our model. How can we control for this problem?  One option is to manually remove the offending predictors (one-at-a-time) until all pariwise correlations are below some pre-determined threshold. However, when the number of predictors is large such as in our case, this becomes tedious. Moreover, multicollinearity can arise when one feature is linearly related to two or more features (which is more difficult to detect^[In such cases we can use a statistic called the _variance inflation factor_ which tries to capture how strongly each feature is linearly related to all the others predictors in a model.]). In these cases, manual removal of specific predictors may not be possible. Consequently, the following sections offers two simple extensions of linear regression where dimension reduction is applied prior to performing linear regression. Chapter \@ref(regularized-regression) offers a modified regression approach that helps to deal with the problem. And future chapters provide alternative methods that are less effected by multicollinearity.
+
+## Principal component regression {#PCR}
+
+As mentioned in Section \@ref(feature-reduction) and fully discussed in Chapter \@ref(pca), principal components analysis can be used to represent correlated variables with a smaller number of uncorrelated features (called principle components) and the resulting components can be used as predictors in a linear regression model. This two-step process is known as _principal component regression_\index{principal component regression} (PCR) [@massy1965principal] and is illustrated in Figure \@ref(fig:pcr-steps). 
+
+```{r pcr-steps, echo=FALSE, out.height="70%", out.width="70%", fig.cap="A depiction of the steps involved in performing principal component regression."}
+knitr::include_graphics("images/pcr-steps.png")
+```
+
+Performing PCR with __caret__ is an easy extension from our previous model. We simply specify `method = "pcr"` within `train()` to perform PCA on all our numeric predictors prior to fitting the model. Often, we can greatly improve performance by only using a small subset of all principal components as predictors. Consequently, you can think of the number of principal components as a tuning parameter (see Section \@ref(tune-overfit)). The following performs cross-validated PCR with $1, 2, \dots, 20$ principal components, and Figure \@ref(fig:pcr-regression) illustrates the cross-validated RMSE. You can see a significant drop in prediction error from our previous linear models using just five principal components followed by a gradual decrease thereafter. Using 17 principal components corresponds to the lowest RMSE (see `cv_model_pcr` for a comparison of the cross-validated results).
+
+```{block, type="note"}
+Note in the below example we use `preProcess` to remove near-zero variance features and center/scale the numeric features.  We then use `method = "pcr"`.  This is equivalent to creating a blueprint as illustrated in Section 3.8.3 to remove near-zero variance features, center/scale the numeric features, perform PCA on the nuemric features, then feeding that blueprint into `train()` with `method = "lm"`.
+```
+
+
+```{r pcr-regression, fig.height=3.5, fig.width=6, fig.cap="The 10-fold cross valdation RMSE obtained using PCR with 1-20 principal components."}
+# perform 10-fold cross validation on a PCR model tuning the 
+# number of principal components to use as predictors from 1-20
+set.seed(123)
+cv_model_pcr <- train(
+  Sale_Price ~ ., 
+  data = ames_train, 
+  method = "pcr",
+  trControl = trainControl(method = "cv", number = 10),
+  preProcess = c("zv", "center", "scale"),
+  tuneLength = 20
+  )
+
+# model with lowest RMSE
+cv_model_pcr$bestTune
+
+# plot cross-validated RMSE
+ggplot(cv_model_pcr)
+```
+
+By controlling for multicollinearity with PCR, we can experience significant improvement in our predictive accuary compared to the previously obtained linear models (reducing the cross-validated RMSE from about \$37,000 to below \$35,000); however, we still do not improve upon the _k_-nearest neighbor model illustrated in Section \@ref(engineering-process-example). It's important to note that since PCR is a two step process, the PCA step does not consider any aspects of the response when it selects the components. Consequently, the new predictors produced by the PCA step are not designed to maximize the relationship with the response. Instead, it simply seeks to reduce the variability present throughout the predictor space. If that variability happens to be related to the response variability, then PCR has a good chance to identify a predictive relationship, as in our case. If, however, the variability in the predictor space is not related to the variability of the response, then PCR can have difficulty identifying a predictive relationship when one might actually exists (i.e., we may actually experience a decrease in our predictive accuracy). An alternative approach to reduce the impact of multicollinearity is partial least squares.
+
+## Partial least squares
+
+_Partial least squares_\index{partial least squares} (PLS) can be viewed as a supervised dimension reduction procedure [@apm]. Similar to PCR, this technique also constructs a set of linear combinations of the inputs for regression, but unlike PCR it uses the response variable to aid the construction of the principal components as illustrated in Figure \@ref(fig:pcr-vs-pls)^[Figure \@ref(fig:pcr-vs-pls) was inspired by, and modified from, Chapter 6 in @apm.]. Thus, we can think of PLS as a supervised dimension reduction procedure that finds new features that not only captures most of the information in the original features, but also are related to the response.
+
+```{r pcr-vs-pls, echo=FALSE, fig.cap="A diagram depicting the differences between PCR (left) and PLS (right). PCR finds principal components (PCs) that maximally summarize the features independent of the response variable and then uses those PCs as predictor variables. PLS finds components that simultaneously summarize variation of the predictors while being optimally correlated with the outcome and then uses those PCs as predictors.", out.width="100%"}
+knitr::include_graphics("images/pls-vs-pcr.png")
+```
+
+We illustrate PLS with some exemplar data^[This is actually using the solubility data that is provided by the __AppliedPredictiveModeling__ package [@R-apm]]. Figure \@ref(fig:pls-vs-pcr-relationship) illustrates that the first two PCs when using PCR have very little relationship to the response variable; however, the first two PCs when using PLS have a much stronger association to the response.
+
+```{r pls-vs-pcr-relationship, echo=FALSE, fig.cap="Illustration showing that the first two PCs when using PCR have very little relationship to the response variable (top row); however, the first two PCs when using PLS have a much stronger association to the response (bottom row).", fig.height=4.5}
+library(AppliedPredictiveModeling)
+library(recipes)
+
+data(solubility)
+df <- cbind(solTrainX, solTrainY)
+
+pca_df <- recipe(solTrainY ~ ., data = df) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors()) %>%
+  step_pca(all_predictors()) %>%
+  prep(training = df, retain = TRUE) %>%
+  juice() %>%
+  select(PC1, PC2, solTrainY) %>%
+  rename(`PCR Component 1` = "PC1", `PCR Component 2` = "PC2") %>%  
+  gather(component, value, -solTrainY)
+
+pls_df <- recipe(solTrainY ~ ., data = df) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors()) %>%
+  step_pls(all_predictors(), outcome = "solTrainY") %>%
+  prep(training = df, retain = TRUE) %>%
+  juice() %>%
+  rename(`PLS Component 1` = "PLS1", `PLS Component 2` = "PLS2") %>%
+  gather(component, value, -solTrainY)
+
+pca_df %>% 
+  bind_rows(pls_df) %>%
+  ggplot(aes(value, solTrainY)) +
+  geom_point(alpha = .25) +
+  geom_smooth(method = "lm", se = FALSE, lty = "dashed") +
+  facet_wrap(~ component, scales = "free") +
+  labs(x = "PC Eigenvalues", y = "Response")
+  
+```
+
+Referring to Equation \@ref(eq:pca1) in Chapter \@ref(pca), PLS will compute the first principal ($z_1$) by setting each $\phi_{j1}$ to the coefficient from a SLR model of $y$ onto that respective $x_j$. One can show that this coefficient is proportional to the correlation between $y$ and $x_j$. Hence, in computing $z_1 = \sum^p_{j=1} \phi_{j1}x_j$, PLS places the highest weight on the variables that are most strongly related to the response.
+
+To compute the second PC ($z_2$), we first regress each variable on $z_1$. The residuals from this regression capture the remaining signal that has not been explained by the first PC. We substitute these residual values for the predictor values in Equation \@ref(eq:pca2) in Chapter \@ref(pca). This process continues until all $m$ components have been computed and then we use OLS to regress the response on $z_1, \dots, z_m$.
+
+```{block, type="note"}
+See @esl and @geladi1986partial for a thorough discussion of PLS.
+```
+
+Similar to PCR, we can easily fit a PLS model by changing the `method` argument in `train()`. As with PCR, the number of principal components to use is a tuning parameter that is determined by the model that maximizes predictive accuracy (minimizes RMSE in this case). The following performs cross-validated PLS with $1, 2, \dots, 20$ PCs, and Figure \@ref(fig:pls-regression) shows the cross-validated RMSEs. You can see a greater drop in prediction error compared to PCR. Using PLS with $m = 3$ principal components corresponded with the lowest cross-validated RMSE of \$29,970.
+
+```{r pls-regression, fig.height=3.5, fig.width=6, fig.cap="The 10-fold cross valdation RMSE obtained using PLS with 1-20 principal components."}
+# perform 10-fold cross validation on a PLS model tuning the 
+# number of principal components to use as predictors from 1-20
+set.seed(123)
+cv_model_pls <- train(
+  Sale_Price ~ ., 
+  data = ames_train, 
+  method = "pls",
+  trControl = trainControl(method = "cv", number = 10),
+  preProcess = c("zv", "center", "scale"),
+  tuneLength = 20
+)
+
+# model with lowest RMSE
+cv_model_pls$bestTune
+
+# plot cross-validated RMSE
+ggplot(cv_model_pls)
+```
+
+## Feature interpretation {#lm-model-interp}
+
+Once we've found the model that minimizes the predictive accuracy, our next goal is to interpret the model structure. Linear regression models provide a very intuitive model structure as they assume a _monotonic linear relationship_\index{monotonic linear relationship} between the predictor variables and the response. The _linear_ relationship part of that statement just means, for a given predictor variable, it assumes for every one unit change in a given predictor variable there is a constant change in the response. As discussed earlier in the chapter, this constant rate of change is provided by the coefficient for a predictor. The _monotonic_ relationship means that a given predictor variable will always have a positive or negative relationship. But how do we determine the most influential variables?
+
+Variable importance seeks to identify those variables that are most influential in our model. For linear regression models, this is most often measured by the absolute value of the _t_-statistic for each model parameter used; though simple, the results can be hard to interpret when the model includes interaction effects and complex transformations (in Chapter \@ref(iml) we'll discuss _model-agnostic_\index{model-agnostic} approaches that don't have this issue). For a PLS model, variable importance can be computed using the weighted sums of the absolute regression coefficients. The weights are a function of the reduction of the RSS across the number of PLS components and are computed separately for each outcome. Therefore, the contribution of the coefficients are weighted proportionally to the reduction in the RSS.
+
+We can use `vip::vip()` to extract and plot the most important variables. The importance measure is normalized from 100 (most important) to 0 (least important). Figure \@ref(fig:pls-vip) illustrates that the top 4 most important variables are `Gr_liv_Area`, `First_Flr_SF`, `Total_Bsmt_SF`, and `Garage_Cars` respectively.
+
+```{r pls-vip, fig.cap="Top 20 most important variables for the PLS model."}
+vip(cv_model_pls, num_features = 20, method = "model")
+```
+
+As stated earlier, linear regression models assume a monotonic linear relationship. To illustrate this, we can construct partial dependence plots (PDPs). PDPs plot the change in the average predicted value ($\widehat{y}$) as specified feature(s) vary over their marginal distribution. As you will see in later chapters, PDPs become more useful when non-linear relationships are present (we discuss PDPs and other ML interpretation techniques in Chapter \@ref(iml)). However, PDPs of linear models help illustrate how a fixed change in $x_i$ relates to a fixed linear change in $\widehat{y}_i$ while taking into account the average effect of all the other features in the model (for linear models, the slope of the PDP is equal to the corresponding features LS coefficient). 
+
+```{block, type="tip"}
+The __pdp__ package [@R-pdp] provides convenient functions for computing and plotting PDPs. For example, the following code chunk would plot the PDP for the `Gr_Liv_Area` predictor.
+
+`pdp::partial(cv_model_pls, "Gr_Liv_Area", grid.resolution = 20, plot = TRUE)`
+```
+
+
+All four of the most important predictors have a positive relationship with sale price; however, we see that the slope ($\widehat{beta}_i$) is steepest for the most important predictor and gradually decreases for lessor important variables.
+
+```{r, echo=FALSE, fig.height=5, fig.width=7, fig.cap="Partial dependence plots for the first four most important variables."}
+p1 <- pdp::partial(cv_model_pls, pred.var = "Gr_Liv_Area", grid.resolution = 20) %>% 
+  autoplot() +
+  scale_y_continuous(limits = c(0, 300000), labels = scales::dollar)
+p2 <- pdp::partial(cv_model_pls, pred.var = "First_Flr_SF", grid.resolution = 20) %>% 
+  autoplot() +
+  scale_y_continuous(limits = c(0, 300000), labels = scales::dollar)
+p3 <- pdp::partial(cv_model_pls, pred.var = "Total_Bsmt_SF", grid.resolution = 20) %>% 
+  autoplot() +
+  scale_y_continuous(limits = c(0, 300000), labels = scales::dollar)
+p4 <- pdp::partial(cv_model_pls, pred.var = "Garage_Cars", grid.resolution = 4) %>% 
+  autoplot() +
+  scale_y_continuous(limits = c(0, 300000), labels = scales::dollar)
+
+grid.arrange(p1, p2, p3, p4, nrow = 2)
+```
+
+## Final thoughts
+
+Linear regression is usually the first supervised learning algorithm you will learn. The approach provides a solid fundamental understanding of the supervised learning task; however, as we've discussed there are several concerns that result from the assumptions required. Although extensions of linear regression that integrate dimension reduction steps into the algorithm can help address some of the problems with linear regression, more advanced supervised algorithms typically provide greater flexibility and improved accuracy. Nonetheless, understanding linear regression provides a foundation that will serve you well in learning these more advanced methods.

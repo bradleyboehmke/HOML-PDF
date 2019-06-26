@@ -114,7 +114,7 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage[bf,singlelinecheck=off]{caption}
-
+\usepackage{amsmath}
 \usepackage{framed,color}
 \definecolor{shadecolor}{RGB}{248,248,248}
 
@@ -200,8 +200,9 @@
 
 \title{Hands-on Machine Learning with R}
 \author{Brad Boehmke \& Brandon Greenwell}
-\date{2019-06-25}
+\date{2019-06-26}
 
+\let\BeginKnitrBlock\begin \let\EndKnitrBlock\end
 \begin{document}
 \maketitle
 
@@ -396,7 +397,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>  collate  en_US.UTF-8                 }
 \CommentTok{#>  ctype    en_US.UTF-8                 }
 \CommentTok{#>  tz       America/New_York            }
-\CommentTok{#>  date     2019-06-25                  }
+\CommentTok{#>  date     2019-06-26                  }
 \CommentTok{#> }
 \CommentTok{#> - Packages ------------------------------------------}
 \CommentTok{#>  ! package       * version    date       lib}
@@ -475,7 +476,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    keras           2.2.4.1    2019-04-05 [1]}
 \CommentTok{#>    kernlab         0.9-27     2018-08-10 [1]}
 \CommentTok{#>    KernSmooth      2.23-15    2015-06-29 [1]}
-\CommentTok{#>    knitr           1.23       2019-05-18 [1]}
+\CommentTok{#>    knitr         * 1.23       2019-05-18 [1]}
 \CommentTok{#>    labeling        0.3        2014-08-23 [1]}
 \CommentTok{#>    lattice       * 0.20-38    2018-11-04 [1]}
 \CommentTok{#>    lava            1.6.5      2019-02-12 [1]}
@@ -513,7 +514,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    plogr           0.2.0      2018-03-25 [1]}
 \CommentTok{#>    plotmo          3.5.4      2019-04-06 [1]}
 \CommentTok{#>    plotrix         3.7-5      2019-04-07 [1]}
-\CommentTok{#>    pls             2.7-1      2019-03-23 [1]}
+\CommentTok{#>    pls           * 2.7-1      2019-03-23 [1]}
 \CommentTok{#>    plyr            1.8.4      2016-06-08 [1]}
 \CommentTok{#>    polynom         1.4-0      2019-03-22 [1]}
 \CommentTok{#>    prediction      0.3.6.2    2019-01-31 [1]}
@@ -534,7 +535,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    RCurl           1.95-4.12  2019-03-04 [1]}
 \CommentTok{#>    readr         * 1.3.1      2018-12-21 [1]}
 \CommentTok{#>    readxl          1.3.1      2019-03-13 [1]}
-\CommentTok{#>    recipes         0.1.5      2019-03-21 [1]}
+\CommentTok{#>    recipes       * 0.1.5      2019-03-21 [1]}
 \CommentTok{#>    rematch         1.0.1      2016-04-21 [1]}
 \CommentTok{#>    reshape2        1.4.3      2017-12-11 [1]}
 \CommentTok{#>    reticulate      1.12       2019-04-12 [1]}
@@ -565,7 +566,7 @@ This book was built with the following packages and R version. All code was exec
 \CommentTok{#>    tinytex         0.13       2019-05-14 [1]}
 \CommentTok{#>    utf8            1.1.4      2018-05-24 [1]}
 \CommentTok{#>    vctrs           0.1.0      2018-11-29 [1]}
-\CommentTok{#>    vip             0.1.2.9000 2019-06-04 [1]}
+\CommentTok{#>    vip           * 0.1.2.9000 2019-06-04 [1]}
 \CommentTok{#>    viridis         0.5.1      2018-03-29 [1]}
 \CommentTok{#>    viridisLite     0.3.0      2018-02-01 [1]}
 \CommentTok{#>    whisker         0.3-2      2013-04-28 [1]}
@@ -1357,13 +1358,15 @@ To fit a model to our data, the model terms must be specified. Historically, the
 \KeywordTok{model_fn}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{Neighborhood }\OperatorTok{+}\StringTok{ }\NormalTok{Year_Sold, }\DataTypeTok{data =}\NormalTok{ ames)}
 
 \CommentTok{# Variables + interactions}
-\KeywordTok{model_fn}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{Neighborhood }\OperatorTok{+}\StringTok{ }\NormalTok{Year_Sold }\OperatorTok{+}\StringTok{ }\NormalTok{Neighborhood}\OperatorTok{:}\NormalTok{Year_Sold, }\DataTypeTok{data =}\NormalTok{ ames)}
+\KeywordTok{model_fn}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{Neighborhood }\OperatorTok{+}\StringTok{ }\NormalTok{Year_Sold }\OperatorTok{+}\StringTok{ }
+\StringTok{           }\NormalTok{Neighborhood}\OperatorTok{:}\NormalTok{Year_Sold, }\DataTypeTok{data =}\NormalTok{ ames)}
 
 \CommentTok{# Shorthand for all predictors}
 \KeywordTok{model_fn}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames)}
 
 \CommentTok{# Inline functions / transformations}
-\KeywordTok{model_fn}\NormalTok{(}\KeywordTok{log10}\NormalTok{(Sale_Price) }\OperatorTok{~}\StringTok{ }\KeywordTok{ns}\NormalTok{(Longitude, }\DataTypeTok{df =} \DecValTok{3}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{ns}\NormalTok{(Latitude, }\DataTypeTok{df =} \DecValTok{3}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ ames)}
+\KeywordTok{model_fn}\NormalTok{(}\KeywordTok{log10}\NormalTok{(Sale_Price) }\OperatorTok{~}\StringTok{ }\KeywordTok{ns}\NormalTok{(Longitude, }\DataTypeTok{df =} \DecValTok{3}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{           }\KeywordTok{ns}\NormalTok{(Latitude, }\DataTypeTok{df =} \DecValTok{3}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ ames)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1592,10 +1595,10 @@ Its important to note that there are other useful resampling procedures. If you'
 
 Additionally, \citet{efron1983estimating} developed the ``632 method'' and \citet{efron1997improvements} discuss the ``632+ method''; both approaches seek to minimize biases experienced with bootstrapping on smaller data sets and are available via \textbf{caret} (see \texttt{?caret::trainControl} for details).
 
-\hypertarget{bias-variance-trade-off-bias-var}{%
-\section{\texorpdfstring{Bias variance trade-off \{\#bias-var\}\index{bias variance trade-off}}{Bias variance trade-off \{\#bias-var\}}}\label{bias-variance-trade-off-bias-var}}
+\hypertarget{bias-var}{%
+\section{Bias variance trade-off}\label{bias-var}}
 
-Prediction errors can be decomposed into two important subcomponents: error due to ``bias'' and error due to ``variance''. There is often a tradeoff between a model's ability to minimize bias and variance. Understanding how different sources of error lead to bias and variance helps us improve the data fitting process resulting in more accurate models.
+Prediction errors can be decomposed into two important subcomponents: error due to ``bias'' and error due to ``variance''. There is often a tradeoff between a model's ability to minimize bias and variance. Understanding how different sources of error lead to bias and variance helps us improve the data fitting process resulting in more accurate models.\index{bias variance trade-off}
 
 \hypertarget{bias}{%
 \subsection{Bias}\label{bias}}
@@ -1858,16 +1861,2000 @@ Looking at our results we see that the best model coincided with \(k=\) 5, which
 \end{Highlighting}
 \end{Shaded}
 
-\textbackslash{}begin\{figure\}
+\begin{figure}
 
-\{\centering \includegraphics{bookdown_files/figure-latex/example-process-assess-1}
+{\centering \includegraphics{bookdown_files/figure-latex/example-process-assess-1} 
 
-\}
+}
 
-\textbackslash{}caption\{Results from a grid search for a k-nearest neighbor model on the Ames housing data assessing values for \emph{k} ranging from 2-25.\}\label{fig:example-process-assess}
-\textbackslash{}end\{figure\}
+\caption{Results from a grid search for a k-nearest neighbor model on the Ames housing data assessing values for k ranging from 2-25.}\label{fig:example-process-assess}
+\end{figure}
 
 The question remains: ``Is this the best predictive model we can find?'' We may have identified the optimal \emph{k}-nearest neighbor model for our given data set, but this doesn't mean we've found the best possible overall model. Nor have we considered potential feature and target engineering options. The remainder of this book will walk you through the journey of identifying alternative solutions and, hopefully, a much more optimal model.
+
+\hypertarget{engineering}{%
+\chapter{Feature \& Target Engineering}\label{engineering}}
+
+Data pre-processing and engineering techniques generally refer to the addition, deletion, or transformation of data. The time spent on identifying data engineering needs can be significant and requires you to spend substantial time understanding your data\ldots{}or as Leo Breiman said ``live with your data before you plunge into modeling'' \citep[ p.~201]{breiman2001statistical}. Although this book primarily focuses on applying machine learning algorithms, feature engineering can make or break an algorithm's predictive ability and deserves your continued focus and education.
+
+We will not cover all the potential ways of implementing feature engineering; however, we'll cover several fundamental pre-processing tasks that can potentially significantly improve modeling performance. Moreover, different models have different sensitivities to the type of target and feature values in the model and we will try to highlight some of these concerns. For more indepth coverage of feature engineering, please refer to \citet{kuhn2019feature} and \citet{zheng2018feature}.
+
+\hypertarget{prerequisites-1}{%
+\section{Prerequisites}\label{prerequisites-1}}
+
+This chapter leverages the following packages:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Helper packages}
+\KeywordTok{library}\NormalTok{(dplyr)    }\CommentTok{# for data manipulation}
+\KeywordTok{library}\NormalTok{(ggplot2)  }\CommentTok{# for awesome graphics}
+\KeywordTok{library}\NormalTok{(visdat)   }\CommentTok{# for additional visualizations}
+
+\CommentTok{# Feature engineering packages}
+\KeywordTok{library}\NormalTok{(caret)    }\CommentTok{# for various feature engineering tasks}
+\KeywordTok{library}\NormalTok{(recipes)  }\CommentTok{# for various feature engineering tasks}
+\end{Highlighting}
+\end{Shaded}
+
+We'll also continue working with the \texttt{ames\_train} data set created in Section \ref{put-process-together}:
+
+\hypertarget{target-engineering}{%
+\section{Target engineering}\label{target-engineering}}
+
+Although not always a requirement, transforming the response variable can lead to predictive improvement, especially with parametric models (where require that certain assumptions about the model be met). For instance, ordinary linear regression models assume that the prediction errors (and hence the response) are normally distributed. This is usually fine, except when the prediction target has heavy tails (i.e., \emph{outliers}) or is skewed in one direction or the other. In these cases, the normality assumption likely does not hold. For example, as we saw in the data splitting section (\ref{splitting}), the response variable for the Ames housing data (\texttt{Sale\_Price}) is right (or positively) skewed as illustrated in Figure \ref{fig:distributions} (ranging from \$12,789 to \$755,000). A simple linear model, say \(\text{Sale\_Price}=\beta_{0} + \beta_{1} \text{Year\_Built} + \epsilon\), often assumes the error term \(\epsilon\) (and hence \texttt{Sale\_Price}) is normally distributed; fortunately, a simple log (or similar) transformation of the response can often help alleviate this concern as Figure \ref{fig:skewed-residuals} illustrates.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/skewed-residuals-1} 
+
+}
+
+\caption{Transforming the response variable to minimize skewness can resolve concerns with non-normally distributed errors.}\label{fig:skewed-residuals}
+\end{figure}
+
+Furthermore, using a log (or other) transformation to minimize the response skewness can be used for shaping the business problem as well. For example, in the House Prices: Advanced Regression Techniques Kaggle competition\footnote{\url{https://www.kaggle.com/c/house-prices-advanced-regression-techniques}}, which used the Ames housing data, the competition focused on using a log transformed Sale Price response because ``\ldots{}taking logs means that errors in predicting expensive houses and cheap houses will affect the result equally.'' This would be an alternative to using the root mean squared logarithmic error (RMSLE) loss function as discussed in Section \ref{model-eval}.
+
+There are two main approaches to help correct for postively skewed target variables:
+
+\textbf{Option 1}: normalize with a log transformation\index{log transformation}. This will transform most right skewed distributions to be approximately normal. One way to do this is to simply log transform the training and test set in a manual, single step manner similar to:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{transformed_response <-}\StringTok{ }\KeywordTok{log}\NormalTok{(ames_train}\OperatorTok{$}\NormalTok{Sale_Price)}
+\end{Highlighting}
+\end{Shaded}
+
+However, we should think of the pre-processing as creating a blueprint to be re-applied strategically. For this, you can use the \textbf{recipe} package or something similar (e.g., \texttt{caret::preProcess()}). This will not return the actual log transformed values but, rather, a blueprint to be applied later.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# log transformation}
+\NormalTok{ames_recipe <-}\StringTok{ }\KeywordTok{recipe}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_log}\NormalTok{(}\KeywordTok{all_outcomes}\NormalTok{())}
+
+\NormalTok{ames_recipe}
+\CommentTok{## Data Recipe}
+\CommentTok{## }
+\CommentTok{## Inputs:}
+\CommentTok{## }
+\CommentTok{##       role #variables}
+\CommentTok{##    outcome          1}
+\CommentTok{##  predictor         80}
+\CommentTok{## }
+\CommentTok{## Operations:}
+\CommentTok{## }
+\CommentTok{## Log transformation on all_outcomes()}
+\end{Highlighting}
+\end{Shaded}
+
+If your reponse has negative values or zeros then a log transformation will produce \texttt{NaN}s and \texttt{-Inf}s, respectively (you cannot take the logarithm of a negative number). If the nonpositive response values values are small (say between -0.99 and 0) then you can apply a small offset such as in \texttt{log1p()} which adds 1 to the value prior to applying a log transformation (you can do the same within \texttt{step\_log()} by using the \texttt{offset} argument). If your data consists of values \(\le -1\), use the Yeo-Johnson transformation mentioned next.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{log}\NormalTok{(}\OperatorTok{-}\FloatTok{0.5}\NormalTok{)}
+\CommentTok{## [1] NaN}
+\KeywordTok{log1p}\NormalTok{(}\OperatorTok{-}\FloatTok{0.5}\NormalTok{)}
+\CommentTok{## [1] -0.6931}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Option 2}: use a \emph{Box Cox transformation}\index{Box Cox transformation}. A Box Cox transformation is more flexible than (but also includes as a special case) the log transformation and will find an appropriate transformation from a family of power transforms that will transform the variable as close as possible to a normal distribution \citep{box1964analysis, carroll1981prediction}. At the core of the Box Cox transformation is an exponent, lambda (\(\lambda\)), which varies from -5 to 5. All values of \(\lambda\) are considered and the optimal value for the given data is estimated from the training data; The ``optimal value'' is the one which results in the best transofrmation to an approximate normal distribution. The transformation of the response \(Y\) has the form:
+
+\begin{equation} 
+ y(\lambda) =
+\begin{cases}
+   \frac{Y^\lambda-1}{\lambda}, & \text{if}\ \lambda \neq 0 \\
+   \log\left(Y\right), & \text{if}\ \lambda = 0.
+\end{cases}
+\end{equation}
+
+\begin{warning}
+Be sure to compute the \texttt{lambda} on the training set and apply
+that same \texttt{lambda} to both the training and test set to minimize
+\emph{data leakage}. The \textbf{recipes} package automates this process
+for you.
+
+If your response has negative values, the Yeo-Johnson transformation is
+very similar to the Box-Cox but does not require the input variables to
+be strictly positive. To apply, use \texttt{step\_YeoJohnson()}.
+\end{warning}
+
+Figure \ref{fig:distribution-comparison} illustrates that the log transformation and Box Cox transformation both do about equally well in transforming \texttt{Sale\_Price} to look more normally distributed.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/distribution-comparison-1} 
+
+}
+
+\caption{Response variable transformations.}\label{fig:distribution-comparison}
+\end{figure}
+
+Note that when you model with a transformed response variable, your predictions will also be on the transformed scale. You will likely want to re-transform your predicted values back to their normal scale so that decision-makers can more easily interpret the results. This is illustrated in the following code chunk:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# log transform a value}
+\NormalTok{y <-}\StringTok{ }\KeywordTok{log}\NormalTok{(}\DecValTok{10}\NormalTok{)}
+
+\CommentTok{# re-transforming the log-transformed value}
+\KeywordTok{exp}\NormalTok{(y)}
+\CommentTok{## [1] 10}
+
+\CommentTok{# Box Cox transform a value}
+\NormalTok{y <-}\StringTok{ }\NormalTok{forecast}\OperatorTok{::}\KeywordTok{BoxCox}\NormalTok{(}\DecValTok{10}\NormalTok{, lambda)}
+
+\CommentTok{# Inverse Box Cox function}
+\NormalTok{inv_box_cox <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x, lambda) \{}
+  \CommentTok{# for Box-Cox, lambda = 0 is equivalent to log transform}
+  \ControlFlowTok{if}\NormalTok{ (lambda }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{) }\KeywordTok{exp}\NormalTok{(x) }\ControlFlowTok{else}\NormalTok{ (lambda}\OperatorTok{*}\NormalTok{x }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{^}\NormalTok{(}\DecValTok{1}\OperatorTok{/}\NormalTok{lambda) }
+\NormalTok{\}}
+
+\CommentTok{# re-transforming the Box Cox-transformed value}
+\KeywordTok{inv_box_cox}\NormalTok{(y, lambda)}
+\CommentTok{## [1] 10}
+\CommentTok{## attr(,"lambda")}
+\CommentTok{## [1] 0.0526}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{dealing-with-missingness}{%
+\section{Dealing with missingness}\label{dealing-with-missingness}}
+
+Data quality is an important issue for any project involving analyzing data. Data quality issues deserve an entire book in their own right, and a good reference is the The Quartz guide to bad data.\footnote{\url{https://github.com/Quartz/bad-data-guide}} One of the most common data quality concerns you will run into is missing values.
+
+Data can be missing for many different reasons; however, these reasons are usually lumped into two categories: \emph{informative missingess}\index{informative missingess} \citep{apm} and \emph{missingness at random}\index{missingness at random} \citep{little2014statistical}. Informative missinginess implies a structural cause for the missing value that can provide insight in its own right; whether this be definciencies in how the data was collected or abnormalities in the oberservational environment. Missingness at random implies that missing values occur independent of the data collection process\footnote{\citet{little2014statistical} discuss two different kinds of missingness at random; however, we combine them for simplicity as their nuanced differences are distinguished between the two in practice.}.
+
+The category that drives missing values will determine how you handle them. For example, we may give values that are driven by informative missingness their own category (e.g., \texttt{"None"}) as their unique value may affect predictive performance. Whereas values that are missing at random may deserve deletion\footnote{If your data set is large, deleting missing observations that have missing values at random rarely impacts predictive performance. However, as your data sets get smaller, preserving observations is critical and alternative solutions should be explored.} or imputation.
+
+Furthermore, different machine learning models handle missingness differently. Most algorithms cannot handle missingness (e.g., generalized linear models and their cousins, neural networks, and support vector machines) and, therefore, require them to be dealt with before hand. A few models (mainly tree-based), have built-in procedures to deal with missing values. However, since the modeling process involves comparing and contrasting multiple models to identify the optimal one, you will want to handle missing values prior to applying any models so that your algorithms are based on the same data quality assumptions.
+
+\hypertarget{visualizing-missing-values}{%
+\subsection{Visualizing missing values}\label{visualizing-missing-values}}
+
+It is important to understand the distribution of missing values (i.e., \texttt{NA}) in any data set. So far, we have been using a pre-processed version of the Ames housing data set (via the \texttt{AmesHousing::make\_ames()} function). However, if we use the raw Ames housing data (via \texttt{AmesHousing::ames\_raw}), there are actually 13,997 missing values---there is at least one missing values in each row of the original data!
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(AmesHousing}\OperatorTok{::}\NormalTok{ames_raw))}
+\CommentTok{## [1] 13997}
+\end{Highlighting}
+\end{Shaded}
+
+It is important to understand the distribution of missing values in a data set in order to determine the best approach for pre-processing. Heat maps are an efficient way to visualize the distribution of missing values for small- to medium-sized data sets. The code \texttt{is.na(\textless{}data-frame-name\textgreater{})} will return a matrix of the same dimension as the given data frame, but each cell will contain either \texttt{TRUE} (if the corresponding value is missing) or \texttt{FALSE} (if the corresponding value is not missing). To construct such a plot, we can use R's built-in \texttt{heatmap()} or \texttt{image()} functions, or \textbf{ggplot2}'s \texttt{geom\_raster()} function, among others; Figure \ref{fig:heat-map-missingness} illustrates \texttt{geom\_raster()}. This allows us to easily see where the majority of missing values occur (i.e., in the variables \texttt{Alley}, \texttt{Fireplace\ Qual}, \texttt{Pool\ QC}, \texttt{Fence}, and \texttt{Misc\ Feature}). Due to their high frequency of missingness, these variables would likely need to be removed prior to statiscial analysis, or imputed. We can also spot obvious patterns of missingness. For example, missing values appear to occur within the same observations across all garage variables.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{AmesHousing}\OperatorTok{::}\NormalTok{ames_raw }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{is.na}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\NormalTok{reshape2}\OperatorTok{::}\KeywordTok{melt}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(Var2, Var1, }\DataTypeTok{fill=}\NormalTok{value)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_raster}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{coord_flip}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_y_continuous}\NormalTok{(}\OtherTok{NULL}\NormalTok{, }\DataTypeTok{expand =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_fill_grey}\NormalTok{(}\DataTypeTok{name =} \StringTok{""}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"Present"}\NormalTok{, }\StringTok{"Missing"}\NormalTok{)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Observation"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.y  =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{size =} \DecValTok{4}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{bookdown_files/figure-latex/heat-map-missingness-1} 
+
+}
+
+\caption{Heat map of missing values in the raw Ames housing data.}\label{fig:heat-map-missingness}
+\end{figure}
+
+Digging a little deeper into these variables, we might notice that \texttt{Garage\_Cars} and \texttt{Garage\_Area} contain the value \texttt{0} whenever the other \texttt{Garage\_xx} variables have missing values (i.e.~a value of \texttt{NA}). This might be because they did not have a way to identify houses with no garages when the data were originally collected, and therefore, all houses with no garage were identified by including nothing. Since this missingness is informative, it would be appropriate to impute \texttt{NA} with a new category level (e.g., \texttt{"None"}) for these garage variables. Circumstances like this tend to only become apparent upon careful descriptive and visual examination of the data!
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{AmesHousing}\OperatorTok{::}\NormalTok{ames_raw }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(}\StringTok{`}\DataTypeTok{Garage Type}\StringTok{`}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{select}\NormalTok{(}\StringTok{`}\DataTypeTok{Garage Type}\StringTok{`}\NormalTok{, }\StringTok{`}\DataTypeTok{Garage Cars}\StringTok{`}\NormalTok{, }\StringTok{`}\DataTypeTok{Garage Area}\StringTok{`}\NormalTok{)}
+\CommentTok{## # A tibble: 157 x 3}
+\CommentTok{##    `Garage Type` `Garage Cars` `Garage Area`}
+\CommentTok{##    <chr>                 <int>         <int>}
+\CommentTok{##  1 <NA>                      0             0}
+\CommentTok{##  2 <NA>                      0             0}
+\CommentTok{##  3 <NA>                      0             0}
+\CommentTok{##  4 <NA>                      0             0}
+\CommentTok{##  5 <NA>                      0             0}
+\CommentTok{##  6 <NA>                      0             0}
+\CommentTok{##  7 <NA>                      0             0}
+\CommentTok{##  8 <NA>                      0             0}
+\CommentTok{##  9 <NA>                      0             0}
+\CommentTok{## 10 <NA>                      0             0}
+\CommentTok{## # ... with 147 more rows}
+\end{Highlighting}
+\end{Shaded}
+
+The \texttt{vis\_miss()} function in R package \texttt{visdat} \citep{R-visdat} also allows for easy visualization of missing data patterns (with sorting and clustering options). We illustrate this functionality below using the raw Ames housing data (Figure \ref{fig:missingness-visna}). The columns of the heat map represent the 82 variables of the raw data and the rows represent the observations. Missing values (i.e., \texttt{NA}) are inidcated via a black cell. The variables and \texttt{NA} patterns have been clustered by rows (i.e., \texttt{cluster\ =\ TRUE}).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{vis_miss}\NormalTok{(AmesHousing}\OperatorTok{::}\NormalTok{ames_raw, }\DataTypeTok{cluster =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/missingness-visna-1} 
+
+}
+
+\caption{Visualizing missing patterns in the raw Ames housing data.}\label{fig:missingness-visna}
+\end{figure}
+
+Data can be missing for different reasons. Perhaps the values were never recoded (or lost in translation), or it was recorded in error (a common feature of data enetered by hand). Regardless, it is important to identify and attempt to understand how missing values are distributed across a data set as it can provide insight into how to deal with these observations.
+
+\hypertarget{impute}{%
+\subsection{Imputation}\label{impute}}
+
+\emph{Imputation}\index{imputation} is the process of replacing a missing value with a substituted, ``best guess'' value. Imputation should be one of the first feature engineering steps yo take as it will effect any downstream pre-processing\footnote{For example, standardizing numeric features will include the imputed numeric values in the calculation and one-hot encoding will include the imputated categorical value.}.
+
+\hypertarget{estimated-statistic}{%
+\subsubsection{Estimated statistic}\label{estimated-statistic}}
+
+An elementary approach to imputing missing values for a feature is to compute descriptive statistics such as the mean, median, or mode (for categorical) and use that value to replace \texttt{NA}s. Although computationally efficient, this approach does not consider any other attributes for a given observation when imputing (e.g., a female patient that is 63 inches tall may have her weight imputed as 175 lbs since that is the average weight across all observations which contains 65\% males that average a height of 70 inches).
+
+An alternative is to try use grouped statistics to capture expected values for observations that fall into similar groups. However, this becomes infeasable for larger data sets. Modeling imputation can automate this process for you and the two most common methods include K-nearest neighbor and tree-based imputation, which are discussed next.
+
+However, it is important to remember that imputation should be performed \textbf{within the resampling process} and as your data set gets larger, repeated model-based imputation can compound the computational demands. Thus, you must weigh the pros and cons of the two approaches. The following would build onto our \texttt{ames\_recipe} and impute all missing values for the \texttt{Gr\_Liv\_Area} variable with the median value:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ames_recipe }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_medianimpute}\NormalTok{(Gr_Liv_Area)}
+\CommentTok{## Data Recipe}
+\CommentTok{## }
+\CommentTok{## Inputs:}
+\CommentTok{## }
+\CommentTok{##       role #variables}
+\CommentTok{##    outcome          1}
+\CommentTok{##  predictor         80}
+\CommentTok{## }
+\CommentTok{## Operations:}
+\CommentTok{## }
+\CommentTok{## Box-Cox transformation on all_outcomes()}
+\CommentTok{## Median Imputation for Gr_Liv_Area}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tip}
+Use \texttt{step\_modeimpute()} to impute categorical features with the
+most common value.
+\end{tip}
+
+\hypertarget{k-nearest-neighbor}{%
+\subsubsection{\texorpdfstring{\emph{K}-nearest neighbor}{K-nearest neighbor}}\label{k-nearest-neighbor}}
+
+\emph{K}-nearest neighbor (KNN) imputes values by identifying observations with missing values, then identifying other observations that are most similar based on the other available features, and using the values from these nearest neighbor observations to impute missing values.
+
+We discuss KNN for predictive modeling in Chapter \ref{knn}; the imputation application works in a similar manner. In KNN imputation, the missing value for a given observation is treated as the targeted response and is predicted based on the average (for quantitative values) or the mode (for qualitative values) of the \emph{k} nearest neighbors.
+
+As discussed in Chapter \ref{knn}, if all features are quantitative then standard Euclidean distance is commonly used as the distance metric to identify the \emph{k} neighbors and when there is a mixture of quantitative and qualitative features then Gower's distance \citep{gower1971general} can be used. KNN imputation is best used on small to moderate sized data sets as it becomes computationally burdomesome with larger data sets \citep{kuhn2019feature}.
+
+\begin{note}
+As we saw in Section 2.7, \emph{k} is a tunable hyperparameter.
+Suggested values for imputation are 5--10 {[}@kuhn2019feature{]}. By
+default, \texttt{step\_knnimpute()} will use 5 but can be adjusted with
+the \texttt{neighbors} argument.
+\end{note}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ames_recipe }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_knnimpute}\NormalTok{(}\KeywordTok{all_predictors}\NormalTok{(), }\DataTypeTok{neighbors =} \DecValTok{6}\NormalTok{)}
+\CommentTok{## Data Recipe}
+\CommentTok{## }
+\CommentTok{## Inputs:}
+\CommentTok{## }
+\CommentTok{##       role #variables}
+\CommentTok{##    outcome          1}
+\CommentTok{##  predictor         80}
+\CommentTok{## }
+\CommentTok{## Operations:}
+\CommentTok{## }
+\CommentTok{## Box-Cox transformation on all_outcomes()}
+\CommentTok{## 6-nearest neighbor imputation for all_predictors()}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{tree-based}{%
+\subsubsection{Tree-based}\label{tree-based}}
+
+As previously discussed, several implementations of decision trees (Chapter \ref{DT}) and their derivatives can be constructed in the presence of missing values. Thus, they provide a good alternative for imputation. As discussed in Chapters \ref{DT}-\ref{random-forest}, single trees have high variance but aggregating across many trees creates a robust, low variance predictor. Random forest imputation procedures have been studied \citep{shah2014comparison, stekhoven2015missforest}; however, they require significant computational demands in a resampling environment \citep{kuhn2019feature}. Bagged trees (Chapter \ref{bagging}) offer a compromise between predictive accuracy and computational burden.
+
+Similar to KNN imputation, observations with missing values are identified and the feature containing the missing value is treated as the target and predicted using bagged decision trees.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ames_recipe }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_bagimpute}\NormalTok{(}\KeywordTok{all_predictors}\NormalTok{())}
+\CommentTok{## Data Recipe}
+\CommentTok{## }
+\CommentTok{## Inputs:}
+\CommentTok{## }
+\CommentTok{##       role #variables}
+\CommentTok{##    outcome          1}
+\CommentTok{##  predictor         80}
+\CommentTok{## }
+\CommentTok{## Operations:}
+\CommentTok{## }
+\CommentTok{## Box-Cox transformation on all_outcomes()}
+\CommentTok{## Bagged tree imputation for all_predictors()}
+\end{Highlighting}
+\end{Shaded}
+
+Figure \ref{fig:imputation-examples} illustrates the differences between mean, KNN, and tree-based imputation on the raw Ames housing data. It is apparent how descriptive statistic methods (e.g., using the mean and median) are inferior to the KNN and tree-based imputation methods.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/imputation-examples-1} 
+
+}
+
+\caption{Comparison of three different imputation methods. The red points represent actual values which were removed and made missing and the blue points represent the imputed values. Estimated statistic imputation methods (i.e. mean, median) merely predict the same value for each observation and can reduce the signal between a feature and the response; whereas KNN and tree-based procedures tend to maintain the feature distribution and relationship.}\label{fig:imputation-examples}
+\end{figure}
+
+\hypertarget{feature-filtering}{%
+\section{Feature filtering}\label{feature-filtering}}
+
+In many data analyses and modeling projects we end up with hundreds or even thousands of collected features. From a practical perspective, a model with more features often becomes harder to interpret and is costly to compute. Some models are more resistant to non-informative predictors (e.g., the Lasso and tree-based methods) than others as illustrated in Figure \ref{fig:accuracy-comparison}.\footnote{See \citet{apm} section 19.1 for data set generation.}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/accuracy-comparison-1} 
+
+}
+
+\caption{Test set RMSE profiles when non-informative predictors are added.}\label{fig:accuracy-comparison}
+\end{figure}
+
+Although the performance of some of our models are not significantly affected by non-informative predictors, the time to train these models can be negatively impacted as more features are added. Figure \ref{fig:impact-on-time} shows the increase in time to perform 10-fold CV on the exemplar data, which consists of 10,000 observations. We see that many algorithms (e.g., elastic nets, random forests, and gradient boosting machines) become extremely time intensive the more predictors we add. Consequently, filtering or reducing features prior to modeling may significantly speed up training time.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/impact-on-time-1} 
+
+}
+
+\caption{Impact in model training time as non-informative predictors are added.}\label{fig:impact-on-time}
+\end{figure}
+
+Zero and near-zero variance variables are low-hanging fruit to eliminate. Zero variance variables\index{Zero variance}, meaning the feature only contains a single uniquen value, provides no useful information to a model. Some algorithms are unaffected by zero variance features. However, features that have near-zero variance\index{near-zero variance} also offer very little, if any, information to a model. Furthermore, they can cause problems during resampling as there is a high probability that a given sample will only contain a single unique value (the dominant value) for that feature. A rule of thumb for detecting near-zero variance features is:
+
+\begin{itemize}
+\tightlist
+\item
+  The fraction of unique values over the sample size is low (say \$ \leq 10\$\%).
+\item
+  The ratio of the frequency of the most prevalent value to the frequency of the second most prevalent value is large (say \$ \geq 20\$\%).
+\end{itemize}
+
+If both of these criteria are true then it is often adventageous to remove the variable from the model. For the Ames data, we do not have any zero variance predictors but there are 20 features that meet the near-zero threshold.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{caret}\OperatorTok{::}\KeywordTok{nearZeroVar}\NormalTok{(ames_train, }\DataTypeTok{saveMetrics=} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(nzv)}
+\CommentTok{##               rowname freqRatio percentUnique zeroVar}
+\CommentTok{## 1              Street    255.75       0.09737   FALSE}
+\CommentTok{## 2               Alley     24.69       0.14606   FALSE}
+\CommentTok{## 3        Land_Contour     21.88       0.19474   FALSE}
+\CommentTok{## 4           Utilities   2052.00       0.14606   FALSE}
+\CommentTok{## 5          Land_Slope     21.68       0.14606   FALSE}
+\CommentTok{## 6         Condition_2    184.73       0.34080   FALSE}
+\CommentTok{## 7           Roof_Matl    112.50       0.29211   FALSE}
+\CommentTok{## 8           Bsmt_Cond     24.03       0.29211   FALSE}
+\CommentTok{## 9      BsmtFin_Type_2     23.13       0.34080   FALSE}
+\CommentTok{## 10            Heating     91.82       0.29211   FALSE}
+\CommentTok{## 11    Low_Qual_Fin_SF    674.33       1.41188   FALSE}
+\CommentTok{## 12      Kitchen_AbvGr     22.85       0.19474   FALSE}
+\CommentTok{## 13         Functional     35.30       0.38948   FALSE}
+\CommentTok{## 14     Enclosed_Porch    109.06       7.20545   FALSE}
+\CommentTok{## 15 Three_season_porch    674.67       1.26582   FALSE}
+\CommentTok{## 16       Screen_Porch    186.90       4.81986   FALSE}
+\CommentTok{## 17          Pool_Area   2046.00       0.43817   FALSE}
+\CommentTok{## 18            Pool_QC    682.00       0.24343   FALSE}
+\CommentTok{## 19       Misc_Feature     29.58       0.29211   FALSE}
+\CommentTok{## 20           Misc_Val    124.00       1.26582   FALSE}
+\CommentTok{##     nzv}
+\CommentTok{## 1  TRUE}
+\CommentTok{## 2  TRUE}
+\CommentTok{## 3  TRUE}
+\CommentTok{## 4  TRUE}
+\CommentTok{## 5  TRUE}
+\CommentTok{## 6  TRUE}
+\CommentTok{## 7  TRUE}
+\CommentTok{## 8  TRUE}
+\CommentTok{## 9  TRUE}
+\CommentTok{## 10 TRUE}
+\CommentTok{## 11 TRUE}
+\CommentTok{## 12 TRUE}
+\CommentTok{## 13 TRUE}
+\CommentTok{## 14 TRUE}
+\CommentTok{## 15 TRUE}
+\CommentTok{## 16 TRUE}
+\CommentTok{## 17 TRUE}
+\CommentTok{## 18 TRUE}
+\CommentTok{## 19 TRUE}
+\CommentTok{## 20 TRUE}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{note}
+We can add \texttt{step\_zv()} and \texttt{step\_nzv()} to our
+\texttt{ames\_recipe} to remove zero or near-zero variance features.
+\end{note}
+
+Other feature filtering methods exist; see \citet{saeys2007review} for a thorough review. Furthermore, several wrapper methods exist that evaluate multiple models using procedures that add or remove predictors to find the optimal combination of features that maximizes model performance (see, for example, \citet{kursa2010feature}, \citet{granitto2006recursive}, \citet{maldonado2009wrapper}). However, this topic is beyond the scope of this book.
+
+\hypertarget{numeric-feature-engineering}{%
+\section{Numeric feature engineering}\label{numeric-feature-engineering}}
+
+Numeric features can create a host of problems for certain models when their distributions are skewed, contain outliers, or have a wide range in magnitudes. Tree-based models are quite immune to these types of problems in the feature space, but many other models (e.g., GLMs, regularized regression, KNN, support vector machines, neural networks) can be greatly hampered by these issues. Normalizing and standardizing heavily skewed features can help minimize these concerns.
+
+\hypertarget{skewness}{%
+\subsection{Skewness}\label{skewness}}
+
+Similar to the process discussed to normalize target variables, parametric models that have distributional assumptions (e.g., GLMs, and regularized models) can benefit from minimizing the skewness of numeric features. When normalizing many variables, its best to use the Box-Cox (when feature values are strictly positive) or Yeo-Johnson (when feature values are not strictly positive) procedures as these methods will identify if a transformation is required and what the optimal transformation will be.
+
+\begin{note}
+Non-parametric models are rarely affected by skewed features; however,
+normalizing features will not have a negative affect on these models'
+performance. For example, normalizing features will only shift the
+optimal split points in tree-based algorithms. Consequently, when in
+doubt, normalize.
+\end{note}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# we can normalize all numeric features, including the response }
+\CommentTok{# at the same time}
+\KeywordTok{recipe}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_YeoJohnson}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{())                 }
+\CommentTok{## Data Recipe}
+\CommentTok{## }
+\CommentTok{## Inputs:}
+\CommentTok{## }
+\CommentTok{##       role #variables}
+\CommentTok{##    outcome          1}
+\CommentTok{##  predictor         80}
+\CommentTok{## }
+\CommentTok{## Operations:}
+\CommentTok{## }
+\CommentTok{## Yeo-Johnson transformation on all_numeric()}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{standardization}{%
+\subsection{Standardization}\label{standardization}}
+
+We must also consider the scale on which the individual features are measured. What are the largest and smallest values across all features and do they span several orders of magnitude? Models that incorporate smooth functions of input features are sensitive to the scale of the inputs. For example, \(5X+2\) is a simple linear function of the input \emph{X}, and the scale of its output depends directly on the scale of the input. Many algorithms use linear functions within their algorithms, some more obvious (e.g., GLMs and regularized regression) than others (e.g., neural networks, support vector machines, and principal components analysis). Other examples include algorithms that use distance measures such as the Euclidean distance (e.g., \emph{k} nearest neighbor, \emph{k}-means clustering, and hierarchical clustering).
+
+For these models and modeling components, it is often a good idea to \emph{standardize}\index{standardize} the features. Standardizing features includes \emph{centering} and \emph{scaling} so that numeric variables have zero mean and unit variance, which provides a common comparable unit of measure across all the variables.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/standardizing-1} 
+
+}
+
+\caption{Standardizing features allows all features to be compared on a common value scale regardless of their real value differences.}\label{fig:standardizing}
+\end{figure}
+
+Some packages (e.g., \textbf{glmnet}, and \textbf{caret}) have built-in options to standardize and some do not (e.g., \textbf{keras} for neural networks). However, you should standardize your variables within the recipe blueprint so that both training and test data standardization are based on the same mean and variance. This helps to minimize data leakage.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ames_recipe }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_center}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_scale}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{())}
+\CommentTok{## Data Recipe}
+\CommentTok{## }
+\CommentTok{## Inputs:}
+\CommentTok{## }
+\CommentTok{##       role #variables}
+\CommentTok{##    outcome          1}
+\CommentTok{##  predictor         80}
+\CommentTok{## }
+\CommentTok{## Operations:}
+\CommentTok{## }
+\CommentTok{## Box-Cox transformation on all_outcomes()}
+\CommentTok{## Centering for 2 items}
+\CommentTok{## Scaling for 2 items}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{categorical-feature-engineering}{%
+\section{Categorical feature engineering}\label{categorical-feature-engineering}}
+
+Most models require that the predictors take numeric form. There are exceptions, for example, tree-based models naturally handle numeric or categorical features. However, even tree-based models can benefit from pre-processing categorical features. The following sections will discuss a few of the more common approaches to engineer categorical features.
+
+\hypertarget{lumping}{%
+\subsection{Lumping}\label{lumping}}
+
+Sometimes features will contain levels that have very few observations. For example, there are 28 unique neighborhoods represented in the Ames housing data but several of them only have a few observations.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{count}\NormalTok{(ames_train, Neighborhood) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(n)}
+\CommentTok{## # A tibble: 28 x 2}
+\CommentTok{##    Neighborhood            n}
+\CommentTok{##    <fct>               <int>}
+\CommentTok{##  1 Green_Hills             1}
+\CommentTok{##  2 Landmark                1}
+\CommentTok{##  3 Blueste                 5}
+\CommentTok{##  4 Greens                  7}
+\CommentTok{##  5 Veenker                16}
+\CommentTok{##  6 Northpark_Villa        17}
+\CommentTok{##  7 Briardale              22}
+\CommentTok{##  8 Bloomington_Heights    23}
+\CommentTok{##  9 Meadow_Village         27}
+\CommentTok{## 10 Clear_Creek            30}
+\CommentTok{## # ... with 18 more rows}
+\end{Highlighting}
+\end{Shaded}
+
+Even numeric features can have similar distributions. For example, \texttt{Screen\_Porch} has 92\% values recorded as zero (zero square footage meaning no screen porch) and the remaining 8\% have unique dispersed values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{count}\NormalTok{(ames_train, Screen_Porch) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(n)}
+\CommentTok{## # A tibble: 99 x 2}
+\CommentTok{##    Screen_Porch     n}
+\CommentTok{##           <int> <int>}
+\CommentTok{##  1           40     1}
+\CommentTok{##  2           53     1}
+\CommentTok{##  3           60     1}
+\CommentTok{##  4           63     1}
+\CommentTok{##  5           80     1}
+\CommentTok{##  6           84     1}
+\CommentTok{##  7           88     1}
+\CommentTok{##  8           92     1}
+\CommentTok{##  9           94     1}
+\CommentTok{## 10           95     1}
+\CommentTok{## # ... with 89 more rows}
+\end{Highlighting}
+\end{Shaded}
+
+Sometimes we can benefit from collapsing, or ``lumping'' these into a lesser number of categories. In the above examples, we may want to collapse all levels that are observed in less than 10\% of the training sample into an ``other'' category. We can use \texttt{step\_other()} to do so. However, lumping should be used sparingly as there is often a loss in model performance \citep{apm}.
+
+\begin{tip}
+Tree-based models often perform exceptionally well with high cardinality
+features and are not as impacted by levels with small representation.
+\end{tip}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# lump levels for two features}
+\NormalTok{lumping <-}\StringTok{ }\KeywordTok{recipe}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_other}\NormalTok{(Neighborhood, }\DataTypeTok{threshold =} \FloatTok{.01}\NormalTok{, }\DataTypeTok{other =} \StringTok{"other"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{   }\KeywordTok{step_other}\NormalTok{(Screen_Porch, }\DataTypeTok{threshold =} \FloatTok{.1}\NormalTok{, }\DataTypeTok{other =} \StringTok{">0"}\NormalTok{)}
+
+\CommentTok{# apply this blue print --> you will learn about this at }
+\CommentTok{# the end of the chapter}
+\NormalTok{apply_}\DecValTok{2}\NormalTok{_training <-}\StringTok{ }\KeywordTok{prep}\NormalTok{(lumping, }\DataTypeTok{training =}\NormalTok{ ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{bake}\NormalTok{(ames_train)}
+
+\CommentTok{# new distribution of Neighborhood}
+\KeywordTok{count}\NormalTok{(apply_}\DecValTok{2}\NormalTok{_training, Neighborhood) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(n)}
+\CommentTok{## # A tibble: 23 x 2}
+\CommentTok{##    Neighborhood                                n}
+\CommentTok{##    <fct>                                   <int>}
+\CommentTok{##  1 Briardale                                  22}
+\CommentTok{##  2 Bloomington_Heights                        23}
+\CommentTok{##  3 Meadow_Village                             27}
+\CommentTok{##  4 Clear_Creek                                30}
+\CommentTok{##  5 South_and_West_of_Iowa_State_University    33}
+\CommentTok{##  6 Stone_Brook                                36}
+\CommentTok{##  7 Timberland                                 47}
+\CommentTok{##  8 other                                      47}
+\CommentTok{##  9 Northridge                                 55}
+\CommentTok{## 10 Iowa_DOT_and_Rail_Road                     59}
+\CommentTok{## # ... with 13 more rows}
+
+\CommentTok{# new distribution of Screen_Porch}
+\KeywordTok{count}\NormalTok{(apply_}\DecValTok{2}\NormalTok{_training, Screen_Porch) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(n)}
+\CommentTok{## # A tibble: 2 x 2}
+\CommentTok{##   Screen_Porch     n}
+\CommentTok{##   <fct>        <int>}
+\CommentTok{## 1 >0             185}
+\CommentTok{## 2 0             1869}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{one-hot-dummy-encoding}{%
+\subsection{One-hot \& dummy encoding}\label{one-hot-dummy-encoding}}
+
+Many models require that all predictor variables be numeric. Consequently, we need to intelligently transform any categorical variables into numeric representations so that these algorithms can compute. Some packages automate this process (e.g., \textbf{h2o} and \textbf{caret}) while others do not (e.g., \textbf{glmnet} and \textbf{keras}). There are many ways to re, say,code categorical variables as numeric (e.g., one-hot, ordinal, binary, sum, and Helmert).
+
+The most common is referred to as one-hot encoding, where we transpose our categorical variables so that each level of the feature is represented as a boolean value. For example, one-hot encoding\index{one-hot encoding} \texttt{x} in the following
+
+\begin{tabular}{r|l}
+\hline
+id & x\\
+\hline
+1 & a\\
+\hline
+2 & c\\
+\hline
+3 & a\\
+\hline
+4 & b\\
+\hline
+5 & a\\
+\hline
+6 & c\\
+\hline
+7 & c\\
+\hline
+8 & b\\
+\hline
+\end{tabular}
+
+results in the following representation:
+
+\begin{tabular}{r|r|r|r}
+\hline
+id & x.a & x.b & x.c\\
+\hline
+1 & 1 & 0 & 0\\
+\hline
+2 & 0 & 0 & 1\\
+\hline
+3 & 1 & 0 & 0\\
+\hline
+4 & 0 & 1 & 0\\
+\hline
+5 & 1 & 0 & 0\\
+\hline
+6 & 0 & 0 & 1\\
+\hline
+7 & 0 & 0 & 1\\
+\hline
+8 & 0 & 1 & 0\\
+\hline
+\end{tabular}
+
+This is called less than \emph{full rank} encoding where we retain all variables for each level of \texttt{x}. However, this creates perfect collinearity which causes problems with some predictive modeling algorithms (e.g., ordinary linear regression and neural networks). Alternatively, we can create a full-rank encoding by dropping one of the levels (level \texttt{a} has been dropped). This is referred to as \emph{dummy} encoding\index{dummy encoding}.
+
+\begin{tabular}{r|r|r}
+\hline
+id & x.b & x.c\\
+\hline
+1 & 0 & 0\\
+\hline
+2 & 0 & 1\\
+\hline
+3 & 0 & 0\\
+\hline
+4 & 1 & 0\\
+\hline
+5 & 0 & 0\\
+\hline
+6 & 0 & 1\\
+\hline
+7 & 0 & 1\\
+\hline
+8 & 1 & 0\\
+\hline
+\end{tabular}
+
+We can one-hot or dummy encode with the same function (\texttt{step\_dummy()}). By default, \texttt{step\_dummy()} will create a full rank encoding but you can change this by setting \texttt{one\_hot\ =\ TRUE}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# lump levels for two features}
+\KeywordTok{recipe}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_dummy}\NormalTok{(}\KeywordTok{all_nominal}\NormalTok{(), }\DataTypeTok{one_hot =} \OtherTok{TRUE}\NormalTok{)}
+\CommentTok{## Data Recipe}
+\CommentTok{## }
+\CommentTok{## Inputs:}
+\CommentTok{## }
+\CommentTok{##       role #variables}
+\CommentTok{##    outcome          1}
+\CommentTok{##  predictor         80}
+\CommentTok{## }
+\CommentTok{## Operations:}
+\CommentTok{## }
+\CommentTok{## Dummy variables from all_nominal()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tip}
+Since one-hot encoding adds new features it can significantly increase
+the dimensionality of our data. If you have a data set with many
+categorical variables and those categorical variables in turn have many
+unique levels, the number of features can explode. In these cases you
+may want to explore label/ordinal encoding or some other alternative.
+\end{tip}
+
+\hypertarget{label-encoding}{%
+\subsection{Label encoding}\label{label-encoding}}
+
+\emph{Label encoding}\index{label encoding} is a pure numeric conversion of the levels of a categorical variable. If a categorical variable is a factor and it has pre-specified levels then the numeric conversion will be in level order. If no levels are specified, the encoding will be based on alphabetical order. For example, the \texttt{MS\_SubClass} variable has 16 levels, which we can recode numerically with \texttt{step\_integer()}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# original categories}
+\KeywordTok{count}\NormalTok{(ames_train, MS_SubClass)}
+\CommentTok{## # A tibble: 16 x 2}
+\CommentTok{##    MS_SubClass                                   n}
+\CommentTok{##    <fct>                                     <int>}
+\CommentTok{##  1 One_Story_1946_and_Newer_All_Styles         749}
+\CommentTok{##  2 One_Story_1945_and_Older                     97}
+\CommentTok{##  3 One_Story_with_Finished_Attic_All_Ages        4}
+\CommentTok{##  4 One_and_Half_Story_Unfinished_All_Ages       14}
+\CommentTok{##  5 One_and_Half_Story_Finished_All_Ages        192}
+\CommentTok{##  6 Two_Story_1946_and_Newer                    401}
+\CommentTok{##  7 Two_Story_1945_and_Older                     94}
+\CommentTok{##  8 Two_and_Half_Story_All_Ages                  16}
+\CommentTok{##  9 Split_or_Multilevel                          87}
+\CommentTok{## 10 Split_Foyer                                  31}
+\CommentTok{## 11 Duplex_All_Styles_and_Ages                   73}
+\CommentTok{## 12 One_Story_PUD_1946_and_Newer                147}
+\CommentTok{## 13 One_and_Half_Story_PUD_All_Ages               1}
+\CommentTok{## 14 Two_Story_PUD_1946_and_Newer                 94}
+\CommentTok{## 15 PUD_Multilevel_Split_Level_Foyer             12}
+\CommentTok{## 16 Two_Family_conversion_All_Styles_and_Ages    42}
+
+\CommentTok{# label encoded}
+\KeywordTok{recipe}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_integer}\NormalTok{(MS_SubClass) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{prep}\NormalTok{(ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{bake}\NormalTok{(ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{count}\NormalTok{(MS_SubClass)}
+\CommentTok{## # A tibble: 16 x 2}
+\CommentTok{##    MS_SubClass     n}
+\CommentTok{##          <dbl> <int>}
+\CommentTok{##  1           1   749}
+\CommentTok{##  2           2    97}
+\CommentTok{##  3           3     4}
+\CommentTok{##  4           4    14}
+\CommentTok{##  5           5   192}
+\CommentTok{##  6           6   401}
+\CommentTok{##  7           7    94}
+\CommentTok{##  8           8    16}
+\CommentTok{##  9           9    87}
+\CommentTok{## 10          10    31}
+\CommentTok{## 11          11    73}
+\CommentTok{## 12          12   147}
+\CommentTok{## 13          13     1}
+\CommentTok{## 14          14    94}
+\CommentTok{## 15          15    12}
+\CommentTok{## 16          16    42}
+\end{Highlighting}
+\end{Shaded}
+
+We should be careful with label encoding unordered categorical features because most models will treat them as ordered numeric features. If a categorical feature is naturally ordered then label encoding is a natural choice (most commonly referred to as ordinal encoding). For example, the various quality features in the Ames housing data are ordinal in nature (ranging from \texttt{Very\_Poor} to \texttt{Very\_Excellent}).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ames_train }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(}\KeywordTok{contains}\NormalTok{(}\StringTok{"Qual"}\NormalTok{))}
+\CommentTok{## # A tibble: 2,054 x 6}
+\CommentTok{##    Overall_Qual Exter_Qual Bsmt_Qual Low_Qual_Fin_SF}
+\CommentTok{##    <fct>        <fct>      <fct>               <int>}
+\CommentTok{##  1 Above_Avera~ Typical    Typical                 0}
+\CommentTok{##  2 Average      Typical    Typical                 0}
+\CommentTok{##  3 Above_Avera~ Typical    Typical                 0}
+\CommentTok{##  4 Good         Good       Typical                 0}
+\CommentTok{##  5 Above_Avera~ Typical    Typical                 0}
+\CommentTok{##  6 Very_Good    Good       Good                    0}
+\CommentTok{##  7 Very_Good    Good       Good                    0}
+\CommentTok{##  8 Good         Typical    Typical                 0}
+\CommentTok{##  9 Above_Avera~ Typical    Good                    0}
+\CommentTok{## 10 Above_Avera~ Typical    Good                    0}
+\CommentTok{## # ... with 2,044 more rows, and 2 more variables:}
+\CommentTok{## #   Kitchen_Qual <fct>, Garage_Qual <fct>}
+\end{Highlighting}
+\end{Shaded}
+
+Ordinal encoding\index{ordinal encoding} these features provides a natural and intuitive interpretation and can logically be applied to all models.
+
+\begin{tip}
+The various \texttt{xxx\_Qual} features in the Ames housing are not
+ordered factors. For ordered factors you could also use
+\texttt{step\_ordinalscore()}.
+\end{tip}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# original categories}
+\KeywordTok{count}\NormalTok{(ames_train, Overall_Qual)}
+\CommentTok{## # A tibble: 10 x 2}
+\CommentTok{##    Overall_Qual       n}
+\CommentTok{##    <fct>          <int>}
+\CommentTok{##  1 Very_Poor          4}
+\CommentTok{##  2 Poor               8}
+\CommentTok{##  3 Fair              23}
+\CommentTok{##  4 Below_Average    169}
+\CommentTok{##  5 Average          582}
+\CommentTok{##  6 Above_Average    497}
+\CommentTok{##  7 Good             425}
+\CommentTok{##  8 Very_Good        249}
+\CommentTok{##  9 Excellent         75}
+\CommentTok{## 10 Very_Excellent    22}
+
+\CommentTok{# label encoded}
+\KeywordTok{recipe}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_integer}\NormalTok{(Overall_Qual) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{prep}\NormalTok{(ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{bake}\NormalTok{(ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{count}\NormalTok{(Overall_Qual)}
+\CommentTok{## # A tibble: 10 x 2}
+\CommentTok{##    Overall_Qual     n}
+\CommentTok{##           <dbl> <int>}
+\CommentTok{##  1            1     4}
+\CommentTok{##  2            2     8}
+\CommentTok{##  3            3    23}
+\CommentTok{##  4            4   169}
+\CommentTok{##  5            5   582}
+\CommentTok{##  6            6   497}
+\CommentTok{##  7            7   425}
+\CommentTok{##  8            8   249}
+\CommentTok{##  9            9    75}
+\CommentTok{## 10           10    22}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{alternatives-1}{%
+\subsection{Alternatives}\label{alternatives-1}}
+
+There are several alternative categorical encodings that are implemented in various R machine learning engines and are worth exploring. For example, target encoding\index{target encoding} is the process of replacing a categorical value with the mean (regression) or proportion (classification) of the target variable. For example, target encoding the \texttt{Neighborhood} feature would change \texttt{North\_Ames} to 144617.
+
+\begin{tabular}{l|r}
+\hline
+Neighborhood & Avg Sale\_Price\\
+\hline
+North\_Ames & 147040\\
+\hline
+College\_Creek & 202438\\
+\hline
+Old\_Town & 121815\\
+\hline
+Edwards & 124297\\
+\hline
+Somerset & 232394\\
+\hline
+Northridge\_Heights & 320174\\
+\hline
+Gilbert & 191095\\
+\hline
+Sawyer & 137405\\
+\hline
+Northwest\_Ames & 186082\\
+\hline
+Sawyer\_West & 183062\\
+\hline
+\end{tabular}
+
+Target encoding runs the risk of \emph{data leakage} since you are using the reponse variable to encode a feature. An alternative to this is to change the feature value to represent the proportion a particular level represents for a given feature. In this case, \texttt{North\_Ames} would be changed to 0.153.
+
+\begin{note}
+In Chapter 9, we discuss how tree-based models use this approach to
+order categorical features when choosing a split point.
+\end{note}
+
+\begin{tabular}{l|r}
+\hline
+Neighborhood & Proportion\\
+\hline
+North\_Ames & 0.1543\\
+\hline
+College\_Creek & 0.0930\\
+\hline
+Old\_Town & 0.0808\\
+\hline
+Edwards & 0.0638\\
+\hline
+Somerset & 0.0618\\
+\hline
+Northridge\_Heights & 0.0579\\
+\hline
+Gilbert & 0.0560\\
+\hline
+Sawyer & 0.0521\\
+\hline
+Northwest\_Ames & 0.0399\\
+\hline
+Sawyer\_West & 0.0448\\
+\hline
+\end{tabular}
+
+Several alternative approaches include effect or likelihood encoding \citep{micci2001preprocessing, zumel2016vtreat}, empirical Bayes methods \citep{west2014linear}, word and entity embeddings \citep{guo2016entity, chollet2018deep}, and more. For more indepth coverage of categorical encodings we highly recommend \citet{kuhn2019feature}.
+
+\hypertarget{feature-reduction}{%
+\section{Dimension reduction}\label{feature-reduction}}
+
+Dimension reduction is an alternative approach to filter out non-informative features without manually removing them. We discuss dimension reduction topics in depth later in the book (Chapters \ref{pca}-\ref{autoencoders}) so please refer to those chapters for details.
+
+However, we wanted to highlight that it is very common to include these types of dimension reduction approaches during the feature engineering process. For example, we may wish to reduce the dimension of our features with principal components analysis\index{principal components analysis} (Chapter \ref{pca}) and retain the number of components required to explain, say, 95\% of the variance and use these components as features in downstream modeling.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{recipe}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_center}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_scale}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_pca}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{(), }\DataTypeTok{threshold =} \FloatTok{.95}\NormalTok{)}
+\CommentTok{## Data Recipe}
+\CommentTok{## }
+\CommentTok{## Inputs:}
+\CommentTok{## }
+\CommentTok{##       role #variables}
+\CommentTok{##    outcome          1}
+\CommentTok{##  predictor         80}
+\CommentTok{## }
+\CommentTok{## Operations:}
+\CommentTok{## }
+\CommentTok{## Centering for all_numeric()}
+\CommentTok{## Scaling for all_numeric()}
+\CommentTok{## PCA extraction with all_numeric()}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{proper-implementation}{%
+\section{Proper implementation}\label{proper-implementation}}
+
+We stated at the beginning of this chapter that we should think of feature engineering as creating a blueprint rather than manually performing each task individually. This helps us in two ways: (1) thinking sequentially and (2) to apply appropriately within the resampling process.
+
+\hypertarget{sequential-steps}{%
+\subsection{Sequential steps}\label{sequential-steps}}
+
+Thinking of feature engineering as a blueprint forces us to think of the ordering of our pre-processing steps. Although each particular problem requires you to think of the effects of sequential pre-processing, there are some general suggestions that you should consider:
+
+\begin{itemize}
+\tightlist
+\item
+  If using a log or Box-Cox transformation, don't center the data first or do any operations that might make the data non-positive. Alternatively, use the Yeo-Johnson transformation so you don't have to worry about this.
+\item
+  One-hot or dummy encoding typically results in sparse data which many algorithms can operate efficiently on. If you standardize sparse data you will create dense data and you loose the computational efficiency. Consequently, its often preferred to standardize your numeric features and then one-hot/dummy encode.
+\item
+  If you are lumping infrequently categories together, do so before one-hot/dummy encoding.
+\item
+  Although you can perform dimension reduction procedures on categorical features, it is common to primarily do so on numeric features when doing so for feature engineering purposes.
+\end{itemize}
+
+While your project's needs may vary, here is a suggested order of potential steps that should work for most problems:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Filter out zero or near-zero variance features.
+\item
+  Perform imputation if required.
+\item
+  Normalize to resolve numeric feature skewness.
+\item
+  Standardize (center and scale) numeric features.
+\item
+  Perform dimension reduction (e.g., PCA) on numeric features.
+\item
+  One-hot or dummy encode categorical features.
+\end{enumerate}
+
+\hypertarget{data-leakage}{%
+\subsection{Data leakage}\label{data-leakage}}
+
+\emph{Data leakage}\index{data leakage} is when information from outside the training data set is used to create the model. Data leakage often occurs during the data preprocessing period. To minimize this, feature engineering should be done in isolation of each resampling iteration. Recall that resampling allows us to estimate the generalizable prediction error. Therefore, we should apply our feature engineering blueprint to each resample independently as illustrated in Figure \ref{fig:minimize-leakage}. That way we are not leaking information from one data set to another (each resample is designed to act as isolated training and test data).
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.9\linewidth]{images/minimize-leakage} 
+
+}
+
+\caption{Performing feature engineering pre-processing within each resample helps to minimize data leakage.}\label{fig:minimize-leakage}
+\end{figure}
+
+For example, when standardizing numeric features, each resampled training data should use its own mean and variance estimates and these specific values should be applied to the same resampled test set. This imitates how real-life prediction occurs where we only know our current data's mean and variance estimates; therefore, on new data that comes in where we need to predict we assume the feature values follow the same distribution of what we've seen in the past.
+
+\hypertarget{engineering-process-example}{%
+\subsection{Putting the process together}\label{engineering-process-example}}
+
+To illustrate how this process works together via R code, let's do a simple re-assessment on the \texttt{ames} data set that we did at the end of the last chapter (section \ref{put-process-together}) and see if some simple feature engineering improves our prediction error. But first, we'll formally introduce the \textbf{recipes} package, which we've been implicitly illustrating throughout.
+
+The \textbf{recipes} package allows us to develop our feature engineering blueprint in a sequential nature. The idea behind \textbf{recipes} is similar to \texttt{caret::preProcess()} where we want to create the pre-processing blueprint but apply it later and within each resample.\footnote{In fact, most of the feature engineering capabilities found in \textbf{resample} can also be found in \texttt{caret::preProcess()}.}
+
+There are three main steps in creating and applying feature engineering with \textbf{recipes}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \texttt{recipe}: where you define your feature engineering steps to create your blueprint.
+\item
+  \texttt{prep}are: estimate feature engineering parameters based on training data.
+\item
+  \texttt{bake}: apply the blueprint to new data.
+\end{enumerate}
+
+The first step is where you define your blueprint (aka recipe). With this process, you supply the formula of interest (the target variable, features, and the data these are based on) with \texttt{recipe()} and then you sequentially add feature engineering steps with \texttt{step\_xxx()}. For example, the following defines \texttt{Sale\_Price} as the target variable and then uses all the remaining columns as features based on \texttt{ames\_train}. We then:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Remove near-zero variance features that are categorical (aka nominal).
+\item
+  Ordinally encode our quality-based features (which are inherently ordinal).
+\item
+  Center and scale (i.e., standardize) all numeric fetures.
+\item
+  Perform dimension reduction by applying PCA to all numeric features.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{blueprint <-}\StringTok{ }\KeywordTok{recipe}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_nzv}\NormalTok{(}\KeywordTok{all_nominal}\NormalTok{())  }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_integer}\NormalTok{(}\KeywordTok{matches}\NormalTok{(}\StringTok{"Qual|Cond|QC|Qu"}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_center}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_scale}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_pca}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{())}
+  
+\NormalTok{blueprint}
+\CommentTok{## Data Recipe}
+\CommentTok{## }
+\CommentTok{## Inputs:}
+\CommentTok{## }
+\CommentTok{##       role #variables}
+\CommentTok{##    outcome          1}
+\CommentTok{##  predictor         80}
+\CommentTok{## }
+\CommentTok{## Operations:}
+\CommentTok{## }
+\CommentTok{## Sparse, unbalanced variable filter on all_nominal()}
+\CommentTok{## Integer encoding for matches("Qual|Cond|QC|Qu")}
+\CommentTok{## Centering for 2 items}
+\CommentTok{## Scaling for 2 items}
+\CommentTok{## PCA extraction with 2 items}
+\end{Highlighting}
+\end{Shaded}
+
+Next, we need to train this blueprint on some training data. Remember, there are many feature engineering steps that we do not want to train on the test data (e.g., standardize and PCA) as this would create data leakage. So in this step we estimate these parameters based on the training data of interest.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{prepare <-}\StringTok{ }\KeywordTok{prep}\NormalTok{(blueprint, }\DataTypeTok{training =}\NormalTok{ ames_train)}
+\NormalTok{prepare}
+\CommentTok{## Data Recipe}
+\CommentTok{## }
+\CommentTok{## Inputs:}
+\CommentTok{## }
+\CommentTok{##       role #variables}
+\CommentTok{##    outcome          1}
+\CommentTok{##  predictor         80}
+\CommentTok{## }
+\CommentTok{## Training data contained 2054 data points and no missing data.}
+\CommentTok{## }
+\CommentTok{## Operations:}
+\CommentTok{## }
+\CommentTok{## Sparse, unbalanced variable filter removed Street, ... [trained]}
+\CommentTok{## Integer encoding for Condition_1, ... [trained]}
+\CommentTok{## Centering for Lot_Frontage, ... [trained]}
+\CommentTok{## Scaling for Lot_Frontage, ... [trained]}
+\CommentTok{## PCA extraction with Lot_Frontage, ... [trained]}
+\end{Highlighting}
+\end{Shaded}
+
+Lastly, we can apply our blueprint to new data (e.g., the training data or future test data) with \texttt{bake()}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{baked_train <-}\StringTok{ }\KeywordTok{bake}\NormalTok{(prepare, }\DataTypeTok{new_data =}\NormalTok{ ames_train)}
+\NormalTok{baked_test <-}\StringTok{ }\KeywordTok{bake}\NormalTok{(prepare, }\DataTypeTok{new_data =}\NormalTok{ ames_test)}
+\NormalTok{baked_train}
+\CommentTok{## # A tibble: 2,054 x 27}
+\CommentTok{##    MS_SubClass MS_Zoning Lot_Shape Lot_Config}
+\CommentTok{##    <fct>       <fct>     <fct>     <fct>     }
+\CommentTok{##  1 One_Story_~ Resident~ Slightly~ Corner    }
+\CommentTok{##  2 One_Story_~ Resident~ Regular   Inside    }
+\CommentTok{##  3 One_Story_~ Resident~ Slightly~ Corner    }
+\CommentTok{##  4 One_Story_~ Resident~ Regular   Corner    }
+\CommentTok{##  5 Two_Story_~ Resident~ Slightly~ Inside    }
+\CommentTok{##  6 One_Story_~ Resident~ Slightly~ Inside    }
+\CommentTok{##  7 One_Story_~ Resident~ Slightly~ Inside    }
+\CommentTok{##  8 Two_Story_~ Resident~ Regular   Inside    }
+\CommentTok{##  9 Two_Story_~ Resident~ Slightly~ Corner    }
+\CommentTok{## 10 One_Story_~ Resident~ Slightly~ Inside    }
+\CommentTok{## # ... with 2,044 more rows, and 23 more variables:}
+\CommentTok{## #   Neighborhood <fct>, Bldg_Type <fct>,}
+\CommentTok{## #   House_Style <fct>, Roof_Style <fct>,}
+\CommentTok{## #   Exterior_1st <fct>, Exterior_2nd <fct>,}
+\CommentTok{## #   Mas_Vnr_Type <fct>, Foundation <fct>,}
+\CommentTok{## #   Bsmt_Exposure <fct>, BsmtFin_Type_1 <fct>,}
+\CommentTok{## #   Central_Air <fct>, Electrical <fct>,}
+\CommentTok{## #   Garage_Type <fct>, Garage_Finish <fct>,}
+\CommentTok{## #   Paved_Drive <fct>, Fence <fct>, Sale_Type <fct>,}
+\CommentTok{## #   Sale_Price <int>, PC1 <dbl>, PC2 <dbl>, PC3 <dbl>,}
+\CommentTok{## #   PC4 <dbl>, PC5 <dbl>}
+\end{Highlighting}
+\end{Shaded}
+
+Consequently, the goal is to develop our blueprint, then within each resample iteration we want to apply \texttt{prep()} and \texttt{bake()} to our resample training and validation data. Luckily, the \textbf{caret} package simplifies this process. We only need to specify the blueprint and \textbf{caret} will automatically prepare and bake within each resample. We illustrate with the \texttt{ames} housing example.
+
+First, we create our feature engineering blueprint to perform the following tasks:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Filter out near-zero variance features for categorical features.
+\item
+  Ordinally encode all quality features, which are on a 1--10 likert scale.
+\item
+  Standardize (center and scale) all numeric features.
+\item
+  One-hot encode our remaining categorical features.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{blueprint <-}\StringTok{ }\KeywordTok{recipe}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames_train) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_nzv}\NormalTok{(}\KeywordTok{all_nominal}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_integer}\NormalTok{(}\KeywordTok{matches}\NormalTok{(}\StringTok{"Qual|Cond|QC|Qu"}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_center}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_scale}\NormalTok{(}\KeywordTok{all_numeric}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{step_dummy}\NormalTok{(}\KeywordTok{all_nominal}\NormalTok{(), }\OperatorTok{-}\KeywordTok{all_outcomes}\NormalTok{(), }\DataTypeTok{one_hot =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Next, we apply the same resampling method and hyperparameter search grid as we did in Section \ref{put-process-together}. The only difference is when we train our resample models with \texttt{train()}, we supply our blueprint as the first argument and then \textbf{caret} takes care of the rest.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# create a resampling method}
+\NormalTok{cv <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}
+  \DataTypeTok{method =} \StringTok{"repeatedcv"}\NormalTok{, }
+  \DataTypeTok{number =} \DecValTok{10}\NormalTok{, }
+  \DataTypeTok{repeats =} \DecValTok{5}
+\NormalTok{  )}
+
+\CommentTok{# create a hyperparameter grid search}
+\NormalTok{hyper_grid <-}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{k =} \KeywordTok{seq}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{25}\NormalTok{, }\DataTypeTok{by =} \DecValTok{1}\NormalTok{))}
+
+\CommentTok{# fit knn model and perform grid search}
+\NormalTok{knn_fit2 <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  blueprint, }
+  \DataTypeTok{data =}\NormalTok{ ames_train, }
+  \DataTypeTok{method =} \StringTok{"knn"}\NormalTok{, }
+  \DataTypeTok{trControl =}\NormalTok{ cv, }
+  \DataTypeTok{tuneGrid =}\NormalTok{ hyper_grid,}
+  \DataTypeTok{metric =} \StringTok{"RMSE"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+Looking at our results we see that the best model was associated with \(k=\) 12, which resulted in a cross-validated RMSE of 32,991. Figure \ref{fig:knn-with-blueprint-assess} illustrates the cross-validated error rate across the spectrum of hyperparameter values that we specified.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# print model results}
+\NormalTok{knn_fit2}
+\CommentTok{## k-Nearest Neighbors }
+\CommentTok{## }
+\CommentTok{## 2054 samples}
+\CommentTok{##   80 predictor}
+\CommentTok{## }
+\CommentTok{## Recipe steps: nzv, integer, center, scale, dummy }
+\CommentTok{## Resampling: Cross-Validated (10 fold, repeated 5 times) }
+\CommentTok{## Summary of sample sizes: 1848, 1850, 1848, 1850, 1850, 1848, ... }
+\CommentTok{## Resampling results across tuning parameters:}
+\CommentTok{## }
+\CommentTok{##   k   RMSE   Rsquared  MAE  }
+\CommentTok{##    2  36949  0.7931    22711}
+\CommentTok{##    3  35724  0.8071    21985}
+\CommentTok{##    4  34731  0.8194    21332}
+\CommentTok{##    5  34127  0.8271    20948}
+\CommentTok{##    6  33910  0.8314    20777}
+\CommentTok{##    7  33414  0.8389    20670}
+\CommentTok{##    8  33237  0.8428    20568}
+\CommentTok{##    9  33145  0.8452    20541}
+\CommentTok{##   10  33043  0.8476    20499}
+\CommentTok{##   11  33006  0.8485    20508}
+\CommentTok{##   12  32991  0.8495    20541}
+\CommentTok{##   13  33095  0.8491    20610}
+\CommentTok{##   14  33116  0.8496    20631}
+\CommentTok{##   15  33075  0.8508    20657}
+\CommentTok{##   16  33105  0.8510    20696}
+\CommentTok{##   17  33194  0.8509    20738}
+\CommentTok{##   18  33289  0.8504    20828}
+\CommentTok{##   19  33373  0.8500    20889}
+\CommentTok{##   20  33468  0.8497    20963}
+\CommentTok{##   21  33529  0.8498    21020}
+\CommentTok{##   22  33581  0.8498    21065}
+\CommentTok{##   23  33652  0.8496    21133}
+\CommentTok{##   24  33702  0.8498    21202}
+\CommentTok{##   25  33710  0.8504    21236}
+\CommentTok{## }
+\CommentTok{## RMSE was used to select the optimal model using}
+\CommentTok{##  the smallest value.}
+\CommentTok{## The final value used for the model was k = 12.}
+
+\CommentTok{# plot cross validation results}
+\KeywordTok{ggplot}\NormalTok{(knn_fit2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/knn-with-blueprint-assess-1} 
+
+}
+
+\caption{Results from the same grid search performed in Section 2.7 but with feature engineering performed within each resample.}\label{fig:knn-with-blueprint-assess}
+\end{figure}
+
+By applying a handful of the preprocessing techniques discussed throughout this chapter, we were able to reduce our prediction error by over \$10,000. The chapters that follow will look to see if we can continue reducing our error by applying different algorithms and feature engineering blueprints.
+
+\hypertarget{part-supervised-learning}{%
+\part{Supervised Learning}\label{part-supervised-learning}}
+
+\hypertarget{linear-regression}{%
+\chapter{Linear Regression}\label{linear-regression}}
+
+\emph{Linear regression}\index{linear regression}, a staple of classical statistical modeling, is one of the simplest algorithms for doing supervised learning. Though it may seem somewhat dull compared to some of the more modern statistical learning approaches described in later chapters, linear regression is still a useful and widely applied statistical learning method. Moreover, it serves as a good starting point for more advanced approaches; as we will see in later chapters, many of the more sophisticated statistical learning approaches can be seen as generalizations to or extensions of ordinary linear regression. Consequently, it is important to have a good understanding of linear regression before studying more complex learning methods. This chapter introduces linear regression with an emphasis on prediction, rather than inference. An excellent and comprehensive overview of linear regression is provided in \citet{kutner-2005-applied}. See \citet{faraway-2016-linear} for a discussion of linear regression in R (the book's website also provides Python scripts).
+
+\hypertarget{prerequisites-2}{%
+\section{Prerequisites}\label{prerequisites-2}}
+
+This chapter leverages the following packages:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Helper packages}
+\KeywordTok{library}\NormalTok{(dplyr)    }\CommentTok{# for data manipulation}
+\KeywordTok{library}\NormalTok{(ggplot2)  }\CommentTok{# for awesome graphics}
+
+\CommentTok{# Modeling packages}
+\KeywordTok{library}\NormalTok{(caret)    }\CommentTok{# for logistic regression modeling}
+
+\CommentTok{# Model interpretability packages}
+\KeywordTok{library}\NormalTok{(vip)      }\CommentTok{# variable importance}
+\end{Highlighting}
+\end{Shaded}
+
+We'll also continue working with the \texttt{ames\_train} data set created in Section \ref{put-process-together}.
+
+\hypertarget{simple-linear-regression}{%
+\section{Simple linear regression}\label{simple-linear-regression}}
+
+Pearson's correlation coefficient is often used to quantify the strength of the linear association between two continuous variables. In this section, we seek to fully characterize that linear relationship. \emph{Simple linear regression} (SLR) assumes that the statistical relationship between two continuous variables (say \(X\) and \(Y\)) is (at least approximately) linear:
+
+\begin{equation}
+\label{eq:lm}
+  Y_i = \beta_0 + \beta_1 X_i + \epsilon_i, \quad \text{for } i = 1, 2, \dots, n,
+\end{equation}
+
+where \(Y_i\) represents the \emph{i}-th response value, \(X_i\) represents the \emph{i}-th feature value, \(\beta_0\) and \(\beta_1\) are fixed, but unknown constants (commonly referred to as coefficients or parameters) that represent the intercept and slope of the regression line, respectively, and \(\epsilon_i\) represents noise or random error. In this Chapter, we'll assume that the errors are normally distirbuted with mean zero and constant variance \(\sigma^2\), denoted \(\stackrel{iid}{\sim} \left(0, \sigma^2\right)\). Since the random errors are centered around zero (i.e., \(E\left(\epsilon\right) = 0\)), linear regression is really a problem of estimating a \emph{conditional mean}:
+
+\begin{equation}
+  E\left(Y_i | X_i\right) = \beta_0 + \beta_1 X_i.
+\end{equation}
+
+For brevity, we often drop the conditional piece and write \(E\left(Y | X\right) = E\left(Y\right)\). Consequently, the interpretation of the coefficients are in terms of the average, or mean response. For example, the intercept \(\beta_0\) represents the average response value when \(X = 0\) (it is often not meaningful or of interest and is is sometimes referred to as a \emph{bias term}). The slope \(\beta_1\) represents the increase in the average response per one-unit increase in \(X\) (i.e., it is a \emph{rate of change}).
+
+\hypertarget{estimation}{%
+\subsection{Estimation}\label{estimation}}
+
+Ideally, we want estimates of \(\beta_0\) and \(\beta_1\) that give us the ``best fitting'' line. But what is meant by ``best fitting''? The most common approach is to use the method of \emph{least squares}\index{least squares} (LS) estimation; this form of linear regression is often referred to as ordinary least squares (OLS) regression. There are multiple ways to measure ``best fitting'', but the LS criterion finds the ``best fitting'' line by minimizing the \emph{residual sum of squares}\index{residual sum of squares} (RSS):
+
+\begin{equation}
+\label{eq:least-squares-simple}
+  RSS\left(\beta_0, \beta_1\right) = \sum_{i=1}^n\left[Y_i - \left(\beta_0 + \beta_1 X_i\right)\right]^2 = \sum_{i=1}^n\left(Y_i - \beta_0 - \beta_1 X_i\right)^2.
+\end{equation}
+
+The LS estimates of \(\beta_0\) and \(\beta_1\) are denoted as \(\widehat{\beta}_0\) and \(\widehat{\beta}_1\), respectively. Once obtained, we can generate predicted values, say at \(X = X_{new}\), using the estimated regression equation:
+
+\begin{equation}
+  \widehat{Y}_{new} = \widehat{\beta}_0 + \widehat{\beta}_1 X_{new},
+\end{equation}
+
+where \(\widehat{Y}_{new} = \widehat{E\left(Y_{new} | X = X_{new}\right)}\) is the estimated mean response at \(X = X_{new}\).
+
+With the Ames housing data, suppose we wanted to model a linear relationship between the total above ground living space of a home (\texttt{Gr\_Liv\_Area}) and sale price (\texttt{Sale\_Price}). To perform an OLS regression model in R we can use the \texttt{lm()} function:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model1 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{Gr_Liv_Area, }\DataTypeTok{data =}\NormalTok{ ames_train)}
+\end{Highlighting}
+\end{Shaded}
+
+The fitted model (\texttt{model1}) is displayed in the left plot in Figure \ref{fig:04-visualize-model1} where the points represent the values of \texttt{Sale\_Price} in the training data. In the right plot of Figure \ref{fig:04-visualize-model1}, the vertical lines represent the individual errors, called \emph{residuals}\index{residuals}, associated with each observation. The OLS criterion \eqref{eq:least-squares-simple} identifies the ``best fitting'' line that minimizes the sum of squares of these residuals.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/04-visualize-model1-1} 
+
+}
+
+\caption{The least squares fit from regressing sale price on living space for the the Ames housing data. Left: Fitted regresison line. Right: Fitted regression line with vertical grey bars representing the residuals.}\label{fig:04-visualize-model1}
+\end{figure}
+
+The \texttt{coef()} function extracts the estimated coefficients from the model. We can also use \texttt{summary()} to get a more detailed report of the model results.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(model1)}
+\CommentTok{## }
+\CommentTok{## Call:}
+\CommentTok{## lm(formula = Sale_Price ~ Gr_Liv_Area, data = ames_train)}
+\CommentTok{## }
+\CommentTok{## Residuals:}
+\CommentTok{##     Min      1Q  Median      3Q     Max }
+\CommentTok{## -413052  -30218   -1612   23383  330421 }
+\CommentTok{## }
+\CommentTok{## Coefficients:}
+\CommentTok{##             Estimate Std. Error t value}
+\CommentTok{## (Intercept)  7989.35    3892.40    2.05}
+\CommentTok{## Gr_Liv_Area   115.59       2.46   46.90}
+\CommentTok{##                        Pr(>|t|)    }
+\CommentTok{## (Intercept)                0.04 *  }
+\CommentTok{## Gr_Liv_Area <0.0000000000000002 ***}
+\CommentTok{## ---}
+\CommentTok{## Signif. codes:  }
+\CommentTok{## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1}
+\CommentTok{## }
+\CommentTok{## Residual standard error: 55800 on 2052 degrees of freedom}
+\CommentTok{## Multiple R-squared:  0.517,  Adjusted R-squared:  0.517 }
+\CommentTok{## F-statistic: 2.2e+03 on 1 and 2052 DF,  p-value: <0.0000000000000002}
+\end{Highlighting}
+\end{Shaded}
+
+The estimated coefficients from our model are \(\widehat{\beta}_0 =\) 7989.35 and \(\widehat{\beta}_1 =\) 115.59. To interpret, we estimate that the mean selling price increases by 115.59 for each additional one square foot of above ground living space. This simple description of the relationship between the sale price and square footage using a single number (i.e., the slope) is what makes linear regression such an intuitive and popular modeling tool.
+
+One drawback of the LS procedure in linear regression is that it only provides estimates of the coefficents; it does not provide an estimate of the error variance \(\sigma^2\)! LS also makes no assumptions about the random errors. These assumptions are important for inference and in estimating the error variance which we're assuming is a constant value \(\sigma^2\). One way to estimate \(\sigma^2\) (which is required for characterizing the variability of our fitted model), is to use the method of \emph{maximum likelihood}\index{maximum likelihood} (ML) estimation (see \citet{kutner-2005-applied} sec 1.7 for details). The ML procedure requires that we assume a particular distribution for the random errors. Most often, we assume the errors to be normally distributed. In practice, under the usual assumptions stated above, an unbiased estimate of the error variance is given as the sum of the squared residuals divided by \(n - p\) (where \(p\) is the number of regression coefficients or parameters in the model):
+
+\begin{equation}
+  \widehat{\sigma}^2 = \frac{1}{n - p}\sum_{i = 1} ^ n r_i ^ 2,
+\end{equation}
+
+where \(r_i = \left(Y_i - \widehat{Y}_i\right)\) is referred to as the \emph{i}-th residual (i.e., the difference between the \emph{i}-th observed and predicted response value). The quantity \(\widehat{\sigma}^2\) is also referred to as the \emph{mean square error}\index{mean square error} (MSE) and it's square root is denoted RMSE (see Section \ref{model-eval} for discussion on these metrics). In R, the RMSE of a linear model can be extracted using the \texttt{sigma()} function:
+
+\begin{note}
+Typically, these error metrics are computed on a separate validation set
+or using cross-validation as discussed in Section 2.4; however, they can
+also be computed on the same training data the model was trained on as
+illustrated here.
+\end{note}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sigma}\NormalTok{(model1)    }\CommentTok{# RMSE}
+\CommentTok{## [1] 55753}
+\KeywordTok{sigma}\NormalTok{(model1)}\OperatorTok{^}\DecValTok{2}  \CommentTok{# MSE}
+\CommentTok{## [1] 3108447546}
+\end{Highlighting}
+\end{Shaded}
+
+Note that the RMSE is also reported as the \texttt{Residual\ standard\ error} in the output from \texttt{summary()}.
+
+\hypertarget{inference}{%
+\subsection{Inference}\label{inference}}
+
+How accurate are the LS of \(\beta_0\) and \(\beta_1\)? Point estimates by themselves are not very useful. It is often desirable to associate some measure of an estimates variability. The variability of an estimate is often measured by its \emph{standard error}\index{standard error} (SE)---the square root of its variance. If we assume that the errors in the linear regression model are \(\stackrel{iid}{\sim} \left(0, \sigma^2\right)\), then simple expressions for the SEs of the estimated coefficients exist and are displayed in the column labeled \texttt{Std.\ Error} in the output from \texttt{summary()}. From this, we can also derive simple \(t\)-tests to understand if the individual coefficients are statistically significant from zero. The \emph{t}-statistics for such a test are nothing more than the estimated coefficients divided by their corresponding estimated standard errors (i.e., in the output from \texttt{summary()}, \texttt{t\ value} = \texttt{Estimate} / \texttt{Std.\ Error}). The reported \emph{t}-statistics measure the number of standard deviations each coefficient is away from 0. Thus, large \emph{t}-statistics (greater than two in absolute value, say) roughly indicate statistical significance at the \(\alpha = 0.05\) level. The \emph{p}-values for these tests are also reported by \texttt{summary()} in the column labeled \texttt{Pr(\textgreater{}\textbar{}t\textbar{})}.
+
+Under the same assumptions, we can also derive confidence intervals for the coefficients. The formula for the traditional \(100\left(1 - \alpha\right)\)\% confidence interval for \(\beta_j\) is
+
+\begin{equation}
+  \widehat{\beta}_j \pm t_{1 - \alpha / 2, n - p} \widehat{SE}\left(\widehat{\beta}_j\right),
+  \label{eq:conf-int}
+\end{equation}
+
+In R, we can construct such (one-at-a-time) confidence intervals for each coefficient using \texttt{confint()}. For example, a 95\% confidence intervals for the coefficients in our SLR example can be computed using
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{confint}\NormalTok{(model1, }\DataTypeTok{level =} \FloatTok{0.95}\NormalTok{)}
+\CommentTok{##             2.5 %  97.5 %}
+\CommentTok{## (Intercept) 355.9 15622.8}
+\CommentTok{## Gr_Liv_Area 110.8   120.4}
+\end{Highlighting}
+\end{Shaded}
+
+To interpret, we estimate with 95\% confidence that the mean selling price increases between 110.75 and 120.42 for each additional one square foot of above ground living space. We can also conclude that the slope \(\beta_1\) is significantly different from zero (or any other pre-specified value not included in the interval) at the \(\alpha = 0.05\) level. This is also supported by the output from \texttt{summary()}.
+
+\BeginKnitrBlock{note}
+Most statistical software, including R, will include estimated standard errors, \emph{t}-statistics, etc. as part of its regression output. However, it is important to remember that such quantities depend on three major assumptions of the linear regresion model:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Independent observations
+\item
+  The random errors have mean zero, and constant variance
+\item
+  The random errors are normally distributed
+\end{enumerate}
+
+If any or all of these assumptions are violated, then remdial measures need to be taken. For instance, \emph{weighted least squares} (and other procedures) can be used when the constant variance assumption is violated. Transformations (of both the response and features) can also help to correct departures from these assumptions. The residuals are extremely useful in helping to identify how parametric models depart from such assumptions.
+\EndKnitrBlock{note}
+
+\hypertarget{multi-lm}{%
+\section{Multiple linear regression}\label{multi-lm}}
+
+In practice, we often have more than one predictor. For example, with the Ames housing data, we may wish to understand if above ground square footage (\texttt{Gr\_Liv\_Area}) and the year the house was built (\texttt{Year\_Built}) are (linearly) related to sale price (\texttt{Sale\_Price}). We can extend the SLR model so that it can directly accommodate multiple predictors; this is referred to as the \emph{multiple linear regression} (MLR) model. With two predictors, the MLR model becomes:
+
+\begin{equation}
+  Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \epsilon,
+\end{equation}
+
+where \(X_1\) and \(X_2\) are features of interest. In our Ames housing example, \(X_1\) represents \texttt{Gr\_Liv\_Area} and \(X_2\) represents \texttt{Year\_Built}.
+
+In R, multiple linear regression models can be fit by separating all the features of interest with a \texttt{+}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(model2 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{Gr_Liv_Area }\OperatorTok{+}\StringTok{ }\NormalTok{Year_Built, }\DataTypeTok{data =}\NormalTok{ ames_train))}
+\CommentTok{## }
+\CommentTok{## Call:}
+\CommentTok{## lm(formula = Sale_Price ~ Gr_Liv_Area + Year_Built, data = ames_train)}
+\CommentTok{## }
+\CommentTok{## Coefficients:}
+\CommentTok{## (Intercept)  Gr_Liv_Area   Year_Built  }
+\CommentTok{##  -2071358.4         99.2       1067.1}
+\end{Highlighting}
+\end{Shaded}
+
+Alternatively, we can use \texttt{update()} to update the model formula used in \texttt{model1}. The new formula can use a \texttt{.} as short hand for keep everything on either the left or right hand side of the formula, and a \texttt{+} or \texttt{-} can be used to add or remove terms from the original model, respectively. In the case of adding \texttt{Year\_Built} to to \texttt{model1}, we could've used:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(model2 <-}\StringTok{ }\KeywordTok{update}\NormalTok{(model1, . }\OperatorTok{~}\StringTok{ }\NormalTok{. }\OperatorTok{+}\StringTok{ }\NormalTok{Year_Built))}
+\CommentTok{## }
+\CommentTok{## Call:}
+\CommentTok{## lm(formula = Sale_Price ~ Gr_Liv_Area + Year_Built, data = ames_train)}
+\CommentTok{## }
+\CommentTok{## Coefficients:}
+\CommentTok{## (Intercept)  Gr_Liv_Area   Year_Built  }
+\CommentTok{##  -2071358.4         99.2       1067.1}
+\end{Highlighting}
+\end{Shaded}
+
+The LS estimates of the regression coefficients are \(\widehat{\beta}_1 =\) 99.169 and \(\widehat{\beta}_2 =\) 1067.108 (the estimated intercept is -2071358.426. In other words, every one square foot increase to above ground square footage is associated with an additional \$99.17 in \textbf{mean selling price} when holding the year the house was built constant. Likewise, for every year newer a home is there is approximately an increase of \$1,067.11 in selling price when holding the above ground square footage constant.
+
+A contour plot of the fitted regression surface is displayed in the left side of Figure \ref{fig:04-mlr-fit} below. Note how the fitted regression surface is flat (i.e., it does not twist or bend). This is true for all linear models that include only \emph{main effects} (i.e., terms involving only a single predictor). One way to model curvature is to include \emph{interaction effects}. An interaction occurs when the effect of one predictor on the response depends on the values of other predictors. In linear regression, interactions can be captured via products of features (i.e., \(X1 \times X_2\)). A model with two main effects can also include a two-way interaction. For example, to include an interaction between \(X_1 =\) \texttt{Gr\_Liv\_Area} and \(X_2 =\) \texttt{Year\_Built}, we introduce an additional product term:
+
+\begin{equation}
+  Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 X_2 + \epsilon.
+\end{equation}
+
+Note that in R, we use the \texttt{:} operator to include an interaction (technically, we could use \texttt{*} as well, but \texttt{x1\ *\ x2} is shorthand for \texttt{x1\ +\ x2\ +\ x1:x2} so is slightly redundant):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{lm}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{Gr_Liv_Area }\OperatorTok{+}\StringTok{ }\NormalTok{Year_Built }\OperatorTok{+}\StringTok{ }\NormalTok{Gr_Liv_Area }\OperatorTok{:}\StringTok{ }\NormalTok{Year_Built, }
+   \DataTypeTok{data =}\NormalTok{ ames_train)}
+\CommentTok{## }
+\CommentTok{## Call:}
+\CommentTok{## lm(formula = Sale_Price ~ Gr_Liv_Area + Year_Built + Gr_Liv_Area:Year_Built, }
+\CommentTok{##     data = ames_train)}
+\CommentTok{## }
+\CommentTok{## Coefficients:}
+\CommentTok{##            (Intercept)             Gr_Liv_Area  }
+\CommentTok{##              30353.414               -1243.040  }
+\CommentTok{##             Year_Built  Gr_Liv_Area:Year_Built  }
+\CommentTok{##                  0.149                   0.681}
+\end{Highlighting}
+\end{Shaded}
+
+A contour plot of the fitted regression surface with interaction is displayed in the right side of Figure \ref{fig:04-mlr-fit}. Note the curvature in the contour lines.
+
+\begin{note}
+Interaction effects are quite prevelant in predictive modeling. Since
+linear models are an example of parametric modeling, it is up to the
+analyst to decide if and when to include interaction effects. In later
+chapters, we'll discuss algorithms that can automatically detect and
+incorporate interaction effects (albeit in different ways). It is also
+important to understand a concept called the \emph{hierarchy
+principle}---which demands that all lower-order terms corresponding to
+an interaction be retained in the model---when concidering interaction
+effects in linear regression models.
+\end{note}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/04-mlr-fit-1} 
+
+}
+
+\caption{In a three-dimensional setting, with two predictors and one response, the least squares regression line becomes a plane. The 'best-fit' plane minimizes the sum of squared errors between the actual sales price (individual dots) and the predicted sales price (plane).}\label{fig:04-mlr-fit}
+\end{figure}
+
+In general, we can include as many predictors as we want, as long as we have more rows than parameters! The general multiple linear regression model with \emph{p} distinct predictors is
+
+\begin{equation}
+  Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon,
+\end{equation}
+
+where \(X_i\) for \(i = 1, 2, \dots, p\) are the predictors of interest. Note some of these may represent interactions (e.g., \(X_3 = X_1 \times X_2\)) between or transformations\footnote{Transformations of the features serve a number of purposes (e.g., modeling nonlinear relationships or alleviating departures from common regression assumptions). See \citet{kutner-2005-applied} for details.} (e.g., \(X_4 = \sqrt{X_1}\)) of the original features. Unfortunately, visualizing beyond three dimensions is not practical as our best-fit plane becomes a hyperplane. However, the motivation remains the same where the best-fit hyperplane is identified by minimizing the RSS. The code below creates a third model where we use all features in our data set as main effects (i.e., no interaction terms) to predict \texttt{Sale\_Price}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# include all possible main effects}
+\NormalTok{model3 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ ames_train) }
+
+\CommentTok{# print estimated coefficients in a tidy data frame}
+\NormalTok{broom}\OperatorTok{::}\KeywordTok{tidy}\NormalTok{(model3)  }
+\CommentTok{## # A tibble: 292 x 5}
+\CommentTok{##    term            estimate std.error statistic p.value}
+\CommentTok{##    <chr>              <dbl>     <dbl>     <dbl>   <dbl>}
+\CommentTok{##  1 (Intercept)      -1.20e7 10949313.    -1.09    0.274}
+\CommentTok{##  2 MS_SubClassOne~   3.37e3     3655.     0.921   0.357}
+\CommentTok{##  3 MS_SubClassOne~   1.21e4    11926.     1.02    0.309}
+\CommentTok{##  4 MS_SubClassOne~   1.16e4    12833.     0.902   0.367}
+\CommentTok{##  5 MS_SubClassOne~   6.67e3     6552.     1.02    0.309}
+\CommentTok{##  6 MS_SubClassTwo~  -1.81e3     6018.    -0.301   0.763}
+\CommentTok{##  7 MS_SubClassTwo~   1.02e4     6612.     1.54    0.124}
+\CommentTok{##  8 MS_SubClassTwo~  -1.62e4    10468.    -1.54    0.123}
+\CommentTok{##  9 MS_SubClassSpl~  -1.03e4    11585.    -0.888   0.375}
+\CommentTok{## 10 MS_SubClassSpl~  -3.13e3     7577.    -0.413   0.680}
+\CommentTok{## # ... with 282 more rows}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{assessing-model-accuracy}{%
+\section{Assessing model accuracy}\label{assessing-model-accuracy}}
+
+We've fit three main effects models to the Ames housing data: a single predictor, two predictors, and all possible predictors. But the question remains, which model is ``best''? To answer this question we have to define what we mean by ``best''. In our case, we'll use the RMSE metric and cross-validation (Section \ref{resampling}) to determine the ``best'' model. We can use the \texttt{caret::train()} function to train a linear model (i.e., \texttt{method\ =\ "lm"}) using cross-validation (or a variety of other validation methods). In practice, a number of factors should be considered in determining a ``best'' model (e.g., time constraints, model production cost, predictive accuracy, etc.). The benefit of \textbf{caret} is that it provides built-in cross-validation capabilities, whereas the \texttt{lm()} function does not\footnote{Although general cross-validation is not avilable in \texttt{lm()} alone, a simple metric called the \emph{PRESS} statistic, for \textbf{PRE}dictive \textbf{S}um of \textbf{S}quare, (equivalent to a \emph{leave-one-out} cross-validated RMSE) can be computed by summing the PRESS residuals which are available using \texttt{rstandard(\textless{}lm-model-name\textgreater{},\ type\ =\ "predictive")}. See \texttt{?rstandard} for details.}. The following code chunk uses \texttt{caret::train()} to refit \texttt{model1} using 10-fold cross-validation:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Use caret package to train model using 10-fold cross-validation}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)  }\CommentTok{# for reproducibility}
+\NormalTok{(cv_model1 <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+  \DataTypeTok{form =}\NormalTok{ Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{Gr_Liv_Area, }
+  \DataTypeTok{data =}\NormalTok{ ames_train, }
+  \DataTypeTok{method =} \StringTok{"lm"}\NormalTok{,}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{)}
+\NormalTok{))}
+\CommentTok{## Linear Regression }
+\CommentTok{## }
+\CommentTok{## 2054 samples}
+\CommentTok{##    1 predictor}
+\CommentTok{## }
+\CommentTok{## No pre-processing}
+\CommentTok{## Resampling: Cross-Validated (10 fold) }
+\CommentTok{## Summary of sample sizes: 1848, 1847, 1848, 1849, 1848, 1850, ... }
+\CommentTok{## Resampling results:}
+\CommentTok{## }
+\CommentTok{##   RMSE   Rsquared  MAE  }
+\CommentTok{##   55670  0.5214    38380}
+\CommentTok{## }
+\CommentTok{## Tuning parameter 'intercept' was held constant at}
+\CommentTok{##  a value of TRUE}
+\end{Highlighting}
+\end{Shaded}
+
+The resulting cross-validated RMSE is \$55,670.37 (this is the average RMSE across the 10 CV folds). How should we interpret this? When applied to unseen data, the predictions this model makes are, on average, about \$55,670.37 off from the actual sale price.
+
+We can perform cross-validation on the other two models in a similar fashion, which we do in the code chunk below.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# model 2 CV}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{cv_model2 <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{Gr_Liv_Area }\OperatorTok{+}\StringTok{ }\NormalTok{Year_Built, }
+  \DataTypeTok{data =}\NormalTok{ ames_train, }
+  \DataTypeTok{method =} \StringTok{"lm"}\NormalTok{,}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{# model 3 CV}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{cv_model3 <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }
+  \DataTypeTok{data =}\NormalTok{ ames_train, }
+  \DataTypeTok{method =} \StringTok{"lm"}\NormalTok{,}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{# Extract out of sample performance measures}
+\KeywordTok{summary}\NormalTok{(}\KeywordTok{resamples}\NormalTok{(}\KeywordTok{list}\NormalTok{(}
+  \DataTypeTok{model1 =}\NormalTok{ cv_model1, }
+  \DataTypeTok{model2 =}\NormalTok{ cv_model2, }
+  \DataTypeTok{model3 =}\NormalTok{ cv_model3}
+\NormalTok{)))}
+\CommentTok{## }
+\CommentTok{## Call:}
+\CommentTok{## summary.resamples(object = resamples(list(model1}
+\CommentTok{##  = cv_model1, model2 = cv_model2, model3 = cv_model3)))}
+\CommentTok{## }
+\CommentTok{## Models: model1, model2, model3 }
+\CommentTok{## Number of resamples: 10 }
+\CommentTok{## }
+\CommentTok{## MAE }
+\CommentTok{##         Min. 1st Qu. Median  Mean 3rd Qu.  Max. NA's}
+\CommentTok{## model1 36295   36806  37005 38380   40034 42096    0}
+\CommentTok{## model2 28076   30690  31325 31479   32620 34536    0}
+\CommentTok{## model3 14257   15855  16131 17080   16689 25677    0}
+\CommentTok{## }
+\CommentTok{## RMSE }
+\CommentTok{##         Min. 1st Qu. Median  Mean 3rd Qu.  Max. NA's}
+\CommentTok{## model1 50003   52413  54193 55670   60344 62415    0}
+\CommentTok{## model2 40456   42957  45597 46133   49114 53745    0}
+\CommentTok{## model3 20945   25674  33769 37304   42967 80339    0}
+\CommentTok{## }
+\CommentTok{## Rsquared }
+\CommentTok{##          Min. 1st Qu. Median   Mean 3rd Qu.   Max.}
+\CommentTok{## model1 0.3805  0.4832 0.5277 0.5214  0.5883 0.6403}
+\CommentTok{## model2 0.5304  0.6666 0.6860 0.6716  0.7084 0.7371}
+\CommentTok{## model3 0.4204  0.7462 0.8287 0.7967  0.9099 0.9224}
+\CommentTok{##        NA's}
+\CommentTok{## model1    0}
+\CommentTok{## model2    0}
+\CommentTok{## model3    0}
+\end{Highlighting}
+\end{Shaded}
+
+Extracting the results for each model, we see that by adding more information via more predictors, we are able to improve the out-of-sample cross validation performance metrics. Specifically, our cross-validated RMSE reduces from \$46,132.74 (the model with two predictors) down to \$37,304.33 (for our full model). In this case, the model with all possible main effects performs the ``best'' (compared with the other two).
+
+\hypertarget{lm-residuals}{%
+\section{Model concerns}\label{lm-residuals}}
+
+As previously stated, linear regression has been a popular modeling tool due to the ease of interpreting the coefficients. However, linear regression makes several strong assumptions that are often violated as we include more predictors in our model. Violation of these assumptions can lead to flawed interpretation of the coefficients and prediction results.
+
+\textbf{1. Linear relationship:} Linear regression assumes a linear relationship between the predictor and the response variable. However, as discussed in Chapter \ref{engineering}, non-linear relationships can be made linear (or near-linear) by applying transformations to the response and/or predictors. For example, Figure \ref{fig:04-linear-relationship} illustrates the relationship between sale price and the year a home was built. The left plot illustrates the non-linear relationship that exists. However, we can achieve a near-linear relationship by log transforming sale price; although some non-linearity still exists for older homes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(ames_train, }\KeywordTok{aes}\NormalTok{(Year_Built, Sale_Price)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{.4}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{se =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_y_continuous}\NormalTok{(}\StringTok{"Sale price"}\NormalTok{, }\DataTypeTok{labels =}\NormalTok{ scales}\OperatorTok{::}\NormalTok{dollar) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Year built"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Non-transformed variables with a }\CharTok{\textbackslash{}n}\StringTok{non-linear relationship."}\NormalTok{)}
+
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(ames_train, }\KeywordTok{aes}\NormalTok{(Year_Built, Sale_Price)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{.4}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{se =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_y_log10}\NormalTok{(}\StringTok{"Sale price"}\NormalTok{, }\DataTypeTok{labels =}\NormalTok{ scales}\OperatorTok{::}\NormalTok{dollar, }
+                \DataTypeTok{breaks =} \KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{400000}\NormalTok{, }\DataTypeTok{by =} \DecValTok{100000}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Year built"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Transforming variables can provide a }\CharTok{\textbackslash{}n}\StringTok{near-linear relationship."}\NormalTok{)}
+
+\NormalTok{gridExtra}\OperatorTok{::}\KeywordTok{grid.arrange}\NormalTok{(p1, p2, }\DataTypeTok{nrow =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/04-linear-relationship-1} 
+
+}
+
+\caption{Linear regression assumes a linear relationship between the predictor(s) and the response variable; however, non-linear relationships can often be altered to be near-linear by appying a transformation to the variable(s).}\label{fig:04-linear-relationship}
+\end{figure}
+
+\textbf{2. Constant variance among residuals:}\index{constant variance} Linear regression assumes the variance among error terms (\(\epsilon_1, \epsilon_2, \dots, \epsilon_p\)) are constant (this assumption is referred to as homoscedasticity). If the error variance is not constant, the \emph{p}-values and confidence intervals for the coefficients will be invalid. Similar to the linear relationship assumption, non-constant variance can often be resolved with variable transformations or by including additional predictors. For example, Figure \ref{fig:04-homoskedasticity} shows the residuals vs.~predicted values for \texttt{model1} and \texttt{model3}. \texttt{model1} displays a classic violation of constant variance as indicated by the cone-shaped pattern. However, \texttt{model3} appears to have near-constant variance.
+
+\begin{tip}
+The \texttt{broom::augment} function is an easy way to add model results
+to each observation (i.e.~predicted values, residuals).
+\end{tip}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\NormalTok{df1 <-}\StringTok{ }\NormalTok{broom}\OperatorTok{::}\KeywordTok{augment}\NormalTok{(cv_model1}\OperatorTok{$}\NormalTok{finalModel, }\DataTypeTok{data =}\NormalTok{ ames_train)}
+
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(df1, }\KeywordTok{aes}\NormalTok{(.fitted, .resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{.4}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Predicted values"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Residuals"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Model 1"}\NormalTok{, }\DataTypeTok{subtitle =} \StringTok{"Sale_Price ~ Gr_Liv_Area"}\NormalTok{)}
+
+\NormalTok{df2 <-}\StringTok{ }\NormalTok{broom}\OperatorTok{::}\KeywordTok{augment}\NormalTok{(cv_model3}\OperatorTok{$}\NormalTok{finalModel, }\DataTypeTok{data =}\NormalTok{ ames_train)}
+
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(df2, }\KeywordTok{aes}\NormalTok{(.fitted, .resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{.4}\NormalTok{)  }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Predicted values"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Residuals"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Model 3"}\NormalTok{, }\DataTypeTok{subtitle =} \StringTok{"Sale_Price ~ ."}\NormalTok{)}
+
+\NormalTok{gridExtra}\OperatorTok{::}\KeywordTok{grid.arrange}\NormalTok{(p1, p2, }\DataTypeTok{nrow =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/04-homoskedasticity-1} 
+
+}
+
+\caption{Linear regression assumes constant variance among the residuals. `model1` (left) shows definitive signs of heteroskedasticity whereas `model3` (right) appears to have constant variance.}\label{fig:04-homoskedasticity}
+\end{figure}
+
+\textbf{3. No autocorrelation:}\index{autocorrelation} Linear regression assumes the errors are independent and uncorrelated. If in fact, there is correlation among the errors, then the estimated standard errors of the coefficients will be biased leading to prediction intervals being narrower than they should be. For example, the left plot in Figure \ref{fig:04-autocorrelation} displays the residuals (\(y\)-axis) vs.~the observation ID (\(x\)-axis) for \texttt{model1}. A clear pattern exists suggesting that information about \(\epsilon_1\) provides information about \(\epsilon_2\).
+
+This pattern is a result of the data being ordered by neighborhood, which we have not accounted for in this model. Consequently, the residuals for homes in the same neighborhood are correlated (homes within a neighborhood are typically the same size and can often contain similar features). Since the \texttt{Neighborhood} predictor is included in \texttt{model3} (right plot), the correlation in the errors is reduced.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\NormalTok{df1 <-}\StringTok{ }\KeywordTok{mutate}\NormalTok{(df1, }\DataTypeTok{id =} \KeywordTok{row_number}\NormalTok{())}
+\NormalTok{df2 <-}\StringTok{ }\KeywordTok{mutate}\NormalTok{(df2, }\DataTypeTok{id =} \KeywordTok{row_number}\NormalTok{())}
+
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(df1, }\KeywordTok{aes}\NormalTok{(id, .resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{.4}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Row ID"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Residuals"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Model 1"}\NormalTok{,}
+    \DataTypeTok{subtitle =} \StringTok{"Correlated residuals."}\NormalTok{)}
+
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(df2, }\KeywordTok{aes}\NormalTok{(id, .resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{.4}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Row ID"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Residuals"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Model 3"}\NormalTok{,}
+    \DataTypeTok{subtitle =} \StringTok{"Uncorrelated residuals."}\NormalTok{)}
+
+\NormalTok{gridExtra}\OperatorTok{::}\KeywordTok{grid.arrange}\NormalTok{(p1, p2, }\DataTypeTok{nrow =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/04-autocorrelation-1} 
+
+}
+
+\caption{Linear regression assumes uncorrelated errors. The residuals in `model1` (left) have a distinct pattern suggesting that information about $\epsilon_1$ provides information about $\epsilon_2$. Whereas `model3` has no signs of autocorrelation.}\label{fig:04-autocorrelation}
+\end{figure}
+
+\textbf{4. More observations than predictors:} Although not an issue with the Ames housing data, when the number of features exceeds the number of observations (\(p > n\)), the OLS estimates are not obtainable. To resolve this issue an analyst can remove variables one-at-a-time until \(p < n\). Although pre-processing tools can be used to guide this manual approach \citep[43-47]{apm}, it can be cumbersome and prone to errors. In Chapter \ref{regularized-regression} we'll introduce regularized regression which provides an alternative to OLS that can be used when \(p > n\).
+
+\textbf{5. No or little multicollinearity:}\index{multicollinearity} \emph{Collinearity}\index{collinearity} refers to the situation in which two or more predictor variables are closely related to one another. The presence of collinearity can pose problems in the OLS, since it can be difficult to separate out the individual effects of collinear variables on the response. In fact, collinearity can cause predictor variables to appear as statistically insignificant when in fact they are significant. This obviously leads to an inaccurate interpretation of coefficients and makes it difficult to identify influential predictors.
+
+In \texttt{ames}, for example, \texttt{Garage\_Area} and \texttt{Garage\_Cars} are two variables that have a correlation of 0.89 and both variables are strongly related to our response variable (\texttt{Sale\_Price}). Looking at our full model where both of these variables are included, we see that \texttt{Garage\_Cars} is found to be statistically significant but \texttt{Garage\_Area} is not:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# fit with two strongly correlated variables}
+\KeywordTok{summary}\NormalTok{(cv_model3) }\OperatorTok{%>%}
+\StringTok{  }\NormalTok{broom}\OperatorTok{::}\KeywordTok{tidy}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(term }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Garage_Area"}\NormalTok{, }\StringTok{"Garage_Cars"}\NormalTok{))}
+\CommentTok{## # A tibble: 2 x 5}
+\CommentTok{##   term        estimate std.error statistic p.value}
+\CommentTok{##   <chr>          <dbl>     <dbl>     <dbl>   <dbl>}
+\CommentTok{## 1 Garage_Cars  4962.     1803.        2.75 0.00599}
+\CommentTok{## 2 Garage_Area     9.47      5.97      1.58 0.113}
+\end{Highlighting}
+\end{Shaded}
+
+However, if we refit the full model without \texttt{Garage\_Cars}, the coefficient estimate for \texttt{Garage\_Area} increases two fold and becomes statistically significant.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# model without Garage_Area}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{mod_wo_Garage_Cars <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }
+  \DataTypeTok{data =} \KeywordTok{select}\NormalTok{(ames_train, }\OperatorTok{-}\NormalTok{Garage_Cars), }
+  \DataTypeTok{method =} \StringTok{"lm"}\NormalTok{,}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{)}
+\NormalTok{)}
+
+\KeywordTok{summary}\NormalTok{(mod_wo_Garage_Cars) }\OperatorTok{%>%}
+\StringTok{  }\NormalTok{broom}\OperatorTok{::}\KeywordTok{tidy}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "Garage_Area"}\NormalTok{)}
+\CommentTok{## # A tibble: 1 x 5}
+\CommentTok{##   term        estimate std.error statistic      p.value}
+\CommentTok{##   <chr>          <dbl>     <dbl>     <dbl>        <dbl>}
+\CommentTok{## 1 Garage_Area     21.6      4.02      5.38 0.0000000846}
+\end{Highlighting}
+\end{Shaded}
+
+This reflects the instability in the linear regression model caused by between-predictor relationships; this instability also gets propagated directly to the model predictions. Considering 16 of our 34 numeric predictors have a medium to strong correlation (Section \ref{pca}), the biased coefficients of these predictors are likely restricting the predictive accuracy of our model. How can we control for this problem? One option is to manually remove the offending predictors (one-at-a-time) until all pariwise correlations are below some pre-determined threshold. However, when the number of predictors is large such as in our case, this becomes tedious. Moreover, multicollinearity can arise when one feature is linearly related to two or more features (which is more difficult to detect\footnote{In such cases we can use a statistic called the \emph{variance inflation factor} which tries to capture how strongly each feature is linearly related to all the others predictors in a model.}). In these cases, manual removal of specific predictors may not be possible. Consequently, the following sections offers two simple extensions of linear regression where dimension reduction is applied prior to performing linear regression. Chapter \ref{regularized-regression} offers a modified regression approach that helps to deal with the problem. And future chapters provide alternative methods that are less effected by multicollinearity.
+
+\hypertarget{PCR}{%
+\section{Principal component regression}\label{PCR}}
+
+As mentioned in Section \ref{feature-reduction} and fully discussed in Chapter \ref{pca}, principal components analysis can be used to represent correlated variables with a smaller number of uncorrelated features (called principle components) and the resulting components can be used as predictors in a linear regression model. This two-step process is known as \emph{principal component regression}\index{principal component regression} (PCR) \citep{massy1965principal} and is illustrated in Figure \ref{fig:pcr-steps}.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.7\linewidth,height=0.7\textheight]{images/pcr-steps} 
+
+}
+
+\caption{A depiction of the steps involved in performing principal component regression.}\label{fig:pcr-steps}
+\end{figure}
+
+Performing PCR with \textbf{caret} is an easy extension from our previous model. We simply specify \texttt{method\ =\ "pcr"} within \texttt{train()} to perform PCA on all our numeric predictors prior to fitting the model. Often, we can greatly improve performance by only using a small subset of all principal components as predictors. Consequently, you can think of the number of principal components as a tuning parameter (see Section \ref{tune-overfit}). The following performs cross-validated PCR with \(1, 2, \dots, 20\) principal components, and Figure \ref{fig:pcr-regression} illustrates the cross-validated RMSE. You can see a significant drop in prediction error from our previous linear models using just five principal components followed by a gradual decrease thereafter. Using 17 principal components corresponds to the lowest RMSE (see \texttt{cv\_model\_pcr} for a comparison of the cross-validated results).
+
+\begin{note}
+Note in the below example we use \texttt{preProcess} to remove near-zero
+variance features and center/scale the numeric features. We then use
+\texttt{method\ =\ "pcr"}. This is equivalent to creating a blueprint as
+illustrated in Section 3.8.3 to remove near-zero variance features,
+center/scale the numeric features, perform PCA on the nuemric features,
+then feeding that blueprint into \texttt{train()} with
+\texttt{method\ =\ "lm"}.
+\end{note}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# perform 10-fold cross validation on a PCR model tuning the }
+\CommentTok{# number of principal components to use as predictors from 1-20}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{cv_model_pcr <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }
+  \DataTypeTok{data =}\NormalTok{ ames_train, }
+  \DataTypeTok{method =} \StringTok{"pcr"}\NormalTok{,}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{),}
+  \DataTypeTok{preProcess =} \KeywordTok{c}\NormalTok{(}\StringTok{"zv"}\NormalTok{, }\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{),}
+  \DataTypeTok{tuneLength =} \DecValTok{20}
+\NormalTok{  )}
+
+\CommentTok{# model with lowest RMSE}
+\NormalTok{cv_model_pcr}\OperatorTok{$}\NormalTok{bestTune}
+\CommentTok{##    ncomp}
+\CommentTok{## 19    19}
+
+\CommentTok{# plot cross-validated RMSE}
+\KeywordTok{ggplot}\NormalTok{(cv_model_pcr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/pcr-regression-1} 
+
+}
+
+\caption{The 10-fold cross valdation RMSE obtained using PCR with 1-20 principal components.}\label{fig:pcr-regression}
+\end{figure}
+
+By controlling for multicollinearity with PCR, we can experience significant improvement in our predictive accuary compared to the previously obtained linear models (reducing the cross-validated RMSE from about \$37,000 to below \$35,000); however, we still do not improve upon the \emph{k}-nearest neighbor model illustrated in Section \ref{engineering-process-example}. It's important to note that since PCR is a two step process, the PCA step does not consider any aspects of the response when it selects the components. Consequently, the new predictors produced by the PCA step are not designed to maximize the relationship with the response. Instead, it simply seeks to reduce the variability present throughout the predictor space. If that variability happens to be related to the response variability, then PCR has a good chance to identify a predictive relationship, as in our case. If, however, the variability in the predictor space is not related to the variability of the response, then PCR can have difficulty identifying a predictive relationship when one might actually exists (i.e., we may actually experience a decrease in our predictive accuracy). An alternative approach to reduce the impact of multicollinearity is partial least squares.
+
+\hypertarget{partial-least-squares}{%
+\section{Partial least squares}\label{partial-least-squares}}
+
+\emph{Partial least squares}\index{partial least squares} (PLS) can be viewed as a supervised dimension reduction procedure \citep{apm}. Similar to PCR, this technique also constructs a set of linear combinations of the inputs for regression, but unlike PCR it uses the response variable to aid the construction of the principal components as illustrated in Figure \ref{fig:pcr-vs-pls}\footnote{Figure \ref{fig:pcr-vs-pls} was inspired by, and modified from, Chapter 6 in \citet{apm}.}. Thus, we can think of PLS as a supervised dimension reduction procedure that finds new features that not only captures most of the information in the original features, but also are related to the response.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{images/pls-vs-pcr} 
+
+}
+
+\caption{A diagram depicting the differences between PCR (left) and PLS (right). PCR finds principal components (PCs) that maximally summarize the features independent of the response variable and then uses those PCs as predictor variables. PLS finds components that simultaneously summarize variation of the predictors while being optimally correlated with the outcome and then uses those PCs as predictors.}\label{fig:pcr-vs-pls}
+\end{figure}
+
+We illustrate PLS with some exemplar data\footnote{This is actually using the solubility data that is provided by the \textbf{AppliedPredictiveModeling} package \citep{R-apm}}. Figure \ref{fig:pls-vs-pcr-relationship} illustrates that the first two PCs when using PCR have very little relationship to the response variable; however, the first two PCs when using PLS have a much stronger association to the response.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/pls-vs-pcr-relationship-1} 
+
+}
+
+\caption{Illustration showing that the first two PCs when using PCR have very little relationship to the response variable (top row); however, the first two PCs when using PLS have a much stronger association to the response (bottom row).}\label{fig:pls-vs-pcr-relationship}
+\end{figure}
+
+Referring to Equation \eqref{eq:pca1} in Chapter \ref{pca}, PLS will compute the first principal (\(z_1\)) by setting each \(\phi_{j1}\) to the coefficient from a SLR model of \(y\) onto that respective \(x_j\). One can show that this coefficient is proportional to the correlation between \(y\) and \(x_j\). Hence, in computing \(z_1 = \sum^p_{j=1} \phi_{j1}x_j\), PLS places the highest weight on the variables that are most strongly related to the response.
+
+To compute the second PC (\(z_2\)), we first regress each variable on \(z_1\). The residuals from this regression capture the remaining signal that has not been explained by the first PC. We substitute these residual values for the predictor values in Equation \eqref{eq:pca2} in Chapter \ref{pca}. This process continues until all \(m\) components have been computed and then we use OLS to regress the response on \(z_1, \dots, z_m\).
+
+\begin{note}
+See @esl and @geladi1986partial for a thorough discussion of PLS.
+\end{note}
+
+Similar to PCR, we can easily fit a PLS model by changing the \texttt{method} argument in \texttt{train()}. As with PCR, the number of principal components to use is a tuning parameter that is determined by the model that maximizes predictive accuracy (minimizes RMSE in this case). The following performs cross-validated PLS with \(1, 2, \dots, 20\) PCs, and Figure \ref{fig:pls-regression} shows the cross-validated RMSEs. You can see a greater drop in prediction error compared to PCR. Using PLS with \(m = 3\) principal components corresponded with the lowest cross-validated RMSE of \$29,970.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# perform 10-fold cross validation on a PLS model tuning the number of}
+\CommentTok{# principal components to use as predictors from 1-20}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{cv_model_pls <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}
+\NormalTok{  Sale_Price }\OperatorTok{~}\StringTok{ }\NormalTok{., }
+  \DataTypeTok{data =}\NormalTok{ ames_train, }
+  \DataTypeTok{method =} \StringTok{"pls"}\NormalTok{,}
+  \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{),}
+  \DataTypeTok{preProcess =} \KeywordTok{c}\NormalTok{(}\StringTok{"zv"}\NormalTok{, }\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{),}
+  \DataTypeTok{tuneLength =} \DecValTok{20}
+\NormalTok{)}
+
+\CommentTok{# model with lowest RMSE}
+\NormalTok{cv_model_pls}\OperatorTok{$}\NormalTok{bestTune}
+\CommentTok{##   ncomp}
+\CommentTok{## 3     3}
+
+\CommentTok{# plot cross-validated RMSE}
+\KeywordTok{ggplot}\NormalTok{(cv_model_pls)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/pls-regression-1} 
+
+}
+
+\caption{The 10-fold cross valdation RMSE obtained using PLS with 1-20 principal components.}\label{fig:pls-regression}
+\end{figure}
+
+\hypertarget{lm-model-interp}{%
+\section{Feature interpretation}\label{lm-model-interp}}
+
+Once we've found the model that minimizes the predictive accuracy, our next goal is to interpret the model structure. Linear regression models provide a very intuitive model structure as they assume a \emph{monotonic linear relationship}\index{monotonic linear relationship} between the predictor variables and the response. The \emph{linear} relationship part of that statement just means, for a given predictor variable, it assumes for every one unit change in a given predictor variable there is a constant change in the response. As discussed earlier in the chapter, this constant rate of change is provided by the coefficient for a predictor. The \emph{monotonic} relationship means that a given predictor variable will always have a positive or negative relationship. But how do we determine the most influential variables?
+
+Variable importance seeks to identify those variables that are most influential in our model. For linear regression models, this is most often measured by the absolute value of the \emph{t}-statistic for each model parameter used; though simple, the results can be hard to interpret when the model includes interaction effects and complex transformations (in Chapter \ref{iml} we'll discuss \emph{model-agnostic}\index{model-agnostic} approaches that don't have this issue). For a PLS model, variable importance can be computed using the weighted sums of the absolute regression coefficients. The weights are a function of the reduction of the RSS across the number of PLS components and are computed separately for each outcome. Therefore, the contribution of the coefficients are weighted proportionally to the reduction in the RSS.
+
+We can use \texttt{vip::vip()} to extract and plot the most important variables. The importance measure is normalized from 100 (most important) to 0 (least important). Figure \ref{fig:pls-vip} illustrates that the top 4 most important variables are \texttt{Gr\_liv\_Area}, \texttt{First\_Flr\_SF}, \texttt{Total\_Bsmt\_SF}, and \texttt{Garage\_Cars} respectively.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{vip}\NormalTok{(cv_model_pls, }\DataTypeTok{num_features =} \DecValTok{20}\NormalTok{, }\DataTypeTok{method =} \StringTok{"model"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/pls-vip-1} 
+
+}
+
+\caption{Top 20 most important variables for the PLS model.}\label{fig:pls-vip}
+\end{figure}
+
+As stated earlier, linear regression models assume a monotonic linear relationship. To illustrate this, we can construct partial dependence plots (PDPs). PDPs plot the change in the average predicted value (\(\widehat{y}\)) as specified feature(s) vary over their marginal distribution. As you will see in later chapters, PDPs become more useful when non-linear relationships are present (we discuss PDPs and other ML interpretation techniques in Chapter \ref{iml}). However, PDPs of linear models help illustrate how a fixed change in \(x_i\) relates to a fixed linear change in \(\widehat{y}_i\) while taking into account the average effect of all the other features in the model (for linear models, the slope of the PDP is equal to the corresponding features LS coefficient).
+
+\begin{tip}
+The \textbf{pdp} package {[}@R-pdp{]} provides convenient functions for
+computing and plotting PDPs. For example, the following code chunk would
+plot the PDP for the \texttt{Gr\_Liv\_Area} predictor.
+
+\texttt{pdp::partial(cv\_model\_pls,\ "Gr\_Liv\_Area",\ grid.resolution\ =\ 20,\ plot\ =\ TRUE)}
+\end{tip}
+
+All four of the most important predictors have a positive relationship with sale price; however, we see that the slope (\(\widehat{beta}_i\)) is steepest for the most important predictor and gradually decreases for lessor important variables.
+
+\begin{figure}
+
+{\centering \includegraphics{bookdown_files/figure-latex/unnamed-chunk-33-1} 
+
+}
+
+\caption{Partial dependence plots for the first four most important variables.}\label{fig:unnamed-chunk-33}
+\end{figure}
+
+\hypertarget{final-thoughts}{%
+\section{Final thoughts}\label{final-thoughts}}
+
+Linear regression is usually the first supervised learning algorithm you will learn. The approach provides a solid fundamental understanding of the supervised learning task; however, as we've discussed there are several concerns that result from the assumptions required. Although extensions of linear regression that integrate dimension reduction steps into the algorithm can help address some of the problems with linear regression, more advanced supervised algorithms typically provide greater flexibility and improved accuracy. Nonetheless, understanding linear regression provides a foundation that will serve you well in learning these more advanced methods.
 
 \bibliography{book.bib,packages.bib}
 

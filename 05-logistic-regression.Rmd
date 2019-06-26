@@ -1,0 +1,345 @@
+# Logistic Regression {#logistic-regression}
+
+```{r ch5-setup, include=FALSE}
+
+# Set the graphical theme
+ggplot2::theme_set(ggplot2::theme_light())
+
+# Set global knitr chunk options
+knitr::opts_chunk$set(
+  cache = TRUE,
+  warning = FALSE, 
+  message = FALSE, 
+  collapse = TRUE, 
+  fig.align = "center",
+  fig.height = 3.5
+)
+```
+
+Linear regression is used to approximate the relationship between a continuous response variable and a set of predictor variables. However, when the response variable is binary (i.e., Yes/No), linear regression is not appropriate. Fortunately, analysts can turn to an analogous method, _logistic regression_\index{logistic regression}, which is similar to linear regression in many ways.  This chapter explores the use of logistic regression for binary response variables. Logistic regression can be expanded for multinomial problems (see @faraway2016extending for discussion of multinomial logistic regression in R); however, that goes beyond our intent here.
+
+
+## Prerequisites
+
+For this section we'll use the following packages:
+
+```{r 08-pkgs, message=FALSE}
+# Helper packages
+library(dplyr)     # for data wrangling
+library(ggplot2)   # for awesome plotting
+library(rsample)   # for data splitting
+
+# Modeling packages
+library(caret)     # for logistic regression modeling
+
+# Model interpretability packages
+library(vip)       # variable importance
+```
+
+To illustrate logistic regression concepts we'll use the employee attrition data, where our intent is to predict the `Attrition` response variable (coded as `"Yes"`/`"No"`). As in the previous chapter, we'll set aside 30% of our data as a test set to assess our generalizability error.
+
+```{r 05-data-import}
+df <- attrition %>% mutate_if(is.ordered, factor, ordered = FALSE)
+
+# Create training (70%) and test (30%) sets for the rsample::attrition data.
+set.seed(123)  # for reproducibility
+churn_split <- initial_split(df, prop = .7, strata = "Attrition")
+churn_train <- training(churn_split)
+churn_test  <- testing(churn_split)
+```
+
+
+## Why logistic regression
+
+To provide a clear motivation of logistic regression, assume we have credit card default data for customers and we want to understand if the current credit card balance of a customer is an indicator of whether or not they'll default on their credit card.  To classify a customer as a high- vs. low-risk defaulter based on their balance we could use linear regression; however, the left plot in Figure \@ref(fig:whylogit)  illustrates how linear regression would predict the probability of defaulting. Unfortunately, for balances close to zero we predict a negative probability of defaulting; if we were to predict for very large balances, we would get values bigger than 1. These predictions are not sensible, since of course the true probability of defaulting, regardless of credit card balance, must fall between 0 and 1. These inconsistencies only increase as our data become more imbalanced and the number of outliers increase. Contrast this with the logistic regression line (right plot) that is nonlinear (sigmoidal-shaped).   
+
+```{r whylogit, echo=FALSE, fig.height=3, fig.width=8, fig.cap="Comparing the predicted probabilities of linear regression (left) to logistic regression (right). Predicted probabilities using linear regression results in flawed logic whereas predicted values from logistic regression will always lie between 0 and 1."}
+p1 <- ISLR::Default %>%
+  mutate(prob = ifelse(default == "Yes", 1, 0)) %>%
+  ggplot(aes(balance, prob)) +
+  geom_point(alpha = .15) +
+  geom_smooth(method = "lm") +
+  ggtitle("Linear regression model fit") +
+  xlab("Balance") +
+  ylab("Probability of Default")
+
+p2 <- ISLR::Default %>%
+  mutate(prob = ifelse(default == "Yes", 1, 0)) %>%
+  ggplot(aes(balance, prob)) +
+  geom_point(alpha = .15) +
+  geom_smooth(method = "glm", method.args = list(family = "binomial")) +
+  ggtitle("Logistic regression model fit") +
+  xlab("Balance") +
+  ylab("Probability of Default")
+
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
+To avoid the inadequecies of the linear model fit on a binary response, we must model the probability of our response using a function that gives outputs between 0 and 1 for all values of $X$. Many functions meet this description. In logistic regression, we use the logistic function, which is defined in Equation \@ref(eq:logistic) and produces the S-shaped curve in the right plot above.
+
+\begin{equation}
+(\#eq:logistic)
+  p\left(X\right) = \frac{e^{\beta_0 + \beta_1X}}{1 + e^{\beta_0 + \beta_1X}}
+\end{equation}
+
+The $\beta_i$ parameters represent the coefficients as in linear regression and $p\left(X\right)$ may be interpreted as the probability that the positive class (default in the above example) is present.  The minimum for $p\left(x\right)$ is obtained at $\lim_{a \rightarrow -\infty} \left[ \frac{e^a}{1+e^a} \right] = 0$, and the maximium for $p\left(x\right)$ is obtained at $\lim_{a \rightarrow \infty} \left[ \frac{e^a}{1+e^a} \right] = 1$ which restricts the output probabilities to 0--1. Rearranging Equation \@ref(eq:logistic) yields the _logit transformation_\index{logit transformation} (which is where logistic regression gets its name):
+
+\begin{equation}
+(\#eq:logit)
+  g\left(X\right) = \ln \left[ \frac{p\left(X\right)}{1 - p\left(X\right)} \right] = \beta_0 + \beta_1 X
+\end{equation}
+
+Applying a logit transformation to $p\left(X\right)$ results in a linear equation similar to the mean response in a simple linear regression model. Using the logit transformation also results in an intuitive interpretation for the magnitude of $\beta_1$: the odds (e.g., of defaulting) increase multiplicatively by $\exp\left(\beta_1\right)$ for every one-unit increase in $X$. A similar interpretation exists if $X$ is categorical; see @agresti2003categorical, Chapter 5, for details.
+
+
+## Simple logistic regression
+
+We will fit two logistic regression models in order to predict the probability of an employee attriting. The first predicts the probability of attrition based on their monthly income (`MonthlyIncome`) and the second is based on whether or not the employee works overtime (`OverTime`). The `glm()` function fits generalized linear models, a class of models that includes both logistic regression and simple linear regression as special cases. The syntax of the `glm()` function is similar to that of `lm()`, except that we must pass the argument `family = "binomial"` in order to tell R to run a logistic regression rather than some other type of generalized linear model (the default is `family = "gaussian"`, which is equivalent to ordinary linear regression assuming normally distributed errors).
+
+```{r glm-model1}
+model1 <- glm(Attrition ~ MonthlyIncome, family = "binomial", data = churn_train)
+model2 <- glm(Attrition ~ OverTime, family = "binomial", data = churn_train)
+```
+
+In the background `glm()`, uses ML estimation to estimate the unknown model parameters. The basic intuition behind using ML estimation to fit a logistic regression model is as follows: we seek estimates for $\beta_0$ and $\beta_1$ such that the predicted probability $\widehat p\left(X_i\right)$ of attrition for each employee corresponds as closely as possible to the employee's observed attrition status. In other words, we try to find $\widehat \beta_0$ and $\widehat \beta_1$ such that plugging these estimates into the model for $p\left(X\right)$ (Equation \@ref(eq:logistic)) yields a number close to one for all employees who attrited, and a number close to zero for all employees who did not. This intuition can be formalized using a mathematical equation called a _likelihood function_\index{likelihood function}:
+
+\begin{equation}
+(\#eq:max-like) 
+  \ell\left(\beta_0, \beta_1\right) = \prod_{i:y_i=1}p\left(X_i\right) \prod_{i':y_i'=0}\left[1-p\left(x_i'\right)\right]
+\end{equation}
+
+The estimates $\widehat \beta_0$ and $\widehat \beta_1$ are chosen to _maximize_ this likelihood function. What results is the predicted probability of attrition. Figure \@ref(fig:glm-sigmoid) illustrates the predicted probablities for the two models.
+
+```{r glm-sigmoid, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Predicted probablilities of employee attrition based on monthly income (left) and overtime (right). As monthly income increases, `model1` predicts a decreased probability of attrition and if employees work overtime `model2` predicts an increased probability."}
+churn_train2 <- churn_train %>% mutate(prob = ifelse(Attrition == "Yes", 1, 0))
+churn_train2 <- broom::augment(model2, churn_train2) %>% mutate(.fitted = exp(.fitted))
+
+p1 <- ggplot(churn_train2, aes(MonthlyIncome, prob)) +
+  geom_point(alpha = 0.15) +
+  geom_smooth(method = "glm", method.args = list(family = "binomial")) +
+  ggtitle("Predicted probabilities for model1") +
+  xlab("Monthly Income") +
+  ylab("Probability of Attrition")
+
+p2 <- ggplot(churn_train2, aes(OverTime, .fitted, color = OverTime)) +
+  geom_boxplot(show.legend = FALSE) +
+  geom_rug(sides = "b", position = "jitter", alpha = 0.2, show.legend = FALSE) +
+  ggtitle("Predicted probabilities for model2") +
+  xlab("Over Time") +
+  scale_y_continuous("Probability of Attrition", limits = c(0, 1))
+
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
+The table below shows the coefficient estimates and related information that result from fitting a logistic regression model in order to predict the probability of _Attrition = Yes_ for our two models. Bear in mind that the coefficient estimates from logistic regression characterize the relationship between the predictor and response variable on a _log-odds_\index{log-odds} (i.e., logit) scale. 
+
+For `model1`, the estimated coefficient for `MonthlyIncome` is $\widehat \beta_1 =$ `r scales::number(coef(model1)["MonthlyIncome"], accuracy = 0.000001)`, which is negative, indicating that an increase in `MonthlyIncome` is associated with a decrease in the probability of attrition. Similarly, for `model2`, employees that work `OverTime` are associated with an increased probability of attrition compared to those that do not work `OverTime`.
+
+```{r}
+tidy(model1)
+tidy(model2)
+```
+
+As discussed earlier, it is easier to interpret the coefficients using an $\exp()$ transformation:
+
+```{r convert-odds-probs}
+exp(coef(model1))
+exp(coef(model2))
+```
+
+Thus, the odds of an employee attriting in `model1` increase multiplicatively by `r round(exp(coef(model1))["MonthlyIncome"], digits = 4)` for every one dollar increase in `MonthlyIncome`, whereas the odds of attriting in `model2` increase multiplicatively by `r round(exp(coef(model2))["OverTimeYes"], digits = 4)` for employees that work `OverTime` compared to those that do not.
+
+Many aspects of the logistic regression output are similar to those discussed for linear regression. For example, we can use the estimated standard errors to get confidence intervals as we did for linear regression in Chapter \@ref(linear-regression):
+
+```{r coef-confint}
+confint(model1)  # for odds, you can use `exp(confint(model1))`
+confint(model2)
+```
+
+
+## Multiple logistic regression
+
+We can also extend our model as seen in Equation 1 so that we can predict a binary response using multiple predictors:
+
+\begin{equation}
+(\#eq:multi-logistic)
+p\left(X\right) = \frac{e^{\beta_0 + \beta_1 X + \cdots + \beta_p X_p }}{1 + e^{\beta_0 + \beta_1 X + \cdots + \beta_p X_p}} 
+\end{equation}
+
+Let's go ahead and fit a model that predicts the probability of `Attrition` based on the `MonthlyIncome` and `OverTime`.  Our results show that both features are statistically significant (at the 0.05 level) and Figure \@ref(fig:glm-sigmoid2) illustrates common trends between `MonthlyIncome` and `Attrition`; however, working `OverTime` tends to nearly double the probability of attrition.
+
+
+```{r glm-model3}
+model3 <- glm(Attrition ~ MonthlyIncome + OverTime, family = "binomial", data = churn_train)
+tidy(model3)
+```
+
+
+```{r glm-sigmoid2, echo=FALSE, fig.width=6, fig.height=3, fig.cap="Predicted probability of attrition based on monthly income and whether or not employees work overtime."}
+churn_train3 <- churn_train %>% mutate(prob = ifelse(Attrition == "Yes", 1, 0))
+churn_train3 <- broom::augment(model3, churn_train3) %>% mutate(.fitted = exp(.fitted))
+
+ggplot(churn_train3, aes(MonthlyIncome, prob, color = OverTime)) +
+  geom_point(alpha = .15) +
+  geom_smooth(method = "glm", method.args = list(family = "binomial"), se = FALSE) +
+  ggtitle("Predicted probabilities for model3") +
+  xlab("Monthly Income") +
+  ylab("Probability of Attrition")
+```
+
+
+## Assessing model accuracy
+
+With a basic understanding of logistic regression under our belt, similar to linear regression our concern now shifts to how well do our models predict.  As in the last chapter, we'll use `caret::train()` and fit three 10-fold cross validated logistic regression models.  Extracting the accuracy measures (in this case, classification accuracy), we see that both `cv_model1` and `cv_model2` had an average accuracy of 83.89\%.  However, `cv_model3` which used all predictor variables in our data achieved an average accuracy rate of 86.3\%.
+
+```{r mult-models-logistic}
+set.seed(123)
+cv_model1 <- train(
+  Attrition ~ MonthlyIncome, 
+  data = churn_train, 
+  method = "glm",
+  family = "binomial",
+  trControl = trainControl(method = "cv", number = 10)
+)
+
+set.seed(123)
+cv_model2 <- train(
+  Attrition ~ MonthlyIncome + OverTime, 
+  data = churn_train, 
+  method = "glm",
+  family = "binomial",
+  trControl = trainControl(method = "cv", number = 10)
+)
+
+set.seed(123)
+cv_model3 <- train(
+  Attrition ~ ., 
+  data = churn_train, 
+  method = "glm",
+  family = "binomial",
+  trControl = trainControl(method = "cv", number = 10)
+)
+
+# extract out of sample performance measures
+summary(
+  resamples(
+    list(
+      model1 = cv_model1, 
+      model2 = cv_model2, 
+      model3 = cv_model3
+    )
+  )
+)$statistics$Accuracy
+```
+
+We can get a better understanding of our model's performance by assessing the confusion matrix (see section \@ref(model-eval)).  We can use `train::confusionMatrix()` to compute a confusion matrix.  We need to supply our model's predicted class and the actuals from our training data. The confusion matrix provides a wealth of information.  Particularly, we can see that although we do well predicting cases of non-attrition (note the high specificity), our model does particularly poor predicting actual cases of attrition (note the low sensitivity).
+
+```{block, type="tip"}
+By default the `predict()` function predicts the response class for a __caret__ model; however, you can change the `type` argument to predict the probabilities (see `?predict.train`).
+```
+
+```{r glm-confusion-matrix}
+# predict class
+pred_class <- predict(cv_model3, churn_train)
+
+# create confusion matrix
+confusionMatrix(
+  data = relevel(pred_class, ref = "Yes"), 
+  reference = relevel(churn_train$Attrition, ref = "Yes")
+)
+```
+
+One thing to point out, in the confusion matrix above you will note the metric `No Information Rate: 0.8388`.  This represents the ratio of non-attrition vs. attrition in our training data (`table(churn_train$Attrition) %>% prop.table()`). Consequently, if we simply predicted `"No"` for every employee we would still get an accuracy rate of 83.88\%.  Therefore, our goal is to maximize our accuracy rate over and above this no information baseline while also trying to balance sensitivity and specificity. To that end, we plot the ROC curve (section \@ref(model-eval)) which is displayed in Figure \@ref(fig:roc).  If we compare our simple model (`cv_model1`) to our full model (`cv_model3`), we see the lift achieved with the more accurate model.  
+
+```{r roc, fig.width=6, fig.height=4.5, fig.cap="ROC curve for `cv_model1` and `cv_model3`. The increase in the AUC represents the 'lift' that we achieve with `cv_model3`."}
+library(ROCR)
+
+# Compute predicted probabilities
+m1_prob <- predict(cv_model1, churn_train, type = "prob")$Yes
+m3_prob <- predict(cv_model3, churn_train, type = "prob")$Yes
+
+# Compute AUC metrics for cv_model1 and cv_model3
+perf1 <- prediction(m1_prob, churn_train$Attrition) %>%
+  performance(measure = "tpr", x.measure = "fpr")
+perf2 <- prediction(m3_prob, churn_train$Attrition) %>%
+  performance(measure = "tpr", x.measure = "fpr")
+
+# Plot ROC curves for cv_model1 and cv_model3
+plot(perf1, col = "black", lty = 2)
+plot(perf2, add = TRUE, col = "blue")
+legend(0.8, 0.2, legend = c("cv_model1", "cv_model3"),
+       col = c("black", "blue"), lty = 2:1, cex = 0.6)
+```
+
+
+Similar to linear regression, we can perform a PLS logistic regression to assess if reducing the dimension of our numeric predictors helps to improve accuracy.  There are 16 numeric features in our data set so the following code performs a 10-fold cross-validated PLS model while tuning the number of principal components to use from 1--16. The optimal model uses 14 principal components, which is not reducing the dimension by much. However, the mean accuracy of 0.866 was only marginally better than the average CV accuracy of `cv_model3` (0.863), likely within the margin of error.
+
+```{r pls-logistic-regression, fig.height=3.5, fig.width=6, fig.cap="The 10-fold cross validation RMSE obtained using PLS with 1--16 principal components."}
+# Perform 10-fold CV on a PLS model tuning the number of PCs to use as predictors
+set.seed(123)
+cv_model_pls <- train(
+  Attrition ~ ., 
+  data = churn_train, 
+  method = "pls",
+  family = "binomial",
+  trControl = trainControl(method = "cv", number = 10),
+  preProcess = c("zv", "center", "scale"),
+  tuneLength = 16
+)
+
+# Model with lowest RMSE
+cv_model_pls$bestTune
+
+# Plot cross-validated RMSE
+ggplot(cv_model_pls)
+```
+
+## Model concerns {#glm-residuals}
+
+As with linear models, it is important to check the adequacy of the logistic regression model (in fact, this should be done for all parametric models). This was discussed for linear models in Section \@ref(lm-residuals) where the residuals played an important role. Although not as common, residual analysis and diagnostics are equally important to generalized linear models. The problem is that there is no obvious way to define what a residual is for more general models. For instance, how might we define a residual in logistic regression when the outcome is either 0 or 1? Nonetheless attempts have been made and a number of useful diagnostics can be constructed based on the idea of a _pseduo residual_; see, for example, @harrell2015regression, Section 10.4.
+
+More recently, @dungang2018residuals introduced the concept of _surrogate residuals_ that allows for residual-based diagnostic procedures and plots not unlike those in traditional linear regression (e.g., checking for outliers and misspecified link functions). For an overview with examples in R using the __sure__ package, see @greenwell2018residuals.
+
+
+## Feature interpretation
+
+Similar to linear regression, once our preferred logistic regression model is identified, we need to interpret how the features are influencing the results.  As with normal linear regression models, variable importance for logistic regression models can be computed using the absolute value of the $z$-statistic for each coefficient (albeit with the same issues previously discussed). Using `vip::vip()` we can extract our top 20 influential variables.  Figure \@ref(fig:glm-vip) illustrates that `OverTime` is the most influential followed by `JobSatisfaction`, `NumCompaniesWorked`, and `EnvironmentSatisfaction`. 
+
+```{r glm-vip, fig.cap="Top 20 most important variables for the PLS model."}
+vip(cv_model3, num_features = 20)
+```
+
+Similar to linear regression, logistic regression assumes a monotonic linear relationship.  However, the linear relationship occurrs on the logit scale; on the probability scale, the relationship will be nonlinear.  This is illustrated by the PDP in Figure \@ref(fig:glm-pdp) which illustrates the functional relationship between the predicted probability of attrition and the number of companies an employee has worked for (`NumCompaniesWorked`) while taking into account the average effect of all the other predictos in the model. Employees that have experienced more employment changes tend to have a high probability of making another change in the future.  
+
+Furthermore, the PDPs for the top three categorical predictors (`OverTime`, `JobSatisfaction`, and `EnvironmentSatisfaction`) illustrate the change in predicted probability of attrition based on the employee's status for each predictor.
+
+```{block, type="tip"}
+See the supplemental material at xxxxx_TBD for the code to reproduce the plots in Figure \@ref(glm-pdp).
+```
+
+```{r glm-pdp, echo=FALSE, fig.height=5, fig.width=7, fig.cap="Partial dependence plots for the first four most important variables.  We can see how the predicted probability of attrition changes for each value of the influential predictors."}
+pred.fun <- function(object, newdata) {
+  Yes <- mean(predict(object, newdata, type = "prob")$Yes)
+  as.data.frame(Yes)
+}
+
+p1 <- pdp::partial(cv_model3, pred.var = "OverTime", pred.fun = pred.fun) %>% 
+  autoplot(rug = TRUE) + ylim(c(0, 1))
+
+p2 <- pdp::partial(cv_model3, pred.var = "JobSatisfaction", pred.fun = pred.fun) %>% 
+  autoplot() + ylim(c(0, 1))
+
+p3 <- pdp::partial(cv_model3, pred.var = "NumCompaniesWorked", pred.fun = pred.fun, gr = 10) %>% 
+  autoplot() + scale_x_continuous(breaks = 0:9) + ylim(c(0, 1))
+  
+
+p4 <- pdp::partial(cv_model3, pred.var = "EnvironmentSatisfaction", pred.fun = pred.fun) %>% 
+  autoplot() + ylim(c(0, 1))
+
+grid.arrange(p1, p2, p3, p4, nrow = 2)
+```
+
+
+## Final thoughts
+
+Logistic regression provides an alternative to linear regression for binary classification problems. However, similar to linear regression, logistic regression suffers from the many assumptions involved in the algorithm (i.e. linear relationship of the coefficient, multicollinearity). Moreover, often we have more than two classes to predict which is commonly referred to as multinomial classification. Although multinomial extensions of logistic regression exist, the assumptions made only increase and, often, the stability of the coefficient estimates (and therefore the accuracy) decrease. Future chapters will discuss more advanced algorithms that provide a more natural and trustworthy approach to binary and multinomial classification prediction.
